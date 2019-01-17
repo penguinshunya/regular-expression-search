@@ -43,21 +43,15 @@ $(() => {
 
       case "Enter":
         e.preventDefault();
+
         if (e.shiftKey) {
-          chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-            chrome.tabs.sendMessage(tabs[0].id, {
-              kind: "prev",
-              text: "dummy",
-            }, (response) => {
-              $("#count").text(response.index + " / " + response.count);
-            });
-          });
+          movePrevSearchResult();
           break;
         }
         
         let text = $("#search").text();
         if (text === "") {
-          clearSearchResult(() => {});
+          clearSearchResult();
           PREV_TEXT = "";
           return;
         }
@@ -87,19 +81,18 @@ $(() => {
         }
         INDEX = TEXTS.length - 1;
 
+        PREV_TEXT = text;
+        PREV_FLAGI = flag_i;
+
         $("#count").text("");
         $("#count").addClass("lds-dual-ring");
-        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-          chrome.tabs.sendMessage(tabs[0].id, {
-            kind: "new",
-            text: text,
-            flag_i: flag_i,
-          }, (response) => {
-            PREV_TEXT = text;
-            PREV_FLAGI = flag_i;
-            $("#count").removeClass("lds-dual-ring");
-            $("#count").text(response.index + " / " + response.count);
-          });
+        sendMessage({
+          kind: "new",
+          text: text,
+          flag_i: flag_i,
+        }, (response) => {
+          $("#count").removeClass("lds-dual-ring");
+          $("#count").text(response.index + " / " + response.count);
         });
         break;
     }
@@ -154,42 +147,33 @@ $(() => {
   });
 
   let movePrevSearchResult = () => {
-    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-      chrome.tabs.sendMessage(tabs[0].id, {
-        kind: "prev",
-        text: "dummy",
-      }, (response) => {
-        if (response.count > 0) {
-          $("#count").text(response.index + " / " + response.count);
-        }
-      });
+    sendMessage({
+      kind: "prev",
+    }, (response) => {
+      if (response.count > 0) {
+        $("#count").text(response.index + " / " + response.count);
+      }
     });
   };
 
   let moveNextSearchResult = () => {
-    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-      chrome.tabs.sendMessage(tabs[0].id, {
-        kind: "next",
-        text: "dummy",
-      }, (response) => {
-        if (response.count > 0) {
-          $("#count").text(response.index + " / " + response.count);
-        }
-      });
+    sendMessage({
+      kind: "next",
+    }, (response) => {
+      if (response.count > 0) {
+        $("#count").text(response.index + " / " + response.count);
+      }
     });
   };
 
-  let clearSearchResult = (callback) => {
-    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-      chrome.tabs.sendMessage(tabs[0].id, {
-        kind: "close",
-        text: "dummy",
-      }, () => {
-        $("#count").text("");
-        $("#search").text("");
-        INDEX = TEXTS.length;
-        callback();
-      });
+  let clearSearchResult = (callback = () => {}) => {
+    sendMessage({
+      kind: "close",
+    }, () => {
+      $("#count").text("");
+      $("#search").text("");
+      INDEX = TEXTS.length;
+      callback();
     });
   };
 
@@ -212,4 +196,10 @@ let selectElementContents = (el) => {
   let sel = window.getSelection();
   sel.removeAllRanges();
   sel.addRange(range);
+};
+
+let sendMessage = (data, callback) => {
+  chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+    chrome.tabs.sendMessage(tabs[0].id, data, callback);
+  });
 };

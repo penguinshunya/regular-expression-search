@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
   "name" : "Regular Expression Search",
-  "version" : "0.5.5",
-  "description" : "正規表現で検索する",
+  "version" : "0.5.6",
+  "description" : "search with regular expressions",
   "commands": {
     "_execute_browser_action": {
       "suggested_key": {
