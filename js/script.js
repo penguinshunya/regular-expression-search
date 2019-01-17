@@ -139,18 +139,22 @@ let generateMatchedRangeAndElems = function*(text, flag_i) {
   }
 };
 
+let exclusionTagNames = [
+  "head",
+  "script",
+  "noscript",
+  "style",
+  "textarea",
+  "svg",
+];
+
 let collectTextElement = (parent = document.body) => {
   let list = [];
   parent.childNodes.forEach((elem) => {
-    switch (elem.tagName) {
-      case "HEAD":
-      case "SCRIPT":
-      case "NOSCRIPT":
-      case "STYLE":
-      case "TEXTAREA":
-        return;
-    }
     if (elem.nodeType === Node.ELEMENT_NODE) {
+      if (exclusionTagNames.some(name => elem.tagName.toLowerCase() === name)) {
+        return;
+      }
       let pars = Array.from($(elem).parents());
       if (pars.some(par => $(par).css("display") === "none")) {
         return;
