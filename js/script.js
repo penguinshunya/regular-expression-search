@@ -17,8 +17,7 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
       let text = request.text;
       let flag_i = request.flag_i;
 
-      // 前回の検索結果を消す
-      removeSearchKeyword();
+      clearPrevSearchResult();
       prevText = text;
       prevFlagI = flag_i;
 
@@ -54,7 +53,7 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
       }
       break;
     case "close":
-      removeSearchKeyword();
+      clearPrevSearchResult();
       return;
   }
 
@@ -75,7 +74,7 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
 });
 
 let focusBlock = (blocks, ranges, prevIndex, currIndex) => {
-  // 今現在の検索結果を強調表示
+  // Focus current search result.
   blocks[prevIndex].forEach(($div) => {
     $div.css("background-color", "yellow");
   });
@@ -83,8 +82,8 @@ let focusBlock = (blocks, ranges, prevIndex, currIndex) => {
     $div.css("background-color", "orange");
   });
 
-  // 画面外に検索結果がある場合にスクロール
-  // TODO getBoundingClientRectは非推奨
+  // Scroll when there is a current search result outside the screen.
+  // TODO: getBoundingClientRect() is deprecated.
   let rect = ranges[currIndex].getBoundingClientRect();
   if (0 > rect.x ||
       0 > rect.y ||
@@ -110,7 +109,6 @@ let generateMatchedRangeAndElems = function*(text, flag_i) {
   let length = 0;
   let result;
 
-  // 選択範囲の作成（複数）
   while ((result = regex.exec(content)) != null) {
     let elems = [];
     let range = document.createRange();
@@ -120,7 +118,6 @@ let generateMatchedRangeAndElems = function*(text, flag_i) {
     }
     range.setStart(list[index], result.index - length);
     {
-      // テキスト要素を分割し、後ろの要素をlistに追加する
       let latter = range.startContainer.splitText(range.startOffset);
       list.splice(index + 1, 0, latter);
       length += list[index++].data.length;
@@ -133,7 +130,6 @@ let generateMatchedRangeAndElems = function*(text, flag_i) {
     elems.push(list[index]);
     range.setEnd(list[index], result.index + result[0].length - length);
     {
-      // テキスト要素を分割し、後ろの要素をlistに追加する
       let latter = range.endContainer.splitText(range.endOffset);
       list.splice(index + 1, 0, latter);
       length += list[index++].data.length;
@@ -174,7 +170,7 @@ let collectTextContent = (elements) => {
   return text;
 };
 
-let removeSearchKeyword = () => {
+let clearPrevSearchResult = () => {
   $(".search-result-marker").contents().unwrap();
   prevText = "";
   prevFlagI = null;

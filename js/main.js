@@ -14,7 +14,6 @@ $(() => {
     $("#search").focus();
   });
 
-  // ストレージ上のフラグの状態をUIに反映
   chrome.storage.local.get({flag_i: false}, (result) => {
     setFlagI(result.flag_i);
   });
@@ -77,8 +76,8 @@ $(() => {
           return;
         }
 
-        // 検索履歴の保存
-        // 前回検索した正規表現と同じであれば保存しない
+        // Save a search text.
+        // If it is a same as last search text, don't save.
         if (TEXTS[TEXTS.length - 1] !== text) {
           TEXTS.push(text);
           if (TEXTS.length > 1000) {
@@ -154,7 +153,6 @@ $(() => {
     clearSearchResult(window.close);
   });
 
-  // 前の検索結果に移動
   let movePrevSearchResult = () => {
     chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
       chrome.tabs.sendMessage(tabs[0].id, {
@@ -168,7 +166,6 @@ $(() => {
     });
   };
 
-  // 次の検索結果に移動
   let moveNextSearchResult = () => {
     chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
       chrome.tabs.sendMessage(tabs[0].id, {
@@ -182,7 +179,6 @@ $(() => {
     });
   };
 
-  // 検索結果の削除
   let clearSearchResult = (callback) => {
     chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
       chrome.tabs.sendMessage(tabs[0].id, {
