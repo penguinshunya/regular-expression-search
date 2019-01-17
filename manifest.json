@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name" : "Regular Expression Search",
-  "version" : "0.51",
+  "version" : "0.52",
   "description" : "正規表現で検索する",
   "commands": {
     "_execute_browser_action": {
