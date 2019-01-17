@@ -137,11 +137,10 @@ let collectTextElement = (parent = document.body) => {
   let list = [];
   parent.childNodes.forEach((elem) => {
     if (elem.nodeType === Node.ELEMENT_NODE) {
-      if (exclusionTagNames.some(name => elem.tagName.toLowerCase() === name)) {
+      if (exclusionTagNames.some(name => name === elem.tagName.toLowerCase())) {
         return;
       }
-      let pars = Array.from($(elem).parents());
-      if (pars.some(par => $(par).css("display") === "none")) {
+      if ($(elem).css("display") === "none") {
         return;
       }
       list = list.concat(collectTextElement(elem));
@@ -168,7 +167,7 @@ let clearPrevSearchResult = () => {
 };
 
 let $mark = $("<mark>");
-$mark.attr("tabIndex", "-1").addClass("search-result-marker").css({
+$mark.attr("tabindex", "-1").addClass("search-result-marker").css({
   margin: 0,
   padding: 0,
   backgroundColor: "yellow",
