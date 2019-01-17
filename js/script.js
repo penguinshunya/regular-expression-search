@@ -151,7 +151,8 @@ let collectTextElement = (parent = document.body) => {
         return;
     }
     if (elem.nodeType === Node.ELEMENT_NODE) {
-      if (elem.style.display === "none") {
+      let pars = Array.from($(elem).parents());
+      if (pars.some(par => $(par).css("display") === "none")) {
         return;
       }
       list = list.concat(collectTextElement(elem));
