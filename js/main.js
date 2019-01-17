@@ -191,7 +191,9 @@ $(() => {
 let selectElementContents = (elem) => {
   let range = document.createRange();
   range.selectNodeContents(elem);
-  window.getSelection().addRange(range);
+  let selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
 };
 
 let sendMessage = (data, callback) => {
