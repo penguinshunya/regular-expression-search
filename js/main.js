@@ -74,9 +74,7 @@ $(() => {
         // If it is a same as last search text, don't save.
         if (TEXTS[TEXTS.length - 1] !== text) {
           TEXTS.push(text);
-          if (TEXTS.length > 1000) {
-            while (TEXTS.length > 1000) TEXTS.shift();
-          }
+          while (TEXTS.length > 1000) TEXTS.shift();
           chrome.storage.local.set({texts: TEXTS}, () => {});
         }
         INDEX = TEXTS.length - 1;
@@ -190,12 +188,10 @@ $(() => {
   };
 });
 
-let selectElementContents = (el) => {
+let selectElementContents = (elem) => {
   let range = document.createRange();
-  range.selectNodeContents(el);
-  let sel = window.getSelection();
-  sel.removeAllRanges();
-  sel.addRange(range);
+  range.selectNodeContents(elem);
+  window.getSelection().addRange(range);
 };
 
 let sendMessage = (data, callback) => {
