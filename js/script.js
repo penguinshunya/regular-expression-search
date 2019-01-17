@@ -3,7 +3,6 @@ let prevIndex = -1;
 let prevText = "";
 let prevFlagI = null;
 let matchBlocks = [];
-let matchRanges = [];
 
 chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
   let kind = request.kind;
@@ -21,17 +20,14 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
       prevText = text;
       prevFlagI = flag_i;
 
-      let ranges = [];
       let blocks = [];
 
-      for (let [range, elems] of generateMatchedRangeAndElems(text, flag_i)) {
-        ranges.push(range);
+      for (let elems of generateMatchedElems(text, flag_i)) {
         blocks.push(elems.map(elem => marking(elem)));
       }
 
       prevIndex = 0;
       currIndex = 0;
-      matchRanges = ranges;
       matchBlocks = blocks;
       break;
     case "prev":
@@ -65,7 +61,7 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
     return;
   }
 
-  focusBlock(matchBlocks, matchRanges, prevIndex, currIndex);
+  focusBlock(matchBlocks, prevIndex, currIndex);
 
   sendResponse({
     index: currIndex + 1,
@@ -73,7 +69,7 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
   });
 });
 
-let focusBlock = (blocks, ranges, prevIndex, currIndex) => {
+let focusBlock = (blocks, prevIndex, currIndex) => {
   // Focus current search result.
   blocks[prevIndex].forEach(($div) => {
     $div.css("background-color", "yellow");
@@ -82,21 +78,10 @@ let focusBlock = (blocks, ranges, prevIndex, currIndex) => {
     $div.css("background-color", "orange");
   });
 
-  // Scroll when there is a current search result outside the screen.
-  // TODO: getBoundingClientRect() is deprecated.
-  let rect = ranges[currIndex].getBoundingClientRect();
-  if (0 > rect.x ||
-      0 > rect.y ||
-      window.innerWidth < rect.x + rect.width ||
-      window.innerHeight < rect.y + rect.height) {
-    window.scroll(
-      rect.x + window.scrollX - window.innerWidth / 2,
-      rect.y + window.scrollY - window.innerHeight / 2,
-    );
-  }
+  blocks[currIndex][0].focus();
 };
 
-let generateMatchedRangeAndElems = function*(text, flag_i) {
+let generateMatchedElems = function*(text, flag_i) {
   if (flag_i) {
     var regex = new RegExp(text, "gi");
   } else {
@@ -135,7 +120,7 @@ let generateMatchedRangeAndElems = function*(text, flag_i) {
       length += list[index++].data.length;
     }
 
-    yield [range, elems];
+    yield elems;
   }
 };
 
@@ -180,11 +165,10 @@ let clearPrevSearchResult = () => {
   prevText = "";
   prevFlagI = null;
   matchBlocks = [];
-  matchRanges = [];
 };
 
 let $mark = $("<mark>");
-$mark.addClass("search-result-marker").css({
+$mark.attr("tabIndex", "-1").addClass("search-result-marker").css({
   margin: 0,
   padding: 0,
   backgroundColor: "yellow",
