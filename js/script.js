@@ -23,7 +23,7 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
       let blocks = [];
 
       for (let elems of generateMatchedElems(text, flag_i)) {
-        blocks.push(elems.map(elem => marking(elem)));
+        blocks.push(elems.map(marking));
       }
 
       prevIndex = 0;
