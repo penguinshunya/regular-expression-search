@@ -1,0 +1,76 @@
+#container {
+    display: flex;
+    padding: 0.5em;
+}
+div:focus {
+    outline: 0;
+}
+#search {
+    font-family: 'Courier New', Courier, monospace;
+    width: 12em;
+    padding: 0.5em 1em;
+}
+#count {
+    width: 8em;
+    padding: 1em;
+    font-size: 0.75em;
+}
+#flag_i {
+    font-family: 'Courier New', Courier, monospace;
+    margin: 0.5em;
+    padding: 0.5em;
+    font-size: 0.5em;
+    width: 2.5em;
+    height: 2.5em;
+    text-align: center;
+    cursor: pointer;
+}
+#flag_i:focus {
+    background-color: #e8e8e8;
+    border-radius: 0.2em;
+}
+#flag_i[data-select="true"] {
+    background-color: #cccccc;
+    border-radius: 1.25em;
+}
+#flag_i[data-select="true"]:focus {
+    background-color: #aaaaaa;
+    border-radius: 0.2em;
+}
+.chevron {
+    margin: 0.5em;
+    padding: 0.5em;
+    font-size: 0.5em;
+    width: 2.5em;
+    height: 2.5em;
+    text-align: center;
+    cursor: pointer;
+}
+.chevron:focus {
+    background-color: #e8e8e8;
+    border-radius: 0.2em;
+}
+/* css spinner */
+.lds-dual-ring {
+    display: inline-block;
+    width: 1.5em;
+    height: 1.5em;
+}
+.lds-dual-ring:after {
+    content: " ";
+    display: block;
+    width: 1.2em;
+    height: 1.2em;
+    border-radius: 50%;
+    border: 1px solid #666;
+    border-color: #666 transparent #666 transparent;
+    animation: lds-dual-ring 2s linear infinite;
+}
+@keyframes lds-dual-ring {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}

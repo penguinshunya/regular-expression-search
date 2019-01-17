@@ -1,0 +1,32 @@
+{
+  "manifest_version": 2,
+  "name" : "Regular Expression Search",
+  "version" : "0.5",
+  "description" : "正規表現で検索する",
+  "commands": {
+    "_execute_browser_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+F",
+        "mac": "Command+Shift+F"
+      }
+    }
+  },
+  "browser_action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["js/jquery-3.3.1.min.js", "js/script.js"]
+    }
+  ],
+  "options_ui": {
+    "page": "option.html",
+    "open_in_tab": false
+  },
+  "permissions": [
+    "activeTab",
+    "storage",
+    "*://*/*"
+  ]
+}
