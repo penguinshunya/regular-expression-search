@@ -3,13 +3,14 @@ let text = "";
 let flagI = false;
 
 // search process information
+let process = false;
 let regex;
 let list;
 let content;
 let index = 0;
 let length = 0;
 let blocks = [];
-let process = false;
+const CHUNK_SIZE = 10;
 
 // focus information
 let currIndex = 0;
@@ -54,17 +55,21 @@ let main = (port, request) => {
       blocks = [];
       process = true;
     case "process":
-      let elems = sliceMatchedElems();
-      if (elems === null) {
-        process = false;
-        port.postMessage({
-          status: "finish",
-        });
+      let finish = false;
+      for (let i = 0; i < CHUNK_SIZE; i++) {
+        let elems = sliceMatchedElems();
+        if (elems === null) {
+          finish = true;
+          process = false;
+          break;
+        } else {
+          blocks.push(elems.map(elem => marking(elem, blocks.length)));
+        }
+      }
+      if (finish) {
+        port.postMessage({status: "finish"});
       } else {
-        blocks.push(elems.map(marking));
-        port.postMessage({
-          status: "process",
-        });
+        port.postMessage({status: "process"});
       }
       break;
     case "prev":
@@ -189,19 +194,29 @@ let collectTextContent = (elements) => {
 };
 
 let clearPrevSearchResult = () => {
-  $(".search-result-marker").contents().unwrap();
+  $("mark.search-result-marker").contents().unwrap();
   text = "";
   flagI = false;
   process = false;
 };
 
-let $mark = $("<mark>");
-$mark.attr("tabindex", "-1").addClass("search-result-marker").css({
-  margin: 0,
-  padding: 0,
-  backgroundColor: "yellow",
-});
+let marking = (() => {
+  let $mark = $("<mark>");
+  $mark.attr("tabindex", "-1").addClass("search-result-marker").css({
+    margin: 0,
+    padding: 0,
+    backgroundColor: "yellow",
+  });
 
-let marking = (node) => {
-  return $(node).wrap($mark.clone()).parent();
-};
+  $mark.on("click", function() {
+    let index = currIndex;
+    currIndex = $(this).data("index");
+    focusBlock(blocks, index, currIndex);
+  });
+
+  return (node, index) => {
+    let mark = $mark.clone(true);
+    mark.data("index", index);
+    return $(node).wrap(mark).parent();
+  };
+})();
