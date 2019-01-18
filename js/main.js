@@ -14,11 +14,12 @@ $(() => {
         $("#count").text(response.index + " / " + response.count);
       }
       if (response.status === "process") {
-        port.postMessage({
-          kind: "process",
-        });
+        port.postMessage({kind: "process"});
       }
     });
+
+    // If have searched in this page, display count.
+    port.postMessage({kind: "getinfo"});
   });
 
   chrome.storage.local.get({texts: []}, (result) => {

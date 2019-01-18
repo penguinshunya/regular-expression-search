@@ -93,6 +93,8 @@ let main = (port, request) => {
     case "close":
       clearPrevSearchResult();
       return;
+    case "getinfo":
+      break;
   }
 
   if (blocks.length === 0) {
@@ -198,6 +200,7 @@ let clearPrevSearchResult = () => {
   text = "";
   flagI = false;
   process = false;
+  blocks = [];
 };
 
 let marking = (() => {
@@ -208,6 +211,9 @@ let marking = (() => {
     backgroundColor: "yellow",
   });
 
+  // Change focus target.
+  // When click, popup close.
+  // Therefore, don't need to call port.postMessage() after focusBlock().
   $mark.on("click", function() {
     let index = currIndex;
     currIndex = $(this).data("index");
