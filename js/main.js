@@ -1,8 +1,25 @@
+
 $(() => {
+  let port;
   let PREV_TEXT = "";
   let PREV_FLAGI = null;
   let TEXTS;
   let INDEX;
+
+  chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+    port = chrome.tabs.connect(tabs[0].id);
+    
+    port.onMessage.addListener(response => {
+      if (response.count > 0) {
+        $("#count").text(response.index + " / " + response.count);
+      }
+      if (response.status === "process") {
+        port.postMessage({
+          kind: "process",
+        });
+      }
+    });
+  });
 
   chrome.storage.local.get({texts: []}, (result) => {
     TEXTS = result.texts;
@@ -14,8 +31,8 @@ $(() => {
     $("#search").focus();
   });
 
-  chrome.storage.local.get({flag_i: false}, (result) => {
-    setFlagI(result.flag_i);
+  chrome.storage.local.get({flagI: false}, (result) => {
+    setFlagI(result.flagI);
   });
 
   $("#search").on("keydown", (e) => {
@@ -56,9 +73,9 @@ $(() => {
           return;
         }
 
-        let flag_i = getFlagI();
+        let flagI = getFlagI();
 
-        if (text === PREV_TEXT && flag_i === PREV_FLAGI) {
+        if (text === PREV_TEXT && flagI === PREV_FLAGI) {
           moveNextSearchResult();
           return;
         }
@@ -80,17 +97,13 @@ $(() => {
         INDEX = TEXTS.length - 1;
 
         PREV_TEXT = text;
-        PREV_FLAGI = flag_i;
+        PREV_FLAGI = flagI;
 
         $("#count").text("");
-        $("#count").addClass("lds-dual-ring");
-        sendMessage({
+        port.postMessage({
           kind: "new",
           text: text,
-          flag_i: flag_i,
-        }, (response) => {
-          $("#count").removeClass("lds-dual-ring");
-          $("#count").text(response.index + " / " + response.count);
+          flagI: flagI,
         });
         break;
     }
@@ -121,16 +134,16 @@ $(() => {
   $("#flag_i").on("keydown", (e) => {
     if (e.key !== "Enter" && e.key !== " ") return;
     e.preventDefault();
-    let flag_i = !getFlagI();
-    setFlagI(flag_i);
-    saveFlagI(flag_i);
+    let flagI = !getFlagI();
+    setFlagI(flagI);
+    saveFlagI(flagI);
   });
 
   $("#flag_i").on("click", (e) => {
     e.preventDefault();
-    let flag_i = !getFlagI();
-    setFlagI(flag_i);
-    saveFlagI(flag_i);
+    let flagI = !getFlagI();
+    setFlagI(flagI);
+    saveFlagI(flagI);
   });
 
   $("#close").on("keydown", (e) => {
@@ -145,56 +158,32 @@ $(() => {
   });
 
   let movePrevSearchResult = () => {
-    sendMessage({
-      kind: "prev",
-    }, (response) => {
-      if (response.count > 0) {
-        $("#count").text(response.index + " / " + response.count);
-      }
-    });
+    port.postMessage({kind: "prev"});
   };
 
   let moveNextSearchResult = () => {
-    sendMessage({
-      kind: "next",
-    }, (response) => {
-      if (response.count > 0) {
-        $("#count").text(response.index + " / " + response.count);
-      }
-    });
+    port.postMessage({kind: "next"});
   };
 
   let clearSearchResult = (callback = () => {}) => {
-    sendMessage({
-      kind: "close",
-    }, () => {
-      $("#count").text("");
-      $("#search").text("");
-      INDEX = TEXTS.length;
-      callback();
-    });
+    port.postMessage({kind: "close"});
+    $("#count").text("");
+    $("#search").text("");
+    INDEX = TEXTS.length;
+    callback();
   };
 
   let getFlagI = () => {
     return $("#flag_i")[0].dataset.select === "true";
   };
 
-  let setFlagI = (flag_i) => {
-    $("#flag_i")[0].dataset.select = flag_i ? "true" : "false";
+  let setFlagI = (flagI) => {
+    $("#flag_i")[0].dataset.select = flagI ? "true" : "false";
   };
 
-  let saveFlagI = (flag_i) => {
-    chrome.storage.local.set({flag_i: flag_i}, () => {});
+  let saveFlagI = (flagI) => {
+    chrome.storage.local.set({flagI: flagI}, () => {});
   };
-
-  chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-    let port = chrome.tabs.connect(tabs[0].id);
-    port.postMessage({joke: "Knock knock"});
-    port.onMessage.addListener((msg) => {
-      if (msg.question === "Who are you?")
-        port.postMessage({answer: "I'm Takaya."});
-    });
-  });
 });
 
 let selectElementContents = (elem) => {
@@ -204,10 +193,3 @@ let selectElementContents = (elem) => {
   selection.removeAllRanges();
   selection.addRange(range);
 };
-
-let sendMessage = (data, callback) => {
-  chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-    chrome.tabs.sendMessage(tabs[0].id, data, callback);
-  });
-};
-

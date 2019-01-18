@@ -1,59 +1,87 @@
-let currIndex = -1;
-let prevIndex = -1;
-let prevText = "";
-let prevFlagI = null;
-let matchBlocks = [];
+// search information
+let text = "";
+let flagI = false;
+
+// search process information
+let regex;
+let list;
+let content;
+let index = 0;
+let length = 0;
+let blocks = [];
+let process = false;
+
+// focus information
+let currIndex = 0;
 
 chrome.runtime.onConnect.addListener(port => {
-  port.onMessage.addListener(msg => {
-    if (msg.joke === "Knock knock")
-      port.postMessage({question: "Who are you?"});
-    else if (msg.answer === "I'm Takaya.")
-      console.log("finish!");
+  port.onMessage.addListener(request => {
+    main(port, request);
   });
 });
 
-chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
+let main = (port, request) => {
   let kind = request.kind;
 
-  if (kind === "new" && request.text === prevText && request.flag_i === prevFlagI) {
-    kind = "next";
+  if (kind === "new" && request.text === text && request.flagI === flagI) {
+    if (process) { 
+      kind = "process";
+    } else {
+      kind = "next";
+    }
   }
+
+  let prevIndex = 0;
 
   switch (kind) {
     case "new":
-      let text = request.text;
-      let flag_i = request.flag_i;
-
       clearPrevSearchResult();
-      prevText = text;
-      prevFlagI = flag_i;
 
-      let blocks = [];
+      text = request.text;
+      flagI = request.flagI;
 
-      for (let elems of generateMatchedElems(text, flag_i)) {
-        blocks.push(elems.map(marking));
-      }
-
-      prevIndex = 0;
       currIndex = 0;
-      matchBlocks = blocks;
+
+      if (flagI) {
+        regex = new RegExp(text, "gi");
+      } else {
+        regex = new RegExp(text, "g");
+      }
+      list = collectTextElement(document.body);
+      content = collectTextContent(list);
+      index = 0;
+      length = 0;
+      blocks = [];
+      process = true;
+    case "process":
+      let elems = sliceMatchedElems();
+      if (elems === null) {
+        process = false;
+        port.postMessage({
+          status: "finish",
+        });
+      } else {
+        blocks.push(elems.map(marking));
+        port.postMessage({
+          status: "process",
+        });
+      }
       break;
     case "prev":
-      if (matchBlocks.length === 0) {
+      if (blocks.length === 0) {
         break;
       }
       prevIndex = currIndex--;
       if (currIndex < 0) {
-        currIndex = matchBlocks.length - 1;
+        currIndex = blocks.length - 1;
       }
       break;
     case "next":
-      if (matchBlocks.length === 0) {
+      if (blocks.length === 0) {
         break;
       }
       prevIndex = currIndex++;
-      if (currIndex >= matchBlocks.length) {
+      if (currIndex >= blocks.length) {
         currIndex = 0;
       }
       break;
@@ -62,21 +90,21 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
       return;
   }
 
-  if (matchBlocks.length === 0) {
-    sendResponse({
+  if (blocks.length === 0) {
+    port.postMessage({
       index: 0,
       count: 0,
     });
     return;
   }
 
-  focusBlock(matchBlocks, prevIndex, currIndex);
+  focusBlock(blocks, prevIndex, currIndex);
 
-  sendResponse({
+  port.postMessage({
     index: currIndex + 1,
-    count: matchBlocks.length,
+    count: blocks.length,
   });
-});
+};
 
 let focusBlock = (blocks, prevIndex, currIndex) => {
   // Focus current search result.
@@ -90,47 +118,40 @@ let focusBlock = (blocks, prevIndex, currIndex) => {
   blocks[currIndex][0].focus();
 };
 
-let generateMatchedElems = function*(text, flag_i) {
-  if (flag_i) {
-    var regex = new RegExp(text, "gi");
-  } else {
-    var regex = new RegExp(text, "g");
-  }
-  let list = collectTextElement();
-  let content = collectTextContent(list);
-
-  let index = 0;
-  let length = 0;
+let sliceMatchedElems = () => {
   let result;
 
-  while ((result = regex.exec(content)) != null) {
-    let elems = [];
-    let range = document.createRange();
-
-    while (result.index >= length + list[index].data.length) {
-      length += list[index++].data.length;
-    }
-    range.setStart(list[index], result.index - length);
-    {
-      let latter = range.startContainer.splitText(range.startOffset);
-      list.splice(index + 1, 0, latter);
-      length += list[index++].data.length;
-    }
-    
-    while (result.index + result[0].length > length + list[index].data.length) {
-      elems.push(list[index]);
-      length += list[index++].data.length;
-    }
-    elems.push(list[index]);
-    range.setEnd(list[index], result.index + result[0].length - length);
-    {
-      let latter = range.endContainer.splitText(range.endOffset);
-      list.splice(index + 1, 0, latter);
-      length += list[index++].data.length;
-    }
-
-    yield elems;
+  if ((result = regex.exec(content)) == null) {
+    return null;
   }
+
+  let elems = [];
+  let range = document.createRange();
+
+  // TODO 毎回この処理をするのはけっこうなコスト
+  while (result.index >= length + list[index].data.length) {
+    length += list[index++].data.length;
+  }
+  range.setStart(list[index], result.index - length);
+  {
+    let latter = range.startContainer.splitText(range.startOffset);
+    list.splice(index + 1, 0, latter);
+    length += list[index++].data.length;
+  }
+  
+  while (result.index + result[0].length > length + list[index].data.length) {
+    elems.push(list[index]);
+    length += list[index++].data.length;
+  }
+  elems.push(list[index]);
+  range.setEnd(list[index], result.index + result[0].length - length);
+  {
+    let latter = range.endContainer.splitText(range.endOffset);
+    list.splice(index + 1, 0, latter);
+    length += list[index++].data.length;
+  }
+
+  return elems;
 };
 
 let exclusionTagNames = [
@@ -142,7 +163,7 @@ let exclusionTagNames = [
   "svg",
 ];
 
-let collectTextElement = (parent = document.body) => {
+let collectTextElement = (parent) => {
   let list = [];
   parent.childNodes.forEach((elem) => {
     if (elem.nodeType === Node.ELEMENT_NODE) {
@@ -170,9 +191,8 @@ let collectTextContent = (elements) => {
 
 let clearPrevSearchResult = () => {
   $(".search-result-marker").contents().unwrap();
-  prevText = "";
-  prevFlagI = null;
-  matchBlocks = [];
+  text = "";
+  flagI = false;
 };
 
 let $mark = $("<mark>");

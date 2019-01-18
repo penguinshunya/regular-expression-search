@@ -52,27 +52,3 @@ div:focus {
     background-color: #e8e8e8;
     border-radius: 0.2em;
 }
-/* css spinner */
-.lds-dual-ring {
-    display: inline-block;
-    width: 1.5em;
-    height: 1.5em;
-}
-.lds-dual-ring:after {
-    content: " ";
-    display: block;
-    width: 1.2em;
-    height: 1.2em;
-    border-radius: 50%;
-    border: 1px solid #666;
-    border-color: #666 transparent #666 transparent;
-    animation: lds-dual-ring 2s linear infinite;
-}
-@keyframes lds-dual-ring {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
