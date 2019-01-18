@@ -9,6 +9,8 @@ div:focus {
     font-family: 'Courier New', Courier, monospace;
     width: 20em;
     padding: 0.5em 1em;
+    white-space: nowrap;
+    overflow: hidden;
 }
 #count {
     width: 8em;

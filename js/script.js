@@ -4,6 +4,15 @@ let prevText = "";
 let prevFlagI = null;
 let matchBlocks = [];
 
+chrome.runtime.onConnect.addListener(port => {
+  port.onMessage.addListener(msg => {
+    if (msg.joke === "Knock knock")
+      port.postMessage({question: "Who are you?"});
+    else if (msg.answer === "I'm Takaya.")
+      console.log("finish!");
+  });
+});
+
 chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
   let kind = request.kind;
 

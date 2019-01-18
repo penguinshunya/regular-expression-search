@@ -186,6 +186,15 @@ $(() => {
   let saveFlagI = (flag_i) => {
     chrome.storage.local.set({flag_i: flag_i}, () => {});
   };
+
+  chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+    let port = chrome.tabs.connect(tabs[0].id);
+    port.postMessage({joke: "Knock knock"});
+    port.onMessage.addListener((msg) => {
+      if (msg.question === "Who are you?")
+        port.postMessage({answer: "I'm Takaya."});
+    });
+  });
 });
 
 let selectElementContents = (elem) => {
@@ -201,3 +210,4 @@ let sendMessage = (data, callback) => {
     chrome.tabs.sendMessage(tabs[0].id, data, callback);
   });
 };
+
