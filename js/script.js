@@ -128,7 +128,6 @@ let sliceMatchedElems = () => {
   let elems = [];
   let range = document.createRange();
 
-  // TODO 毎回この処理をするのはけっこうなコスト
   while (result.index >= length + list[index].data.length) {
     length += list[index++].data.length;
   }
@@ -193,6 +192,7 @@ let clearPrevSearchResult = () => {
   $(".search-result-marker").contents().unwrap();
   text = "";
   flagI = false;
+  process = false;
 };
 
 let $mark = $("<mark>");
