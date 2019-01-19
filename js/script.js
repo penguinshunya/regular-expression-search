@@ -3,6 +3,7 @@ let text = "";
 let flagI = false;
 
 // search process information
+let search = false;
 let process = false;
 let regex;
 let list;
@@ -54,6 +55,7 @@ let main = (port, request) => {
       length = 0;
       blocks = [];
       process = true;
+      search = true;
     case "process":
       let finish = false;
       for (let i = 0; i < CHUNK_SIZE; i++) {
@@ -97,23 +99,19 @@ let main = (port, request) => {
       break;
   }
 
-  if (blocks.length === 0) {
-    port.postMessage({
-      index: 0,
-      count: 0,
-    });
-    return;
-  }
-
   focusBlock(blocks, prevIndex, currIndex);
 
   port.postMessage({
+    search: search,
     index: currIndex + 1,
     count: blocks.length,
   });
 };
 
 let focusBlock = (blocks, prevIndex, currIndex) => {
+  if (blocks.length === 0) {
+    return;
+  }
   // Focus current search result.
   blocks[prevIndex].forEach(($div) => {
     $div.css("background-color", "yellow");
@@ -200,6 +198,7 @@ let clearPrevSearchResult = () => {
   text = "";
   flagI = false;
   process = false;
+  search = false;
   blocks = [];
 };
 
