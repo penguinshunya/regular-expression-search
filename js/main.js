@@ -73,11 +73,6 @@ $(() => {
       case "Enter":
         e.preventDefault();
 
-        if (e.shiftKey) {
-          movePrevSearchResult();
-          break;
-        }
-        
         let text = $("#search").val();
         if (text === "") {
           clearSearchResult();
@@ -86,6 +81,11 @@ $(() => {
 
         let flagI = getFlagI();
 
+        if (e.shiftKey && text === PREV_TEXT && flagI === PREV_FLAGI) {
+          movePrevSearchResult();
+          break;
+        }
+        
         if (!e.ctrlKey && text === PREV_TEXT && flagI === PREV_FLAGI) {
           moveNextSearchResult();
           return;
