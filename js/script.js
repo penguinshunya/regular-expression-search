@@ -212,7 +212,7 @@ let marking = (() => {
   });
 
   // Change focus target.
-  // When click, popup close.
+  // When click outside the popup area, popup close.
   // Therefore, don't need to call port.postMessage() after focusBlock().
   $mark.on("click", function() {
     let index = currIndex;
