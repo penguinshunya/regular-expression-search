@@ -19,11 +19,15 @@ let currIndex = 0;
 
 chrome.runtime.onConnect.addListener(port => {
   port.onMessage.addListener(request => {
-    main(port, request);
+    main(port, backport, request);
+  });
+  let backport = chrome.runtime.connect();
+  backport.onMessage.addListener(request => {
+    main(port, backport, request);
   });
 });
 
-let main = (port, request) => {
+let main = (port, backport, request) => {
   let kind = request.kind;
 
   if (kind === "new" && request.text === text && request.flagI === flagI) {
@@ -72,6 +76,11 @@ let main = (port, request) => {
           blocks.push(elems.map(elem => marking(elem, i)));
           markers.push(addMarker($(elems[0]).parent(), i));
         }
+      }
+      // Send data to event page here.
+      if (process) {
+        backport.postMessage();
+        break;
       }
       break;
     case "prev":
