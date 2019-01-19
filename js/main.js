@@ -21,6 +21,8 @@ $(() => {
         }
         $("#prev").prop("disabled", false);
         $("#next").prop("disabled", false);
+        PREV_TEXT = response.text;
+        PREV_FLAGI = response.flagI;
       }
       if (response.status === "process") {
         port.postMessage({kind: "process"});
@@ -114,9 +116,6 @@ $(() => {
           chrome.storage.local.set({texts: TEXTS}, () => {});
         }
         INDEX = TEXTS.length - 1;
-
-        PREV_TEXT = text;
-        PREV_FLAGI = flagI;
 
         port.postMessage({
           kind: "new",

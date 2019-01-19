@@ -11,6 +11,7 @@ let content;
 let index = 0;
 let length = 0;
 let blocks = [];
+let markers = [];
 const CHUNK_SIZE = 10;
 
 // focus information
@@ -68,7 +69,9 @@ let main = (port, request) => {
           process = false;
           break;
         } else {
-          blocks.push(elems.map(elem => marking(elem, blocks.length)));
+          let i = blocks.length;
+          blocks.push(elems.map(elem => marking(elem, i)));
+          markers.push(addMarker($(elems[0]).parent(), i));
         }
       }
       if (finish) {
@@ -106,6 +109,8 @@ let main = (port, request) => {
 
   port.postMessage({
     search: search,
+    text: text,
+    flagI: flagI,
     index: currIndex + 1,
     count: blocks.length,
   });
@@ -124,6 +129,17 @@ let focusBlock = (blocks, prevIndex, currIndex) => {
   });
 
   blocks[currIndex][0].focus();
+
+  markers[prevIndex].css({
+    backgroundColor: "yellow",
+    border: "solid 1px yellow",
+    zIndex: 0,
+  });
+  markers[currIndex].css({
+    backgroundColor: "orange",
+    border: "solid 1px orange",
+    zIndex: 1,
+  });
 };
 
 let sliceMatchedElems = () => {
@@ -211,11 +227,13 @@ let clearPrevSearchResult = () => {
   blocks.forEach(block => {
     block.forEach(mark => mark.contents().unwrap());
   });
+  markers.forEach(marker => marker.remove());
   text = "";
   flagI = false;
   process = false;
   search = false;
   blocks = [];
+  markers = [];
 };
 
 let marking = (() => {
@@ -239,5 +257,61 @@ let marking = (() => {
     let mark = $mark.clone(true);
     mark.data("index", index);
     return $(node).wrap(mark).parent();
+  };
+})();
+
+let markerWrapper = $("<div>");
+markerWrapper.css({
+  zIndex: 65536,
+  position: "fixed",
+  margin: 0,
+  padding: 0,
+  width: 16,
+  height: window.innerHeight,
+  top: 0,
+  right: 0,
+});
+markerWrapper.appendTo("body");
+
+$(window).resize(() => {
+  markers.forEach(marker => {
+    let pos = marker.data("position");
+    let top = pos * window.innerHeight / $(document).height();
+    marker.css("top", top);
+  });
+});
+
+let addMarker = (() => {
+  let $marker = $("<mark>");
+  $marker.css({
+    display: "block",
+    position: "absolute",
+    margin: 0,
+    padding: 0,
+    border: "solid 1px yellow",
+    backgroundColor: "yellow",
+    left: 0,
+    width: "100%",
+    height: 10,
+    cursor: "pointer",
+  });
+
+  $marker.on("click", function() {
+    let index = currIndex;
+    currIndex = $(this).data("index");
+    focusBlock(blocks, index, currIndex);
+  });
+
+  return (elem, index) => {
+    let marker = $marker.clone(true);
+    let pos = (elem.offset().top * 2 + elem.height()) / 2;
+    let top = pos * window.innerHeight / $(document).height();
+    let height = elem.height() / $(document).height();
+    marker.css("top", top);
+    marker.height(height);
+    marker.data("index", index);
+    marker.data("position", pos);
+    marker.appendTo(markerWrapper);
+    return marker;
   };
 })();
