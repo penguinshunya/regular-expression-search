@@ -10,22 +10,30 @@ $(() => {
     
     port.onMessage.addListener(response => {
       if (!response.search) {
-        $("#count").text("");
-        $("#prev").prop("disabled", true);
-        $("#next").prop("disabled", true);
-      } else {
-        if (response.count === 0) {
-          $("#count").text(0);
+        if (response.process) {
+          // Searching in progress, but stop searching.
+          modifyCount(response.index, response.count);
+          $("#prev").prop("disabled", false);
+          $("#next").prop("disabled", false);
         } else {
-          $("#count").text(response.index + " / " + response.count);
+          // Do nothing.
+          $("#count").text("");
+          $("#prev").prop("disabled", true);
+          $("#next").prop("disabled", true);
         }
-        $("#prev").prop("disabled", false);
-        $("#next").prop("disabled", false);
-        PREV_TEXT = response.text;
-        PREV_FLAGI = response.flagI;
-      }
-      if (response.status === "process") {
-        port.postMessage({kind: "process"});
+      } else {
+        if (response.process) {
+          // Searching in progress.
+          modifyCount(response.index, response.count);
+          $("#prev").prop("disabled", false);
+          $("#next").prop("disabled", false);
+          port.postMessage({kind: "process"});
+        } else {
+          // Finish searching.
+          modifyCount(response.index, response.count);
+          PREV_TEXT = response.text;
+          PREV_FLAGI = response.flagI;
+        }
       }
     });
 
@@ -35,7 +43,7 @@ $(() => {
     });
 
     // If have searched in this page, display count.
-    port.postMessage({kind: "getinfo"});
+    port.postMessage({kind: "prepare"});
   });
 
   chrome.storage.local.get({texts: []}, (result) => {
@@ -166,12 +174,14 @@ $(() => {
   $("#close").on("keydown", (e) => {
     if (e.key !== "Enter" && e.key !== " ") return;
     e.preventDefault();
-    clearSearchResult(window.close);
+    clearSearchResult();
+    window.close();
   });
 
   $("#close").on("click", (e) => {
     e.preventDefault();
-    clearSearchResult(window.close);
+    clearSearchResult();
+    window.close();
   });
 
   let movePrevSearchResult = () => {
@@ -182,11 +192,10 @@ $(() => {
     port.postMessage({kind: "next"});
   };
 
-  let clearSearchResult = (callback = () => {}) => {
+  let clearSearchResult = () => {
     port.postMessage({kind: "close"});
     PREV_TEXT = "";
     INDEX = TEXTS.length;
-    callback();
   };
 
   let getFlagI = () => {
@@ -199,5 +208,13 @@ $(() => {
 
   let saveFlagI = (flagI) => {
     chrome.storage.local.set({flagI: flagI}, () => {});
+  };
+
+  let modifyCount = (index, count) => {
+    if (count === 0) {
+      $("#count").text(0);
+    } else {
+      $("#count").text(index + " / " + count);
+    }
   };
 });

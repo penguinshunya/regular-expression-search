@@ -27,7 +27,8 @@ let main = (port, request) => {
   let kind = request.kind;
 
   if (kind === "new" && request.text === text && request.flagI === flagI) {
-    if (process) { 
+    if (process) {
+      search = true;
       kind = "process";
     } else {
       kind = "next";
@@ -61,11 +62,9 @@ let main = (port, request) => {
       if (!search) {
         break;
       }
-      let finish = false;
       for (let i = 0; i < CHUNK_SIZE; i++) {
         let elems = sliceMatchedElems();
         if (elems === null) {
-          finish = true;
           process = false;
           break;
         } else {
@@ -73,11 +72,6 @@ let main = (port, request) => {
           blocks.push(elems.map(elem => marking(elem, i)));
           markers.push(addMarker($(elems[0]).parent(), i));
         }
-      }
-      if (finish) {
-        port.postMessage({status: "finish"});
-      } else {
-        port.postMessage({status: "process"});
       }
       break;
     case "prev":
@@ -101,7 +95,10 @@ let main = (port, request) => {
     case "close":
       clearPrevSearchResult();
       break;
-    case "getinfo":
+    case "prepare":
+      if (process) {
+        search = false;
+      }
       break;
   }
 
@@ -109,6 +106,7 @@ let main = (port, request) => {
 
   port.postMessage({
     search: search,
+    process: process,
     text: text,
     flagI: flagI,
     index: currIndex + 1,
