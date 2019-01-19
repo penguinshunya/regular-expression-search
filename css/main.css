@@ -2,19 +2,19 @@
     display: flex;
     padding: 0.5em;
 }
-div:focus {
+div:focus,
+input:focus {
     outline: 0;
 }
 #search {
     font-family: 'Courier New', Courier, monospace;
     width: 20em;
     padding: 0.5em 1em;
-    white-space: nowrap;
-    overflow: hidden;
+    border: 0;
 }
 #count {
     width: 8em;
-    padding: 1em;
+    padding: 0.875em;
     font-size: 0.75em;
 }
 #flag_i {

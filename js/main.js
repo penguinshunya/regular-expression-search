@@ -18,6 +18,11 @@ $(() => {
       }
     });
 
+    // When the page is changes, don't use old port object.
+    port.onDisconnect.addListener(event => {
+      window.close();
+    });
+
     // If have searched in this page, display count.
     port.postMessage({kind: "getinfo"});
   });
@@ -26,8 +31,7 @@ $(() => {
     TEXTS = result.texts;
     INDEX = result.texts.length - 1;
     if (INDEX >= 0) {
-      $("#search").text(TEXTS[INDEX]);
-      selectElementContents($("#search")[0]);
+      $("#search").val(TEXTS[INDEX]);
     }
     $("#search").focus();
   });
@@ -36,13 +40,17 @@ $(() => {
     setFlagI(result.flagI);
   });
 
+  $("#search").focus(function() {
+    $(this).select();
+  });
+
   $("#search").on("keydown", (e) => {
     switch (e.key) {
       case "ArrowUp":
         e.preventDefault();
         if (INDEX > 0) {
-          $("#search").text(TEXTS[--INDEX]);
-          selectElementContents($("#search")[0]);
+          $("#search").val(TEXTS[--INDEX]);
+          $("#search").select();
         }
         $("#count").text("");
         break;
@@ -50,11 +58,11 @@ $(() => {
       case "ArrowDown":
         e.preventDefault();
         if (INDEX < TEXTS.length - 1) {
-          $("#search").text(TEXTS[++INDEX]);
-          selectElementContents($("#search")[0]);
+          $("#search").val(TEXTS[++INDEX]);
+          $("#search").select();
         } else {
           INDEX = TEXTS.length;
-          $("#search").text("");
+          $("#search").val("");
         }
         $("#count").text("");
         break;
@@ -67,7 +75,7 @@ $(() => {
           break;
         }
         
-        let text = $("#search").text();
+        let text = $("#search").val();
         if (text === "") {
           clearSearchResult();
           PREV_TEXT = "";
@@ -84,7 +92,7 @@ $(() => {
         try {
           new RegExp(text);
         } catch (e) {
-          selectElementContents($("#search")[0]);
+          $("#search").select();
           return;
         }
 
@@ -169,7 +177,7 @@ $(() => {
   let clearSearchResult = (callback = () => {}) => {
     port.postMessage({kind: "close"});
     $("#count").text("");
-    $("#search").text("");
+    $("#search").val("");
     INDEX = TEXTS.length;
     callback();
   };
@@ -186,11 +194,3 @@ $(() => {
     chrome.storage.local.set({flagI: flagI}, () => {});
   };
 });
-
-let selectElementContents = (elem) => {
-  let range = document.createRange();
-  range.selectNodeContents(elem);
-  let selection = window.getSelection();
-  selection.removeAllRanges();
-  selection.addRange(range);
-};
