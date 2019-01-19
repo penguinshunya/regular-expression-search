@@ -15,7 +15,7 @@ let markers = [];
 const CHUNK_SIZE = 1;
 
 // focus information
-let currIndex = 0;
+let currIndex = -1;
 
 chrome.runtime.onConnect.addListener(port => {
   port.onMessage.addListener(request => {
@@ -48,7 +48,7 @@ let main = (port, backport, request) => {
       text = request.text;
       flagI = request.flagI;
 
-      currIndex = 0;
+      currIndex = -1;
 
       if (flagI) {
         regex = new RegExp(text, "gi");
@@ -90,6 +90,7 @@ let main = (port, backport, request) => {
       if (currIndex < 0) {
         currIndex = blocks.length - 1;
       }
+      focusBlock(blocks, prevIndex, currIndex);
       break;
     case "next":
       if (blocks.length === 0) {
@@ -99,6 +100,7 @@ let main = (port, backport, request) => {
       if (currIndex >= blocks.length) {
         currIndex = 0;
       }
+      focusBlock(blocks, prevIndex, currIndex);
       break;
     case "close":
       clearPrevSearchResult();
@@ -109,8 +111,6 @@ let main = (port, backport, request) => {
       }
       break;
   }
-
-  focusBlock(blocks, prevIndex, currIndex);
 
   port.postMessage({
     search: search,
@@ -126,6 +126,9 @@ let focusBlock = (blocks, prevIndex, currIndex) => {
   if (blocks.length === 0) {
     return;
   }
+  if (prevIndex < 0) {
+    prevIndex = 0;
+  }
   // Focus current search result.
   blocks[prevIndex].forEach(($div) => {
     $div.css("background-color", "yellow");
@@ -138,12 +141,10 @@ let focusBlock = (blocks, prevIndex, currIndex) => {
 
   markers[prevIndex].css({
     backgroundColor: "yellow",
-    border: "solid 1px yellow",
     zIndex: 0,
   });
   markers[currIndex].css({
     backgroundColor: "orange",
-    border: "solid 1px orange",
     zIndex: 1,
   });
 };

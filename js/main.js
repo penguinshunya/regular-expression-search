@@ -211,8 +211,8 @@ $(() => {
   };
 
   let modifyCount = (index, count) => {
-    if (count === 0) {
-      $("#count").text(0);
+    if (index === 0) {
+      $("#count").text(count);
     } else {
       $("#count").text(index + " / " + count);
     }
