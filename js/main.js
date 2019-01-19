@@ -9,14 +9,18 @@ $(() => {
     port = chrome.tabs.connect(tabs[0].id);
     
     port.onMessage.addListener(response => {
-      if (response.search) {
+      if (!response.search) {
+        $("#count").text("");
+        $("#prev").prop("disabled", true);
+        $("#next").prop("disabled", true);
+      } else {
         if (response.count === 0) {
           $("#count").text(0);
         } else {
           $("#count").text(response.index + " / " + response.count);
         }
-      } else {
-        $("#count").text("");
+        $("#prev").prop("disabled", false);
+        $("#next").prop("disabled", false);
       }
       if (response.status === "process") {
         port.postMessage({kind: "process"});
