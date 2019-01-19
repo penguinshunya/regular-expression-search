@@ -81,13 +81,12 @@ $(() => {
         let text = $("#search").val();
         if (text === "") {
           clearSearchResult();
-          PREV_TEXT = "";
           return;
         }
 
         let flagI = getFlagI();
 
-        if (text === PREV_TEXT && flagI === PREV_FLAGI) {
+        if (!e.ctrlKey && text === PREV_TEXT && flagI === PREV_FLAGI) {
           moveNextSearchResult();
           return;
         }
@@ -97,6 +96,10 @@ $(() => {
         } catch (e) {
           $("#search").select();
           return;
+        }
+
+        if (e.ctrlKey) {
+          clearSearchResult();
         }
 
         // Save a search text.
@@ -178,7 +181,7 @@ $(() => {
 
   let clearSearchResult = (callback = () => {}) => {
     port.postMessage({kind: "close"});
-    $("#search").val("");
+    PREV_TEXT = "";
     INDEX = TEXTS.length;
     callback();
   };
