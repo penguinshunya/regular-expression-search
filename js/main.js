@@ -38,9 +38,7 @@ $(() => {
     });
 
     // When the page is changes, don't use old port object.
-    port.onDisconnect.addListener(event => {
-      window.close();
-    });
+    port.onDisconnect.addListener(window.close);
 
     // If have searched in this page, display count.
     port.postMessage({kind: "prepare"});
