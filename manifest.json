@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name" : "Regular Expression Search",
-  "version" : "0.5.6",
+  "version" : "0.7.0",
   "description" : "search using regular expression on chrome extension",
   "commands": {
     "_execute_browser_action": {
