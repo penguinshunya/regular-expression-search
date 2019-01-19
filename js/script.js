@@ -225,7 +225,7 @@ let clearPrevSearchResult = () => {
   blocks.forEach(block => {
     block.forEach(mark => mark.contents().unwrap());
   });
-  markers.forEach(marker => marker.remove());
+  markerWrapper.html("");
   text = "";
   flagI = false;
   process = false;
@@ -280,9 +280,8 @@ $(window).resize(() => {
 });
 
 let addMarker = (() => {
-  let $marker = $("<mark>");
+  let $marker = $("<div>");
   $marker.css({
-    display: "block",
     position: "absolute",
     margin: 0,
     padding: 0,
@@ -290,7 +289,6 @@ let addMarker = (() => {
     backgroundColor: "yellow",
     left: 0,
     width: "100%",
-    height: 10,
     cursor: "pointer",
   });
 
@@ -302,9 +300,9 @@ let addMarker = (() => {
 
   return (elem, index) => {
     let marker = $marker.clone(true);
-    let pos = (elem.offset().top * 2 + elem.height()) / 2;
-    let top = pos * window.innerHeight / $(document).height();
-    let height = elem.height() / $(document).height();
+    let pos = elem.offset().top;
+    let height = elem.height() * window.innerHeight / $(document).height();
+    let top = pos * (window.innerHeight - height) / $(document).height();
     marker.css("top", top);
     marker.height(height);
     marker.data("index", index);
