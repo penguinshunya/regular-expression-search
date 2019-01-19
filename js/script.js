@@ -174,10 +174,21 @@ let collectTextElement = (parent) => {
   let list = [];
   parent.childNodes.forEach((elem) => {
     if (elem.nodeType === Node.ELEMENT_NODE) {
-      if (exclusionTagNames.some(name => name === elem.tagName.toLowerCase())) {
+      let tagName = elem.tagName.toLowerCase();
+      if (exclusionTagNames.some(name => tagName === name)) {
         return;
       }
       if ($(elem).css("display") === "none") {
+        return;
+      }
+      if (tagName === "iframe") {
+        try {
+          // Error occurs in this line when cross domain.
+          let body = elem.contentWindow.document.body;
+
+          list = list.concat(collectTextElement(body));
+        } catch (e) {
+        }
         return;
       }
       list = list.concat(collectTextElement(elem));
@@ -197,7 +208,9 @@ let collectTextContent = (elements) => {
 };
 
 let clearPrevSearchResult = () => {
-  $("mark.search-result-marker").contents().unwrap();
+  blocks.forEach(block => {
+    block.forEach(mark => mark.contents().unwrap());
+  });
   text = "";
   flagI = false;
   process = false;
@@ -207,7 +220,7 @@ let clearPrevSearchResult = () => {
 
 let marking = (() => {
   let $mark = $("<mark>");
-  $mark.attr("tabindex", "-1").addClass("search-result-marker").css({
+  $mark.attr("tabindex", "-1").css({
     margin: 0,
     padding: 0,
     backgroundColor: "yellow",
