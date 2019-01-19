@@ -272,9 +272,10 @@ markerWrapper.css({
 markerWrapper.appendTo("body");
 
 $(window).resize(() => {
+  // TODO: too late
   markers.forEach(marker => {
     let pos = marker.data("position");
-    let top = pos * window.innerHeight / $(document).height();
+    let top = pos * (window.innerHeight - marker.data("height")) / $(document).height();
     marker.css("top", top);
   });
 });
@@ -306,6 +307,7 @@ let addMarker = (() => {
     marker.css("top", top);
     marker.height(height);
     marker.data("index", index);
+    marker.data("height", height);
     marker.data("position", pos);
     marker.appendTo(markerWrapper);
     return marker;
