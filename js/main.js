@@ -31,6 +31,8 @@ $(() => {
         } else {
           // Finish searching.
           modifyCount(response.index, response.count);
+          PREV_TEXT = response.text;
+          PREV_FLAGI = response.flagI;
         }
       }
     });
