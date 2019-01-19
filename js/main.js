@@ -15,6 +15,8 @@ $(() => {
         } else {
           $("#count").text(response.index + " / " + response.count);
         }
+      } else {
+        $("#count").text("");
       }
       if (response.status === "process") {
         port.postMessage({kind: "process"});
@@ -55,7 +57,6 @@ $(() => {
           $("#search").val(TEXTS[--INDEX]);
           $("#search").select();
         }
-        $("#count").text("");
         break;
 
       case "ArrowDown":
@@ -67,7 +68,6 @@ $(() => {
           INDEX = TEXTS.length;
           $("#search").val("");
         }
-        $("#count").text("");
         break;
 
       case "Enter":
@@ -111,7 +111,6 @@ $(() => {
         PREV_TEXT = text;
         PREV_FLAGI = flagI;
 
-        $("#count").text("");
         port.postMessage({
           kind: "new",
           text: text,
@@ -179,7 +178,6 @@ $(() => {
 
   let clearSearchResult = (callback = () => {}) => {
     port.postMessage({kind: "close"});
-    $("#count").text("");
     $("#search").val("");
     INDEX = TEXTS.length;
     callback();

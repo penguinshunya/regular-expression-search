@@ -57,6 +57,9 @@ let main = (port, request) => {
       process = true;
       search = true;
     case "process":
+      if (!search) {
+        break;
+      }
       let finish = false;
       for (let i = 0; i < CHUNK_SIZE; i++) {
         let elems = sliceMatchedElems();
@@ -94,7 +97,7 @@ let main = (port, request) => {
       break;
     case "close":
       clearPrevSearchResult();
-      return;
+      break;
     case "getinfo":
       break;
   }
