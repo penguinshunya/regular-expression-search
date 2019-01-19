@@ -1,4 +1,3 @@
-
 $(() => {
   let port;
   let PREV_TEXT = "";
