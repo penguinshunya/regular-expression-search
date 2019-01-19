@@ -6,10 +6,15 @@ div:focus,
 input:focus {
     outline: 0;
 }
+#search_wrapper {
+    display: flex;
+    width: 320px;
+}
 #search {
     font-family: 'Courier New', Courier, monospace;
     padding: 0.5em 1em;
     border: 0;
+    width: 100%;
 }
 #count {
     padding: 1em 2em 0 0;

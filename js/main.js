@@ -16,7 +16,6 @@ $(() => {
           $("#count").text(response.index + " / " + response.count);
         }
       }
-      adjustSearchBoxSize();
       if (response.status === "process") {
         port.postMessage({kind: "process"});
       }
@@ -57,7 +56,6 @@ $(() => {
           $("#search").select();
         }
         $("#count").text("");
-        adjustSearchBoxSize();
         break;
 
       case "ArrowDown":
@@ -70,7 +68,6 @@ $(() => {
           $("#search").val("");
         }
         $("#count").text("");
-        adjustSearchBoxSize();
         break;
 
       case "Enter":
@@ -115,7 +112,6 @@ $(() => {
         PREV_FLAGI = flagI;
 
         $("#count").text("");
-        adjustSearchBoxSize();
         port.postMessage({
           kind: "new",
           text: text,
@@ -184,7 +180,6 @@ $(() => {
   let clearSearchResult = (callback = () => {}) => {
     port.postMessage({kind: "close"});
     $("#count").text("");
-    adjustSearchBoxSize();
     $("#search").val("");
     INDEX = TEXTS.length;
     callback();
@@ -200,9 +195,5 @@ $(() => {
 
   let saveFlagI = (flagI) => {
     chrome.storage.local.set({flagI: flagI}, () => {});
-  };
-
-  let adjustSearchBoxSize = () => {
-    $("#search").width(320 - $("#count").width());
   };
 });
