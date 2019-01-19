@@ -80,7 +80,6 @@ let main = (port, backport, request) => {
       // Send data to event page here.
       if (process) {
         backport.postMessage();
-        break;
       }
       break;
     case "prev":

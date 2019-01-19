@@ -27,7 +27,6 @@ $(() => {
           modifyCount(response.index, response.count);
           $("#prev").prop("disabled", false);
           $("#next").prop("disabled", false);
-          // port.postMessage({kind: "process"});
         } else {
           // Finish searching.
           modifyCount(response.index, response.count);
