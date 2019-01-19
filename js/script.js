@@ -12,7 +12,7 @@ let index = 0;
 let length = 0;
 let blocks = [];
 let markers = [];
-const CHUNK_SIZE = 10;
+const CHUNK_SIZE = 1;
 
 // focus information
 let currIndex = 0;
@@ -275,7 +275,7 @@ $(window).resize(() => {
   // TODO: too late
   markers.forEach(marker => {
     let pos = marker.data("position");
-    let top = pos * (window.innerHeight - marker.data("height")) / $(document).height();
+    let top = pos * (window.innerHeight - marker.data("height"));
     marker.css("top", top);
   });
 });
@@ -308,7 +308,7 @@ let addMarker = (() => {
     marker.height(height);
     marker.data("index", index);
     marker.data("height", height);
-    marker.data("position", pos);
+    marker.data("position", pos / $(document).height());
     marker.appendTo(markerWrapper);
     return marker;
   };
