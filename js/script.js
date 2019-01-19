@@ -232,6 +232,7 @@ let clearPrevSearchResult = () => {
   search = false;
   blocks = [];
   markers = [];
+  maxBottom = 0;
 };
 
 let marking = (() => {
@@ -265,20 +266,11 @@ markerWrapper.css({
   margin: 0,
   padding: 0,
   width: 16,
-  height: window.innerHeight,
   top: 0,
   right: 0,
 });
 markerWrapper.appendTo("body");
-
-$(window).resize(() => {
-  // TODO: too late
-  markers.forEach(marker => {
-    let pos = marker.data("position");
-    let top = pos * (window.innerHeight - marker.data("height"));
-    marker.css("top", top);
-  });
-});
+let maxBottom = 0;
 
 let addMarker = (() => {
   let $marker = $("<div>");
@@ -286,7 +278,6 @@ let addMarker = (() => {
     position: "absolute",
     margin: 0,
     padding: 0,
-    border: "solid 1px yellow",
     backgroundColor: "yellow",
     left: 0,
     width: "100%",
@@ -301,15 +292,21 @@ let addMarker = (() => {
 
   return (elem, index) => {
     let marker = $marker.clone(true);
-    let pos = elem.offset().top;
-    let height = elem.height() * window.innerHeight / $(document).height();
-    let top = pos * (window.innerHeight - height) / $(document).height();
-    marker.css("top", top);
+    let height = elem.height() / $(document).height() * window.innerHeight;
+    if (height < 5) height = 5;
+
+    let top = elem.offset().top / ($(document).height() - elem.height());
+    marker.css("top", top * 100 + "%");
     marker.height(height);
     marker.data("index", index);
-    marker.data("height", height);
-    marker.data("position", pos / $(document).height());
     marker.appendTo(markerWrapper);
+
+    let bottom = elem.offset().top + elem.height();
+    if (bottom >= maxBottom) {
+      maxBottom = bottom;
+      markerWrapper.css("height", "calc(100% - " + height + "px)");
+    }
+
     return marker;
   };
 })();
