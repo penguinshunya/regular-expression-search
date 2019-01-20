@@ -12,117 +12,127 @@ let index = 0;
 let length = 0;
 let blocks = [];
 let markers = [];
-const CHUNK_SIZE = 1;
 
 // focus information
 let currIndex = -1;
 
+let markerWrapper = $("<div>");
+let maxBottom = 0;
+
+let focusPrevBlock = () => {
+  if (blocks.length === 0) {
+    return;
+  }
+  let prevIndex = currIndex--;
+  if (currIndex < 0) {
+    currIndex = blocks.length - 1;
+  }
+  focusBlock(prevIndex, currIndex);
+};
+
+let focusNextBlock = () => {
+  if (blocks.length === 0) {
+    return;
+  }
+  let prevIndex = currIndex++;
+  if (currIndex >= blocks.length) {
+    currIndex = 0;
+  }
+  focusBlock(prevIndex, currIndex);
+};
+
 chrome.runtime.onConnect.addListener(port => {
-  port.onMessage.addListener(request => {
-    main(port, backport, request);
-  });
   let backport = chrome.runtime.connect();
-  backport.onMessage.addListener(request => {
-    main(port, backport, request);
+
+  let postMessage = () => {
+    port.postMessage({
+      search: search,
+      process: process,
+      text: text,
+      cain: cain,
+      index: currIndex + 1,
+      count: blocks.length,
+    });
+  };
+
+  port.onMessage.addListener(request => {
+    let kind = request.kind;
+  
+    if (kind === "new" && request.text === text && request.cain === cain) {
+      if (process) {
+        search = true;
+        kind = "process";
+      } else {
+        kind = "next";
+      }
+    }
+  
+    switch (kind) {
+      case "new":
+        clearSearchResult();
+  
+        text = request.text;
+        cain = request.cain;
+  
+        currIndex = -1;
+  
+        regex = new RegExp(text, cain ? "gi" : "g");
+        list = collectTextElement(document.body);
+        content = collectTextContent(list);
+        index = 0;
+        length = 0;
+        blocks = [];
+        process = true;
+        search = true;
+      case "process":
+        backport.postMessage();
+        break;
+      case "prev":
+        focusPrevBlock();
+        break;
+      case "next":
+        focusNextBlock();
+        break;
+      case "close":
+        clearSearchResult();
+        break;
+      case "prepare":
+        if (process) {
+          search = false;
+        }
+        break;
+    }
+    if (port !== null) {
+      postMessage();
+    }
+  });
+
+  port.onDisconnect.addListener(_ => {
+    port = null;
+  });
+
+  backport.onMessage.addListener(_ => {
+    if (!search) {
+      return;
+    }
+    let elems = sliceMatchedElems();
+    if (elems === null) {
+      process = false;
+    } else {
+      let i = blocks.length;
+      blocks.push(elems.map(elem => marking(elem, i)));
+      markers.push(addMarker($(elems[0]).parent(), i));
+    }
+    if (process) {
+      backport.postMessage();
+    }
+    if (port !== null) {
+      postMessage();
+    }
   });
 });
 
-let main = (port, backport, request) => {
-  let kind = request.kind;
-
-  if (kind === "new" && request.text === text && request.cain === cain) {
-    if (process) {
-      search = true;
-      kind = "process";
-    } else {
-      kind = "next";
-    }
-  }
-
-  let prevIndex = 0;
-
-  switch (kind) {
-    case "new":
-      clearPrevSearchResult();
-
-      text = request.text;
-      cain = request.cain;
-
-      currIndex = 0;
-
-      if (cain) {
-        regex = new RegExp(text, "gi");
-      } else {
-        regex = new RegExp(text, "g");
-      }
-      list = collectTextElement(document.body);
-      content = collectTextContent(list);
-      index = 0;
-      length = 0;
-      blocks = [];
-      process = true;
-      search = true;
-    case "process":
-      if (!search) {
-        break;
-      }
-      for (let i = 0; i < CHUNK_SIZE; i++) {
-        let elems = sliceMatchedElems();
-        if (elems === null) {
-          process = false;
-          break;
-        } else {
-          let i = blocks.length;
-          blocks.push(elems.map(elem => marking(elem, i)));
-          markers.push(addMarker($(elems[0]).parent(), i));
-        }
-      }
-      // Send data to event page here.
-      if (process) {
-        backport.postMessage();
-      }
-      break;
-    case "prev":
-      if (blocks.length === 0) {
-        break;
-      }
-      prevIndex = currIndex--;
-      if (currIndex < 0) {
-        currIndex = blocks.length - 1;
-      }
-      focusBlock(blocks, prevIndex, currIndex);
-      break;
-    case "next":
-      if (blocks.length === 0) {
-        break;
-      }
-      prevIndex = currIndex++;
-      if (currIndex >= blocks.length) {
-        currIndex = 0;
-      }
-      focusBlock(blocks, prevIndex, currIndex);
-      break;
-    case "close":
-      clearPrevSearchResult();
-      break;
-    case "prepare":
-      if (process) {
-        search = false;
-      }
-      break;
-  }
-
-  port.postMessage({
-    search: search,
-    process: process,
-    text: text,
-    cain: cain,
-    index: currIndex + 1,
-    count: blocks.length,
-  });
-};
-
-let focusBlock = (blocks, prevIndex, currIndex) => {
+let focusBlock = (prevIndex, currIndex) => {
   if (blocks.length === 0) {
     return;
   }
@@ -150,9 +160,8 @@ let focusBlock = (blocks, prevIndex, currIndex) => {
 };
 
 let sliceMatchedElems = () => {
-  let result;
-
-  if ((result = regex.exec(content)) == null) {
+  let result = regex.exec(content);
+  if (result == null) {
     return null;
   }
 
@@ -184,7 +193,7 @@ let sliceMatchedElems = () => {
   return elems;
 };
 
-let exclusionTagNames = [
+let exclTagNames = [
   "head",
   "script",
   "noscript",
@@ -196,45 +205,44 @@ let exclusionTagNames = [
 let collectTextElement = (parent) => {
   let list = [];
   parent.childNodes.forEach((elem) => {
-    if (elem.nodeType === Node.ELEMENT_NODE) {
-      let tagName = elem.tagName.toLowerCase();
-      if (exclusionTagNames.some(name => tagName === name)) {
-        return;
-      }
-      if ($(elem).css("display") === "none") {
-        return;
-      }
-      if (tagName === "iframe") {
-        try {
-          // Error occurs in this line when cross domain.
-          let body = elem.contentWindow.document.body;
-
-          list = list.concat(collectTextElement(body));
-        } catch (e) {
-        }
-        return;
-      }
-      list = list.concat(collectTextElement(elem));
-    } else if (elem.nodeType === Node.TEXT_NODE) {
+    if (elem.nodeType === Node.TEXT_NODE) {
       list.push(elem);
+      return;
     }
+    if (elem.nodeType !== Node.ELEMENT_NODE) {
+      return;
+    }
+    let tagName = elem.tagName.toLowerCase();
+    if (exclTagNames.indexOf(tagName) >= 0) {
+      return;
+    }
+    if ($(elem).css("display") === "none") {
+      return;
+    }
+    if (tagName === "iframe") {
+      try {
+        // Error occurs in this line when cross domain.
+        let body = elem.contentWindow.document.body;
+
+        list = list.concat(collectTextElement(body));
+      } catch (e) {
+      }
+      return;
+    }
+    list = list.concat(collectTextElement(elem));
   });
   return list;
 };
 
-let collectTextContent = (elements) => {
-  let text = "";
-  elements.forEach(elem => {
-    text += elem.textContent;
-  });
-  return text;
+let collectTextContent = (elems) => {
+  return elems.reduce((accm, elem) => accm + elem.textContent, "");
 };
 
-let clearPrevSearchResult = () => {
+let clearSearchResult = () => {
   blocks.forEach(block => {
     block.forEach(mark => mark.contents().unwrap());
   });
-  markerWrapper.html("");
+  markerWrapper.empty();
   text = "";
   cain = false;
   process = false;
@@ -258,7 +266,7 @@ let marking = (() => {
   $mark.on("click", function() {
     let index = currIndex;
     currIndex = $(this).data("index");
-    focusBlock(blocks, index, currIndex);
+    focusBlock(index, currIndex);
   });
 
   return (node, index) => {
@@ -268,7 +276,6 @@ let marking = (() => {
   };
 })();
 
-let markerWrapper = $("<div>");
 markerWrapper.css({
   zIndex: 65536,
   position: "fixed",
@@ -279,7 +286,6 @@ markerWrapper.css({
   right: 0,
 });
 markerWrapper.appendTo("body");
-let maxBottom = 0;
 
 let addMarker = (() => {
   let $marker = $("<div>");
@@ -296,7 +302,7 @@ let addMarker = (() => {
   $marker.on("click", function() {
     let index = currIndex;
     currIndex = $(this).data("index");
-    focusBlock(blocks, index, currIndex);
+    focusBlock(index, currIndex);
   });
 
   return (elem, index) => {

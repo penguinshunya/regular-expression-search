@@ -1,14 +1,5 @@
 $(() => {
-  // 変なバグをなくすために、完全に正しいコードを書く。
-  // 例えば今のコードでは、接続が確立される前にportオブジェクトを使えることがある。
-  // それは物理的にはほぼありえないとしても、論理的にはありえる。
-  // そういった不安を解消するために、コードを安全なものに書き換える。
-  // 具体的には、接続が確立し、検索履歴と大文字小文字の区別フラグを取得した後に
-  // 各要素にイベントを付加する。
-  // そうすることで、準備前にイベントが発生して思わぬことになってしまう事態を防ぐことができる。
-  // というわけで、port, texts, cainの3つを引数に取るmain関数を作成する。
-
-  // TODO: use async function. return value is promise.
+  // use async function. return value is promise.
   // it may make strange movements.
   chrome.tabs.query({active: true, currentWindow: true}, async (tabs) => {
     let port  = chrome.tabs.connect(tabs[0].id);
@@ -48,8 +39,8 @@ let main = (port, texts, cain) => {
     $("#cain")[0].dataset.select = ci ? "true" : "false";
   };
   
-  let saveCain = (ci) => {
-    chrome.storage.local.set({cain: ci}, () => {});
+  let saveCain = async (ci) => {
+    await setStorageValue("cain", ci);
   };
 
   let backPrevHistory = () => {
@@ -69,11 +60,12 @@ let main = (port, texts, cain) => {
     }
   };
 
-  let saveHistory = (text) => {
+  let saveHistory = async (text) => {
+    // If it is a same as last search text, don't save.
     if (texts[texts.length - 1] !== text) {
       texts.push(text);
       while (texts.length > 1000) texts.shift();
-      chrome.storage.local.set({texts: texts}, () => {});
+      await setStorageValue("texts", texts);
     }
   };
   
@@ -124,7 +116,7 @@ let main = (port, texts, cain) => {
     $(this).select();
   });
 
-  $("#search").on("keydown", (e) => {
+  $("#search").on("keydown", async (e) => {
     switch (e.key) {
       case "ArrowUp":
         e.preventDefault();
@@ -166,9 +158,7 @@ let main = (port, texts, cain) => {
           clearSearchResult();
         }
 
-        // Save a search text.
-        // If it is a same as last search text, don't save.
-        saveHistory(text);
+        await saveHistory(text);
         index = texts.length - 1;
 
         prevText = text;
@@ -205,19 +195,19 @@ let main = (port, texts, cain) => {
     moveNextSearchResult();
   });
 
-  $("#cain").on("keydown", (e) => {
+  $("#cain").on("keydown", async (e) => {
     if (e.key !== "Enter" && e.key !== " ") return;
     e.preventDefault();
     let ci = !getCain();
     setCain(ci);
-    saveCain(ci);
+    await saveCain(ci);
   });
 
-  $("#cain").on("click", (e) => {
+  $("#cain").on("click", async (e) => {
     e.preventDefault();
     let ci = !getCain();
     setCain(ci);
-    saveCain(ci);
+    await saveCain(ci);
   });
 
   $("#close").on("keydown", (e) => {
@@ -245,6 +235,18 @@ let getStorageValue = async (key, defaultValue) => {
     param[key] = defaultValue;
     chrome.storage.local.get(param, (response) => {
       resolve(response[key]);
+    });
+  });
+  return promise;
+};
+
+let setStorageValue = async (key, value, callback = () => {}) => {
+  let promise = new Promise(resolve => {
+    let param = {};
+    param[key] = value;
+    chrome.storage.local.set(param, (response) => {
+      callback(response);
+      resolve();
     });
   });
   return promise;
