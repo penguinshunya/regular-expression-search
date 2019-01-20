@@ -1,6 +1,6 @@
 // search information
 let text = "";
-let flagI = false;
+let cain = false;
 
 // search process information
 let search = false;
@@ -30,7 +30,7 @@ chrome.runtime.onConnect.addListener(port => {
 let main = (port, backport, request) => {
   let kind = request.kind;
 
-  if (kind === "new" && request.text === text && request.flagI === flagI) {
+  if (kind === "new" && request.text === text && request.cain === cain) {
     if (process) {
       search = true;
       kind = "process";
@@ -46,11 +46,11 @@ let main = (port, backport, request) => {
       clearPrevSearchResult();
 
       text = request.text;
-      flagI = request.flagI;
+      cain = request.cain;
 
-      currIndex = -1;
+      currIndex = 0;
 
-      if (flagI) {
+      if (cain) {
         regex = new RegExp(text, "gi");
       } else {
         regex = new RegExp(text, "g");
@@ -116,7 +116,7 @@ let main = (port, backport, request) => {
     search: search,
     process: process,
     text: text,
-    flagI: flagI,
+    cain: cain,
     index: currIndex + 1,
     count: blocks.length,
   });
@@ -236,7 +236,7 @@ let clearPrevSearchResult = () => {
   });
   markerWrapper.html("");
   text = "";
-  flagI = false;
+  cain = false;
   process = false;
   search = false;
   blocks = [];

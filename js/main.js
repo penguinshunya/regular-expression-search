@@ -1,60 +1,124 @@
 $(() => {
-  let port;
-  let PREV_TEXT = "";
-  let PREV_FLAGI = null;
-  let TEXTS;
-  let INDEX;
+  // 変なバグをなくすために、完全に正しいコードを書く。
+  // 例えば今のコードでは、接続が確立される前にportオブジェクトを使えることがある。
+  // それは物理的にはほぼありえないとしても、論理的にはありえる。
+  // そういった不安を解消するために、コードを安全なものに書き換える。
+  // 具体的には、接続が確立し、検索履歴と大文字小文字の区別フラグを取得した後に
+  // 各要素にイベントを付加する。
+  // そうすることで、準備前にイベントが発生して思わぬことになってしまう事態を防ぐことができる。
+  // というわけで、port, texts, cainの3つを引数に取るmain関数を作成する。
 
-  chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-    port = chrome.tabs.connect(tabs[0].id);
+  // TODO: use async function. return value is promise.
+  // it may make strange movements.
+  chrome.tabs.query({active: true, currentWindow: true}, async (tabs) => {
+    let port  = chrome.tabs.connect(tabs[0].id);
+    let texts = await getStorageValue("texts", []);
+    let cain  = await getStorageValue("cain", false);
     
-    port.onMessage.addListener(response => {
+    main(port, texts, cain);
+
+    // If have searched in this page, display count.
+    port.postMessage({kind: "prepare"});
+  });
+});
+
+let main = (port, texts, cain) => {
+  let index = texts.length;
+  let prevText = "", prevCain = null;
+
+  let movePrevSearchResult = () => {
+    port.postMessage({kind: "prev"});
+  };
+
+  let moveNextSearchResult = () => {
+    port.postMessage({kind: "next"});
+  };
+
+  let clearSearchResult = () => {
+    port.postMessage({kind: "close"});
+    prevText = "";
+    index = texts.length;
+  };
+
+  let getCain = () => {
+    return $("#cain")[0].dataset.select === "true";
+  };
+  
+  let setCain = (ci) => {
+    $("#cain")[0].dataset.select = ci ? "true" : "false";
+  };
+  
+  let saveCain = (ci) => {
+    chrome.storage.local.set({cain: ci}, () => {});
+  };
+
+  let backPrevHistory = () => {
+    if (index > 0) {
+      $("#search").val(texts[--index]);
+      $("#search").select();
+    }
+  };
+
+  let forwardNextHistory = () => {
+    if (index < texts.length - 1) {
+      $("#search").val(texts[++index]);
+      $("#search").select();
+    } else {
+      index = texts.length;
+      $("#search").val("");
+    }
+  };
+
+  let saveHistory = (text) => {
+    if (texts[texts.length - 1] !== text) {
+      texts.push(text);
+      while (texts.length > 1000) texts.shift();
+      chrome.storage.local.set({texts: texts}, () => {});
+    }
+  };
+  
+  port.onDisconnect.addListener(window.close);
+  
+  port.onMessage.addListener((()=> {
+    // Only here can change the state of COUNT, PREV, NEXT element.
+    // Trigger for change should not be a popup script.
+    let modifyCount = (index, count) => {
+      if (index === 0) {
+        $("#count").text(count);
+      } else {
+        $("#count").text(index + " / " + count);
+      }
+    };
+    let changeButtonStatus = (enabled) => {
+      $("#prev").prop("disabled", !enabled);
+      $("#next").prop("disabled", !enabled);
+    };
+
+    return response => {
       if (!response.search) {
         if (response.process) {
           // Searching in progress, but stop searching.
           modifyCount(response.index, response.count);
-          $("#prev").prop("disabled", false);
-          $("#next").prop("disabled", false);
+          changeButtonStatus(true);
         } else {
           // Do nothing.
           $("#count").text("");
-          $("#prev").prop("disabled", true);
-          $("#next").prop("disabled", true);
+          changeButtonStatus(false);
         }
       } else {
         if (response.process) {
           // Searching in progress.
           modifyCount(response.index, response.count);
-          $("#prev").prop("disabled", false);
-          $("#next").prop("disabled", false);
+          changeButtonStatus(true);
         } else {
           // Finish searching.
           modifyCount(response.index, response.count);
-          PREV_TEXT = response.text;
-          PREV_FLAGI = response.flagI;
+          prevText = response.text;
+          prevCain = response.cain;
         }
       }
-    });
-
-    // When the page is changes, don't use old port object.
-    port.onDisconnect.addListener(window.close);
-
-    // If have searched in this page, display count.
-    port.postMessage({kind: "prepare"});
-  });
-
-  chrome.storage.local.get({texts: []}, (result) => {
-    TEXTS = result.texts;
-    INDEX = result.texts.length - 1;
-    if (INDEX >= 0) {
-      $("#search").val(TEXTS[INDEX]);
-    }
-    $("#search").focus();
-  });
-
-  chrome.storage.local.get({flagI: false}, (result) => {
-    setFlagI(result.flagI);
-  });
+    };
+  })());
 
   $("#search").focus(function() {
     $(this).select();
@@ -64,23 +128,12 @@ $(() => {
     switch (e.key) {
       case "ArrowUp":
         e.preventDefault();
-        if (INDEX > 0) {
-          $("#search").val(TEXTS[--INDEX]);
-          $("#search").select();
-        }
+        backPrevHistory();
         break;
-
       case "ArrowDown":
         e.preventDefault();
-        if (INDEX < TEXTS.length - 1) {
-          $("#search").val(TEXTS[++INDEX]);
-          $("#search").select();
-        } else {
-          INDEX = TEXTS.length;
-          $("#search").val("");
-        }
+        forwardNextHistory();
         break;
-
       case "Enter":
         e.preventDefault();
 
@@ -90,14 +143,14 @@ $(() => {
           return;
         }
 
-        let flagI = getFlagI();
+        let cain = getCain();
 
-        if (e.shiftKey && text === PREV_TEXT && flagI === PREV_FLAGI) {
+        if (e.shiftKey && text === prevText && cain === prevCain) {
           movePrevSearchResult();
           break;
         }
         
-        if (!e.ctrlKey && text === PREV_TEXT && flagI === PREV_FLAGI) {
+        if (!e.ctrlKey && text === prevText && cain === prevCain) {
           moveNextSearchResult();
           return;
         }
@@ -115,20 +168,16 @@ $(() => {
 
         // Save a search text.
         // If it is a same as last search text, don't save.
-        if (TEXTS[TEXTS.length - 1] !== text) {
-          TEXTS.push(text);
-          while (TEXTS.length > 1000) TEXTS.shift();
-          chrome.storage.local.set({texts: TEXTS}, () => {});
-        }
-        INDEX = TEXTS.length - 1;
+        saveHistory(text);
+        index = texts.length - 1;
 
-        PREV_TEXT = text;
-        PREV_FLAGI = flagI;
+        prevText = text;
+        prevCain = cain;
 
         port.postMessage({
           kind: "new",
           text: text,
-          flagI: flagI,
+          cain: cain,
         });
         break;
     }
@@ -156,19 +205,19 @@ $(() => {
     moveNextSearchResult();
   });
 
-  $("#flag_i").on("keydown", (e) => {
+  $("#cain").on("keydown", (e) => {
     if (e.key !== "Enter" && e.key !== " ") return;
     e.preventDefault();
-    let flagI = !getFlagI();
-    setFlagI(flagI);
-    saveFlagI(flagI);
+    let ci = !getCain();
+    setCain(ci);
+    saveCain(ci);
   });
 
-  $("#flag_i").on("click", (e) => {
+  $("#cain").on("click", (e) => {
     e.preventDefault();
-    let flagI = !getFlagI();
-    setFlagI(flagI);
-    saveFlagI(flagI);
+    let ci = !getCain();
+    setCain(ci);
+    saveCain(ci);
   });
 
   $("#close").on("keydown", (e) => {
@@ -184,37 +233,19 @@ $(() => {
     window.close();
   });
 
-  let movePrevSearchResult = () => {
-    port.postMessage({kind: "prev"});
-  };
+  backPrevHistory();
+  setCain(cain);
 
-  let moveNextSearchResult = () => {
-    port.postMessage({kind: "next"});
-  };
+  $("#search").focus();
+};
 
-  let clearSearchResult = () => {
-    port.postMessage({kind: "close"});
-    PREV_TEXT = "";
-    INDEX = TEXTS.length;
-  };
-
-  let getFlagI = () => {
-    return $("#flag_i")[0].dataset.select === "true";
-  };
-
-  let setFlagI = (flagI) => {
-    $("#flag_i")[0].dataset.select = flagI ? "true" : "false";
-  };
-
-  let saveFlagI = (flagI) => {
-    chrome.storage.local.set({flagI: flagI}, () => {});
-  };
-
-  let modifyCount = (index, count) => {
-    if (index === 0) {
-      $("#count").text(count);
-    } else {
-      $("#count").text(index + " / " + count);
-    }
-  };
-});
+let getStorageValue = async (key, defaultValue) => {
+  let promise = new Promise(resolve => {
+    let param = {};
+    param[key] = defaultValue;
+    chrome.storage.local.get(param, (response) => {
+      resolve(response[key]);
+    });
+  });
+  return promise;
+};

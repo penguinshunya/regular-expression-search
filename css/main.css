@@ -21,7 +21,7 @@
     text-align: right;
     white-space: nowrap;
 }
-#flag_i {
+#cain {
     font-family: 'Courier New', Courier, monospace;
     margin: 0.5em;
     padding: 0.5em;
@@ -31,15 +31,15 @@
     text-align: center;
     cursor: pointer;
 }
-#flag_i:focus {
+#cain:focus {
     background-color: #e8e8e8;
     border-radius: 0.2em;
 }
-#flag_i[data-select="true"] {
+#cain[data-select="true"] {
     background-color: #cccccc;
     border-radius: 1.25em;
 }
-#flag_i[data-select="true"]:focus {
+#cain[data-select="true"]:focus {
     background-color: #aaaaaa;
     border-radius: 0.2em;
 }
