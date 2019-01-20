@@ -16,47 +16,25 @@ let markers = [];
 // focus information
 let currIndex = -1;
 
+let backport = chrome.runtime.connect();
+
 let markerWrapper = $("<div>");
 let maxBottom = 0;
 
-// Treap data structure. data property is blocks array index.
-let sorts;
-
-let calcKey = (i) => {
-  let off = blocks[i][0].offset();
-  return off.top * $(document).width() + off.left;
-};
-
-let knowRank = (i) => {
-  let ok = blocks.length;
-  let ng = 0;
-  while (ok - ng > 1) {
-    let mid = Math.ceil((ok + ng) / 2);
-    let idx = sorts.findRank(mid).data;
-    if (calcKey(i) <= calcKey(idx)) {
-      ok = mid;
-    } else {
-      ng = mid;
-    }
-  }
-  return ok;
-};
+let markerColor = "yellow";
+let focusedMarkerColor = "orange";
 
 let focusPrevBlock = () => {
   if (blocks.length === 0) {
     return;
   }
   if (currIndex === -1) {
-    currIndex = sorts.findRank(blocks.length).data;
-    focusBlock(currIndex, currIndex);
-    return;
+    currIndex = 0;
   }
-  let prevIndex = currIndex;
-
-  let rank = knowRank(prevIndex) - 1;
-  if (rank <= 0) rank = blocks.length;
-  currIndex = sorts.findRank(rank).data;
-
+  let prevIndex = currIndex--;
+  if (currIndex < 0) {
+    currIndex = blocks.length - 1;
+  }
   focusBlock(prevIndex, currIndex);
 };
 
@@ -65,31 +43,45 @@ let focusNextBlock = () => {
     return;
   }
   if (currIndex === -1) {
-    currIndex = sorts.findRank(1).data;
-    focusBlock(currIndex, currIndex);
-    return;
+    currIndex = blocks.length - 1;
   }
-  let prevIndex = currIndex;
-
-  let rank = knowRank(prevIndex) + 1;
-  if (rank > blocks.length) rank = 1;
-  currIndex = sorts.findRank(rank).data;
-
+  let prevIndex = currIndex++;
+  if (currIndex >= blocks.length) {
+    currIndex = 0;
+  }
   focusBlock(prevIndex, currIndex);
 };
 
 chrome.runtime.onConnect.addListener(port => {
-  let backport = chrome.runtime.connect();
-
   let postMessage = () => {
     port.postMessage({
       search: search,
       process: process,
       text: text,
       cain: cain,
-      index: currIndex >= 0 ? knowRank(currIndex) : 0,
+      index: currIndex + 1,
       count: blocks.length,
     });
+  };
+
+  let searchNext = () => {
+    if (!search) {
+      return;
+    }
+    let elems = sliceMatchedElems();
+    if (elems === null) {
+      process = false;
+    } else {
+      let i = blocks.length;
+      blocks.push(elems.map(elem => marking(elem, i)));
+      markers.push(addMarker($(elems[0]).parent(), i));
+    }
+    if (process) {
+      backport.postMessage();
+    }
+    if (port !== null) {
+      postMessage();
+    }
   };
 
   port.onMessage.addListener(request => {
@@ -105,6 +97,12 @@ chrome.runtime.onConnect.addListener(port => {
     }
   
     switch (kind) {
+      case "prepare":
+        backport.disconnect();
+        backport = chrome.runtime.connect();
+        backport.onMessage.addListener(searchNext);
+        backport.postMessage();
+        break;
       case "new":
         clearSearchResult();
   
@@ -119,7 +117,6 @@ chrome.runtime.onConnect.addListener(port => {
         index = 0;
         length = 0;
         blocks = [];
-        sorts = treap.create();
         process = true;
         search = true;
       case "process":
@@ -134,11 +131,6 @@ chrome.runtime.onConnect.addListener(port => {
       case "close":
         clearSearchResult();
         break;
-      case "prepare":
-        if (process) {
-          search = false;
-        }
-        break;
     }
     if (port !== null) {
       postMessage();
@@ -147,29 +139,6 @@ chrome.runtime.onConnect.addListener(port => {
 
   port.onDisconnect.addListener(_ => {
     port = null;
-  });
-
-  backport.onMessage.addListener(_ => {
-    if (!search) {
-      return;
-    }
-    let elems = sliceMatchedElems();
-    if (elems === null) {
-      process = false;
-    } else {
-      let i = blocks.length;
-      blocks.push(elems.map(elem => marking(elem, i)));
-      markers.push(addMarker($(elems[0]).parent(), i));
-
-      // TODO: error occurs when same position element exists
-      sorts.insert(calcKey(i), i);
-    }
-    if (process) {
-      backport.postMessage();
-    }
-    if (port !== null) {
-      postMessage();
-    }
   });
 });
 
@@ -182,24 +151,25 @@ let focusBlock = (prevIndex, currIndex) => {
   }
   // Focus current search result.
   blocks[prevIndex].forEach(($div) => {
-    $div.css("background-color", "yellow");
+    $div.css("background-color", markerColor);
   });
   blocks[currIndex].forEach(($div) => {
-    $div.css("background-color", "orange");
+    $div.css("background-color", focusedMarkerColor);
   });
 
   blocks[currIndex][0].focus();
 
   markers[prevIndex].css({
-    backgroundColor: "yellow",
+    backgroundColor: markerColor,
     zIndex: 0,
   });
   markers[currIndex].css({
-    backgroundColor: "orange",
+    backgroundColor: focusedMarkerColor,
     zIndex: 1,
   });
 };
 
+// TODO: want to speed up this function.
 let sliceMatchedElems = () => {
   let result = regex.exec(content);
   if (result == null) {
@@ -290,7 +260,6 @@ let clearSearchResult = () => {
   search = false;
   blocks = [];
   markers = [];
-  sorts = null;
   maxBottom = 0;
 };
 
@@ -299,7 +268,7 @@ let marking = (() => {
   $mark.attr("tabindex", "-1").css({
     margin: 0,
     padding: 0,
-    backgroundColor: "yellow",
+    backgroundColor: markerColor,
   });
 
   // Change focus target.
@@ -335,7 +304,7 @@ let addMarker = (() => {
     position: "absolute",
     margin: 0,
     padding: 0,
-    backgroundColor: "yellow",
+    backgroundColor: markerColor,
     left: 0,
     width: "100%",
     cursor: "pointer",
