@@ -19,14 +19,44 @@ let currIndex = -1;
 let markerWrapper = $("<div>");
 let maxBottom = 0;
 
+// Treap data structure. data property is blocks array index.
+let sorts;
+
+let calcKey = (i) => {
+  let off = blocks[i][0].offset();
+  return off.top * $(document).width() + off.left;
+};
+
+let knowRank = (i) => {
+  let ok = blocks.length;
+  let ng = 0;
+  while (ok - ng > 1) {
+    let mid = Math.ceil((ok + ng) / 2);
+    let idx = sorts.findRank(mid).data;
+    if (calcKey(i) <= calcKey(idx)) {
+      ok = mid;
+    } else {
+      ng = mid;
+    }
+  }
+  return ok;
+};
+
 let focusPrevBlock = () => {
   if (blocks.length === 0) {
     return;
   }
-  let prevIndex = currIndex--;
-  if (currIndex < 0) {
-    currIndex = blocks.length - 1;
+  if (currIndex === -1) {
+    currIndex = sorts.findRank(blocks.length).data;
+    focusBlock(currIndex, currIndex);
+    return;
   }
+  let prevIndex = currIndex;
+
+  let rank = knowRank(prevIndex) - 1;
+  if (rank <= 0) rank = blocks.length;
+  currIndex = sorts.findRank(rank).data;
+
   focusBlock(prevIndex, currIndex);
 };
 
@@ -34,10 +64,17 @@ let focusNextBlock = () => {
   if (blocks.length === 0) {
     return;
   }
-  let prevIndex = currIndex++;
-  if (currIndex >= blocks.length) {
-    currIndex = 0;
+  if (currIndex === -1) {
+    currIndex = sorts.findRank(1).data;
+    focusBlock(currIndex, currIndex);
+    return;
   }
+  let prevIndex = currIndex;
+
+  let rank = knowRank(prevIndex) + 1;
+  if (rank > blocks.length) rank = 1;
+  currIndex = sorts.findRank(rank).data;
+
   focusBlock(prevIndex, currIndex);
 };
 
@@ -50,7 +87,7 @@ chrome.runtime.onConnect.addListener(port => {
       process: process,
       text: text,
       cain: cain,
-      index: currIndex + 1,
+      index: currIndex >= 0 ? knowRank(currIndex) : 0,
       count: blocks.length,
     });
   };
@@ -82,6 +119,7 @@ chrome.runtime.onConnect.addListener(port => {
         index = 0;
         length = 0;
         blocks = [];
+        sorts = treap.create();
         process = true;
         search = true;
       case "process":
@@ -122,6 +160,9 @@ chrome.runtime.onConnect.addListener(port => {
       let i = blocks.length;
       blocks.push(elems.map(elem => marking(elem, i)));
       markers.push(addMarker($(elems[0]).parent(), i));
+
+      // TODO: error occurs when same position element exists
+      sorts.insert(calcKey(i), i);
     }
     if (process) {
       backport.postMessage();
@@ -219,16 +260,16 @@ let collectTextElement = (parent) => {
     if ($(elem).css("display") === "none") {
       return;
     }
-    if (tagName === "iframe") {
-      try {
-        // Error occurs in this line when cross domain.
-        let body = elem.contentWindow.document.body;
+    // if (tagName === "iframe") {
+    //   try {
+    //     // Error occurs in this line when cross domain.
+    //     let body = elem.contentWindow.document.body;
 
-        list = list.concat(collectTextElement(body));
-      } catch (e) {
-      }
-      return;
-    }
+    //     list = list.concat(collectTextElement(body));
+    //   } catch (e) {
+    //   }
+    //   return;
+    // }
     list = list.concat(collectTextElement(elem));
   });
   return list;
@@ -249,6 +290,7 @@ let clearSearchResult = () => {
   search = false;
   blocks = [];
   markers = [];
+  sorts = null;
   maxBottom = 0;
 };
 
