@@ -25,6 +25,10 @@
     "scripts": ["js/background.js"],
     "persistent": false
   },
+  "options_ui": {
+    "page": "option.html",
+    "open_in_tab": false
+  },
   "permissions": [
     "activeTab",
     "storage",

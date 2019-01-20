@@ -230,16 +230,16 @@ let collectTextElement = (parent) => {
     if ($(elem).css("display") === "none") {
       return;
     }
-    // if (tagName === "iframe") {
-    //   try {
-    //     // Error occurs in this line when cross domain.
-    //     let body = elem.contentWindow.document.body;
+    if (tagName === "iframe") {
+      try {
+        // Error occurs in this line when cross domain.
+        let body = elem.contentWindow.document.body;
 
-    //     list = list.concat(collectTextElement(body));
-    //   } catch (e) {
-    //   }
-    //   return;
-    // }
+        list = list.concat(collectTextElement(body));
+      } catch (e) {
+      }
+      return;
+    }
     list = list.concat(collectTextElement(elem));
   });
   return list;
