@@ -148,9 +148,12 @@ let main = (port, texts, cain) => {
         }
 
         try {
-          new RegExp(text);
+          let regex = new RegExp(text);
+          if (regex.test("")) {
+            throw new Error("Invalid regular expression: Match empty string");
+          }
         } catch (e) {
-          $("#search").select();
+          alert(e.message);
           return;
         }
 
