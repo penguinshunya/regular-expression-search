@@ -144,7 +144,7 @@ chrome.runtime.onConnect.addListener(port => {
   
         currIndex = -1;
 
-        regex = new RegExp(text, cain ? "gi" : "g");
+        regex = new RegExp(text, cain ? "gim" : "gm");
         list = collectTextElement(document.body);
         content = collectTextContent(list);
         index = 0;
@@ -283,8 +283,8 @@ let collectTextContent = (elems) => {
 };
 
 let clearSearchResult = () => {
-  $(".__search_result_marker__").each((_, mark) => {
-    $(mark).contents().unwrap().parent()[0].normalize();
+  blocks.forEach(block => {
+    block.forEach(mark => mark.contents().unwrap().parent()[0].normalize());
   });
   markerWrapper.empty();
   text = "";
@@ -298,7 +298,6 @@ let clearSearchResult = () => {
 
 let marking = (() => {
   let $mark = $("<mark>");
-  $mark.addClass("__search_result_marker__");
   $mark.attr("tabindex", "-1").css({
     margin: 0,
     padding: 0,
