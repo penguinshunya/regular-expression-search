@@ -251,7 +251,7 @@ let collectTextContent = (elems) => {
 
 let clearSearchResult = () => {
   blocks.forEach(block => {
-    block.forEach(mark => mark.contents().unwrap());
+    block.forEach(mark => mark.contents().unwrap().parent()[0].normalize());
   });
   markerWrapper.empty();
   text = "";
