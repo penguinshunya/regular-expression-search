@@ -13,6 +13,8 @@ let length = 0;
 let blocks = [];
 let markers = [];
 
+let input = "";
+
 // focus information
 let currIndex = -1;
 
@@ -52,6 +54,23 @@ let focusNextBlock = () => {
   focusBlock(prevIndex, currIndex);
 };
 
+chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
+  switch (request.kind) {
+    case "input":
+      sendResponse({input: input});
+      break;
+    case "prevText":
+      sendResponse({prevText: text});
+      break;
+    case "prevCain":
+      sendResponse({prevCain: cain});
+      break;
+    case "change":
+      input = request.input;
+      break;
+  }
+});
+
 chrome.runtime.onConnect.addListener(port => {
   let postMessage = () => {
     port.postMessage({
@@ -84,6 +103,12 @@ chrome.runtime.onConnect.addListener(port => {
     }
   };
 
+  let resetBackport = () => {
+    backport.disconnect();
+    backport = chrome.runtime.connect();
+    backport.onMessage.addListener(searchNext);
+  };
+
   port.onMessage.addListener(request => {
     let kind = request.kind;
   
@@ -98,21 +123,20 @@ chrome.runtime.onConnect.addListener(port => {
   
     switch (kind) {
       case "prepare":
-        backport.disconnect();
-        backport = chrome.runtime.connect();
-        backport.onMessage.addListener(searchNext);
+        resetBackport();
         if (process) {
           backport.postMessage();
         }
         break;
       case "new":
         clearSearchResult();
-  
+        resetBackport();
+
         text = request.text;
         cain = request.cain;
   
         currIndex = -1;
-  
+
         regex = new RegExp(text, cain ? "gi" : "g");
         list = collectTextElement(document.body);
         content = collectTextContent(list);

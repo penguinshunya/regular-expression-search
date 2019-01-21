@@ -6,16 +6,19 @@ $(() => {
     let texts = await getStorageValue("texts", []);
     let cain  = await getStorageValue("cain", false);
     
-    main(port, texts, cain);
+    let input = (await sendMessage({kind: "input"})).input;
+    let prevText = (await sendMessage({kind: "prevText"})).prevText;
+    let prevCain = (await sendMessage({kind: "prevCain"})).prevCain;
+    
+    main(port, texts, cain, input, prevText, prevCain);
 
     // If have searched in this page, display count.
     port.postMessage({kind: "prepare"});
   });
 });
 
-let main = (port, texts, cain) => {
+let main = (port, texts, cain, input, prevText, prevCain) => {
   let index = texts.length;
-  let prevText = "", prevCain = null;
 
   let movePrevSearchResult = () => {
     port.postMessage({kind: "prev"});
@@ -81,6 +84,7 @@ let main = (port, texts, cain) => {
         $("#count").text(index + " / " + count);
       }
     };
+
     let changeButtonStatus = (enabled) => {
       $("#prev").prop("disabled", !enabled);
       $("#next").prop("disabled", !enabled);
@@ -173,6 +177,11 @@ let main = (port, texts, cain) => {
           cain: cain,
         });
         break;
+      default:
+        sendMessage({
+          kind: "change",
+          input: $("#search").val(),
+        });
     }
   });
 
@@ -226,9 +235,13 @@ let main = (port, texts, cain) => {
     window.close();
   });
 
-  backPrevHistory();
   setCain(cain);
 
+  if (input === "" || input === texts[texts.length - 1]) {
+    backPrevHistory();
+  } else {
+    $("#search").val(input);
+  }
   $("#search").focus();
 };
 
@@ -250,6 +263,17 @@ let setStorageValue = async (key, value, callback = () => {}) => {
     chrome.storage.local.set(param, (response) => {
       callback(response);
       resolve();
+    });
+  });
+  return promise;
+};
+
+let sendMessage = async (params) => {
+  let promise = new Promise(resolve => {
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+      chrome.tabs.sendMessage(tabs[0].id, params, (response) => {
+        resolve(response);
+      });
     });
   });
   return promise;
