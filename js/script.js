@@ -13,6 +13,9 @@ let length = 0;
 let blocks = [];
 let markers = [];
 
+// The smaller the FPS, the quicker the search ends.
+const FPS = 30;
+
 let input = "";
 
 // focus information
@@ -87,14 +90,18 @@ chrome.runtime.onConnect.addListener(port => {
     if (!search) {
       return;
     }
-    let elems = sliceMatchedElems();
-    if (elems === null) {
-      process = false;
-    } else {
-      let i = blocks.length;
-      blocks.push(elems.map(elem => marking(elem, i)));
-      markers.push(addMarker($(elems[0]).parent(), i));
-    }
+    let start = new Date().getTime();
+    do {
+      let elems = sliceMatchedElems();
+      if (elems === null) {
+        process = false;
+        break;
+      } else {
+        let i = blocks.length;
+        blocks.push(elems.map(elem => marking(elem, i)));
+        markers.push(addMarker($(elems[0]).parent(), i));
+      }
+    } while (new Date().getTime() - start < 1000 / FPS);
     if (process) {
       backport.postMessage();
     }
