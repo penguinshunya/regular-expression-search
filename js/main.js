@@ -3,13 +3,15 @@ $(() => {
   // it may make strange movements.
   chrome.tabs.query({active: true, currentWindow: true}, async (tabs) => {
     let port  = chrome.tabs.connect(tabs[0].id);
+    port.onDisconnect.addListener(window.close);
+
     let texts = await getStorageValue("texts", []);
     let cain  = await getStorageValue("cain", false);
-    
+
     let input = (await sendMessage({kind: "input"})).input;
     let prevText = (await sendMessage({kind: "prevText"})).prevText;
     let prevCain = (await sendMessage({kind: "prevCain"})).prevCain;
-    
+  
     main(port, texts, cain, input, prevText, prevCain);
 
     // If have searched in this page, display count.
@@ -71,8 +73,6 @@ let main = (port, texts, cain, input, prevText, prevCain) => {
       await setStorageValue("texts", texts);
     }
   };
-  
-  port.onDisconnect.addListener(window.close);
   
   port.onMessage.addListener((()=> {
     // Only here can change the state of COUNT, PREV, NEXT element.
