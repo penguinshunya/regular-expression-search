@@ -101,7 +101,9 @@ chrome.runtime.onConnect.addListener(port => {
         backport.disconnect();
         backport = chrome.runtime.connect();
         backport.onMessage.addListener(searchNext);
-        backport.postMessage();
+        if (process) {
+          backport.postMessage();
+        }
         break;
       case "new":
         clearSearchResult();
@@ -169,7 +171,7 @@ let focusBlock = (prevIndex, currIndex) => {
   });
 };
 
-// TODO: want to speed up this function.
+// I want to speed up this function.
 let sliceMatchedElems = () => {
   let result = regex.exec(content);
   if (result == null) {
