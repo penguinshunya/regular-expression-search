@@ -9,9 +9,9 @@ chrome.runtime.onMessage.addListener((() => {
     switch (request.kind) {
       case "page":
         sendResponse({
-          input: input,
           text: text,
           cain: cain,
+          input: input,
         });
         break;
       case "change":
