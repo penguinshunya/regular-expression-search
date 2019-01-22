@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name" : "Regular Expression Search",
   "short_name": "regex search",
-  "version" : "1.0.0.5",
+  "version" : "1.0.0.6",
   "description" : "search using regular expression on chrome extension",
   "commands": {
     "_execute_browser_action": {
@@ -18,7 +18,7 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["js/jquery-3.3.1.min.js", "js/script.js"]
+      "js": ["js/jquery-3.3.1.min.js", "js/function.js", "js/marker.js", "js/script.js"]
     }
   ],
   "permissions": [
