@@ -34,7 +34,16 @@ let focusPrevBlock = () => {
     return;
   }
   if (currIndex === -1) {
-    currIndex = 0;
+    for (let i = blocks.length - 1; i >= 0; i--) {
+      if (blocks[i][0].offset().top + blocks[i][0].height() <= window.scrollY + window.innerHeight) {
+        currIndex = i;
+        focusBlock(i, i);
+        return;
+      }
+    }
+    currIndex = blocks.length - 1;
+    focusBlock(currIndex, currIndex);
+    return;
   }
   let prevIndex = currIndex--;
   if (currIndex < 0) {
@@ -48,7 +57,16 @@ let focusNextBlock = () => {
     return;
   }
   if (currIndex === -1) {
-    currIndex = blocks.length - 1;
+    for (let i = 0; i < blocks.length; i++) {
+      if (blocks[i][0].offset().top >= window.scrollY) {
+        currIndex = i;
+        focusBlock(i, i);
+        return;
+      }
+    }
+    currIndex = 0;
+    focusBlock(currIndex, currIndex);
+    return;
   }
   let prevIndex = currIndex++;
   if (currIndex >= blocks.length) {
