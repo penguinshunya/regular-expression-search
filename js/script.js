@@ -21,7 +21,7 @@ let input = "";
 // focus information
 let currIndex = -1;
 
-let backport = chrome.runtime.connect();
+let timeoutID = null;
 
 let markerWrapper = $("<div>");
 let maxBottom = 0;
@@ -103,17 +103,11 @@ chrome.runtime.onConnect.addListener(port => {
       }
     } while (new Date().getTime() - start < 1000 / FPS);
     if (process) {
-      backport.postMessage();
+      timeoutID = window.setTimeout(searchNext, 0);
     }
     if (port !== null) {
       postMessage();
     }
-  };
-
-  let resetBackport = () => {
-    backport.disconnect();
-    backport = chrome.runtime.connect();
-    backport.onMessage.addListener(searchNext);
   };
 
   port.onMessage.addListener(request => {
@@ -130,14 +124,14 @@ chrome.runtime.onConnect.addListener(port => {
   
     switch (kind) {
       case "prepare":
-        resetBackport();
+        window.clearTimeout(timeoutID);
         if (process) {
-          backport.postMessage();
+          timeoutID = window.setTimeout(searchNext, 0);
         }
         break;
       case "new":
         clearSearchResult();
-        resetBackport();
+        window.clearTimeout(timeoutID);
 
         text = request.text;
         cain = request.cain;
@@ -153,7 +147,7 @@ chrome.runtime.onConnect.addListener(port => {
         process = true;
         search = true;
       case "process":
-        backport.postMessage();
+        timeoutID = window.setTimeout(searchNext, 0);
         break;
       case "prev":
         focusPrevBlock();

@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name" : "Regular Expression Search",
   "short_name": "regex search",
-  "version" : "1.0.0.3",
+  "version" : "1.0.0.4",
   "description" : "search using regular expression on chrome extension",
   "commands": {
     "_execute_browser_action": {
@@ -21,10 +21,6 @@
       "js": ["js/jquery-3.3.1.min.js", "js/script.js"]
     }
   ],
-  "background": {
-    "scripts": ["js/background.js"],
-    "persistent": false
-  },
   "permissions": [
     "activeTab",
     "storage",
