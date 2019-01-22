@@ -8,11 +8,9 @@ $(() => {
     let texts = await getStorageValue("texts", []);
     let cain  = await getStorageValue("cain", false);
 
-    let input = (await sendMessage({kind: "input"})).input;
-    let prevText = (await sendMessage({kind: "prevText"})).prevText;
-    let prevCain = (await sendMessage({kind: "prevCain"})).prevCain;
+    let page = (await sendMessage({kind: "page"}));
   
-    main(port, texts, cain, input, prevText, prevCain);
+    main(port, texts, cain, page.input, page.text, page.cain);
 
     // If have searched in this page, display count.
     port.postMessage({kind: "prepare"});

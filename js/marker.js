@@ -143,6 +143,10 @@ let Marker = (() => {
         mark.forEach(m => m.contents().unwrap().parent()[0].normalize());
       });
       wrapper.empty();
+      marks = [];
+      markers = [];
+      length = 0;
+      currIndex = -1;
     };
 
     return obj;

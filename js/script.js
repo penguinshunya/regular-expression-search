@@ -7,14 +7,12 @@ chrome.runtime.onMessage.addListener((() => {
 
   return (request, _, sendResponse) => {
     switch (request.kind) {
-      case "input":
-        sendResponse({input: input});
-        break;
-      case "prevText":
-        sendResponse({prevText: text});
-        break;
-      case "prevCain":
-        sendResponse({prevCain: cain});
+      case "page":
+        sendResponse({
+          input: input,
+          text: text,
+          cain: cain,
+        });
         break;
       case "change":
         input = request.input;
@@ -41,7 +39,6 @@ chrome.runtime.onConnect.addListener((() => {
 
   let clearSearchResult = () => {
     marker.clear();
-    marker = new Marker();
     text = "";
     cain = false;
     search = false;
@@ -119,6 +116,10 @@ chrome.runtime.onConnect.addListener((() => {
       }
     };
 
+    port.onDisconnect.addListener(() => {
+      port = null;
+    });
+
     port.onMessage.addListener(request => {
       let kind = request.kind;
     
@@ -134,6 +135,7 @@ chrome.runtime.onConnect.addListener((() => {
         case "prepare":
           window.clearTimeout(timeoutID);
           if (process) {
+            // Use new port object.
             timeoutID = window.setTimeout(searchNext, 0);
           }
           break;
@@ -143,11 +145,11 @@ chrome.runtime.onConnect.addListener((() => {
           text = request.text;
           cain = request.cain;
 
-          regex = new RegExp(text, cain ? "gim" : "gm");
+          regex = new RegExp(text, cain ? "gmi" : "gm");
           list = collectTextElement(document.body);
           content = collectTextContent(list);
-          process = true;
           search = true;
+          process = true;
         case "process":
           timeoutID = window.setTimeout(searchNext, 0);
           break;
@@ -164,10 +166,6 @@ chrome.runtime.onConnect.addListener((() => {
       if (port !== null) {
         postMessage();
       }
-    });
-
-    port.onDisconnect.addListener(() => {
-      port = null;
     });
   }
 })());
