@@ -34,13 +34,6 @@ let focusPrevBlock = () => {
     return;
   }
   if (currIndex === -1) {
-    for (let i = blocks.length - 1; i >= 0; i--) {
-      if (blocks[i][0].offset().top + blocks[i][0].height() <= window.scrollY + window.innerHeight) {
-        currIndex = i;
-        focusBlock(i, i);
-        return;
-      }
-    }
     currIndex = blocks.length - 1;
     focusBlock(currIndex, currIndex);
     return;
@@ -57,13 +50,6 @@ let focusNextBlock = () => {
     return;
   }
   if (currIndex === -1) {
-    for (let i = 0; i < blocks.length; i++) {
-      if (blocks[i][0].offset().top >= window.scrollY) {
-        currIndex = i;
-        focusBlock(i, i);
-        return;
-      }
-    }
     currIndex = 0;
     focusBlock(currIndex, currIndex);
     return;
@@ -133,7 +119,6 @@ chrome.runtime.onConnect.addListener(port => {
   
     if (kind === "new" && request.text === text && request.cain === cain) {
       if (process) {
-        search = true;
         kind = "process";
       } else {
         kind = "next";
@@ -153,15 +138,10 @@ chrome.runtime.onConnect.addListener(port => {
 
         text = request.text;
         cain = request.cain;
-  
-        currIndex = -1;
 
         regex = new RegExp(text, cain ? "gim" : "gm");
         list = collectTextElement(document.body);
         content = collectTextContent(list);
-        index = 0;
-        length = 0;
-        blocks = [];
         process = true;
         search = true;
       case "process":
@@ -182,7 +162,7 @@ chrome.runtime.onConnect.addListener(port => {
     }
   });
 
-  port.onDisconnect.addListener(_ => {
+  port.onDisconnect.addListener(() => {
     port = null;
   });
 });
@@ -303,9 +283,12 @@ let clearSearchResult = () => {
   cain = false;
   process = false;
   search = false;
+  index = 0;
+  length = 0;
   blocks = [];
   markers = [];
   maxBottom = 0;
+  currIndex = -1;
 };
 
 let marking = (() => {
