@@ -18,8 +18,7 @@ let Marker = (() => {
 
     let marks = [];
     let markers = [];
-    let length = 0;
-
+    let count = 0;
     let currIndex = -1;
   
     let $mark = $("<mark>").attr("tabindex", "-1").css({
@@ -59,7 +58,7 @@ let Marker = (() => {
     };
   
     let focus = (prevIndex, currIndex) => {
-      if (length === 0) {
+      if (count === 0) {
         return;
       }
       if (prevIndex < 0) {
@@ -98,32 +97,32 @@ let Marker = (() => {
     });
     
     obj.index = () => currIndex + 1;
-    obj.length = () => length;
+    obj.count = () => count;
   
     obj.add = textNodes => {
-      marks.push(textNodes.map(node => makeMark(node, length)));
-      markers.push(makeMarker(marks[length][0], length));
-      length++;
+      marks.push(textNodes.map(node => makeMark(node, count)));
+      markers.push(makeMarker(marks[count][0], count));
+      count++;
     };
 
     obj.focusPrev = () => {
-      if (length === 0) {
+      if (count === 0) {
         return;
       }
       if (currIndex === -1) {
-        currIndex = length - 1;
+        currIndex = count - 1;
         focus(currIndex, currIndex);
         return;
       }
       let prevIndex = currIndex--;
       if (currIndex < 0) {
-        currIndex = length - 1;
+        currIndex = count - 1;
       }
       focus(prevIndex, currIndex);
     };
 
     obj.focusNext = () => {
-      if (length === 0) {
+      if (count === 0) {
         return;
       }
       if (currIndex === -1) {
@@ -132,7 +131,7 @@ let Marker = (() => {
         return;
       }
       let prevIndex = currIndex++;
-      if (currIndex >= length) {
+      if (currIndex >= count) {
         currIndex = 0;
       }
       focus(prevIndex, currIndex);
@@ -145,7 +144,7 @@ let Marker = (() => {
       wrapper.empty();
       marks = [];
       markers = [];
-      length = 0;
+      count = 0;
       currIndex = -1;
     };
 

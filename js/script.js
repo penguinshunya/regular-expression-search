@@ -90,7 +90,7 @@ chrome.runtime.onConnect.addListener((() => {
         text: text,
         cain: cain,
         index: marker.index(),
-        count: marker.length(),
+        count: marker.count(),
       });
     };
 
