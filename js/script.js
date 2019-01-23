@@ -132,14 +132,6 @@ chrome.runtime.onConnect.addListener((() => {
     p.onMessage.addListener(request => {
       let kind = request.kind;
     
-      if (kind === "new" && request.text === text && request.cain === cain) {
-        if (process) {
-          kind = "process";
-        } else {
-          kind = "next";
-        }
-      }
-    
       switch (kind) {
         case "prepare":
           port = p;
@@ -155,7 +147,6 @@ chrome.runtime.onConnect.addListener((() => {
           content = collectTextContent(texts);
           search = true;
           process = true;
-        case "process":
           current = "res" + new Date().getTime();
           window.postMessage(current);
           break;
