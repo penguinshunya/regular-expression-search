@@ -36,7 +36,8 @@ chrome.runtime.onConnect.addListener((() => {
   let index = 0;
   let length = 0;
 
-  let backport = chrome.runtime.connect();
+  let port = null;
+  let current = "";
 
   let clearSearchResult = () => {
     marker.clear();
@@ -82,51 +83,50 @@ chrome.runtime.onConnect.addListener((() => {
     return elems;
   };
 
-  return port => {
-    let postMessage = () => {
-      port.postMessage({
-        search: search,
-        process: process,
-        text: text,
-        cain: cain,
-        index: marker.index(),
-        count: marker.count(),
-      });
-    };
+  let postSearchProcess = () => {
+    port.postMessage({
+      search: search,
+      process: process,
+      text: text,
+      cain: cain,
+      index: marker.index(),
+      count: marker.count(),
+    });
+  };
 
-    let searchNext = () => {
-      if (!search) {
-        return;
+  let searchNext = (e) => {
+    if (e.source !== window || !e.data.startsWith("res")) {
+      return;
+    }
+    if (current > e.data) {
+      return;
+    }
+    let start = new Date().getTime();
+    do {
+      let elems = sliceMatchedElems();
+      if (elems === null) {
+        process = false;
+        break;
+      } else {
+        marker.add(elems);
       }
-      let start = new Date().getTime();
-      do {
-        let elems = sliceMatchedElems();
-        if (elems === null) {
-          process = false;
-          break;
-        } else {
-          marker.add(elems);
-        }
-      } while (new Date().getTime() - start < 1000 / FPS);
-      if (process) {
-        backport.postMessage();
-      }
-      if (port !== null) {
-        postMessage();
-      }
-    };
+    } while (new Date().getTime() - start < 1000 / FPS);
+    if (process) {
+      window.postMessage(e.data);
+    }
+    if (port !== null) {
+      postSearchProcess();
+    }
+  };
 
-    let resetBackport = () => {
-      backport.disconnect();
-      backport = chrome.runtime.connect();
-      backport.onMessage.addListener(searchNext);
-    };
-  
-    port.onDisconnect.addListener(() => {
+  window.addEventListener("message", searchNext, false);
+
+  return p => {
+    p.onDisconnect.addListener(() => {
       port = null;
     });
 
-    port.onMessage.addListener(request => {
+    p.onMessage.addListener(request => {
       let kind = request.kind;
     
       if (kind === "new" && request.text === text && request.cain === cain) {
@@ -139,25 +139,22 @@ chrome.runtime.onConnect.addListener((() => {
     
       switch (kind) {
         case "prepare":
-          resetBackport();
-          if (process) {
-            backport.postMessage();
-          }
+          port = p;
           break;
         case "new":
           clearSearchResult();
-          resetBackport();
 
           text = request.text;
           cain = request.cain;
 
-          regex = new RegExp(text, cain ? "gmi" : "gm");
+          regex = new RegExp(text, cain ? "gi" : "g");
           texts = collectTextElement(document.body);
           content = collectTextContent(texts);
           search = true;
           process = true;
         case "process":
-          backport.postMessage();
+          current = "res" + new Date().getTime();
+          window.postMessage(current);
           break;
         case "prev":
           marker.focusPrev();
@@ -170,7 +167,7 @@ chrome.runtime.onConnect.addListener((() => {
           break;
       }
       if (port !== null) {
-        postMessage();
+        postSearchProcess();
       }
     });
   };
