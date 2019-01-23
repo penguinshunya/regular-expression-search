@@ -101,6 +101,9 @@ chrome.runtime.onConnect.addListener((() => {
     if (current > e.data) {
       return;
     }
+    if (!search) {
+      return;
+    }
     let start = new Date().getTime();
     do {
       let elems = sliceMatchedElems();
