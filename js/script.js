@@ -25,7 +25,6 @@ chrome.runtime.onConnect.addListener((() => {
   // The smaller the FPS, the quicker the search ends.
   const FPS = 30;
 
-  let timeoutID = null;
   let marker = new Marker();
 
   // search process information
@@ -37,6 +36,8 @@ chrome.runtime.onConnect.addListener((() => {
   let index = 0;
   let length = 0;
 
+  let backport = chrome.runtime.connect();
+
   let clearSearchResult = () => {
     marker.clear();
     text = "";
@@ -45,7 +46,6 @@ chrome.runtime.onConnect.addListener((() => {
     process = false;
     index = 0;
     length = 0;
-    window.clearTimeout(timeoutID);
   };
 
   let sliceMatchedElems = () => {
@@ -109,13 +109,19 @@ chrome.runtime.onConnect.addListener((() => {
         }
       } while (new Date().getTime() - start < 1000 / FPS);
       if (process) {
-        timeoutID = window.setTimeout(searchNext, 0);
+        backport.postMessage();
       }
       if (port !== null) {
         postMessage();
       }
     };
 
+    let resetBackport = () => {
+      backport.disconnect();
+      backport = chrome.runtime.connect();
+      backport.onMessage.addListener(searchNext);
+    };
+  
     port.onDisconnect.addListener(() => {
       port = null;
     });
@@ -133,14 +139,14 @@ chrome.runtime.onConnect.addListener((() => {
     
       switch (kind) {
         case "prepare":
-          window.clearTimeout(timeoutID);
+          resetBackport();
           if (process) {
-            // Use new port object.
-            timeoutID = window.setTimeout(searchNext, 0);
+            backport.postMessage();
           }
           break;
         case "new":
           clearSearchResult();
+          resetBackport();
 
           text = request.text;
           cain = request.cain;
@@ -151,7 +157,7 @@ chrome.runtime.onConnect.addListener((() => {
           search = true;
           process = true;
         case "process":
-          timeoutID = window.setTimeout(searchNext, 0);
+          backport.postMessage();
           break;
         case "prev":
           marker.focusPrev();
