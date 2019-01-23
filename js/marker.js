@@ -10,7 +10,7 @@ let Marker = (() => {
     top: 0,
     right: 0,
     width: 16,
-    height: "calc(100% - 8px)",
+    height: "calc(100% - 5px)",
   }).appendTo("body");
 
   return function() {
@@ -46,7 +46,7 @@ let Marker = (() => {
     let makeMarker = (elem, index) => {
       let marker = $marker.clone(true);
       let height = elem.height() / $(document).height() * window.innerHeight;
-      if (height < 8) height = 8;
+      if (height < 5) height = 5;
   
       let top = elem.offset().top / ($(document).height() - elem.height());
       marker.css("top", top * 100 + "%");
