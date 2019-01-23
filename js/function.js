@@ -7,11 +7,10 @@ let collectTextElement = (() => {
     "svg",
   ];
 
-  return (parent) => {
-    let list = [];
+  return (parent, elems = new Treap()) => {
     parent.childNodes.forEach((elem) => {
       if (elem.nodeType === Node.TEXT_NODE) {
-        list.push(elem);
+        elems.push(elem);
         return;
       }
       if (elem.nodeType !== Node.ELEMENT_NODE) {
@@ -28,18 +27,22 @@ let collectTextElement = (() => {
         try {
           // Error occurs in this line when cross domain.
           let body = elem.contentWindow.document.body;
-  
-          list = list.concat(collectTextElement(body));
+          
+          collectTextElement(body, elems);
         } catch (e) {
         }
         return;
       }
-      list = list.concat(collectTextElement(elem));
+      collectTextElement(elem, elems);
     });
-    return list;
+    return elems;
   };
 })();
 
 let collectTextContent = (elems) => {
-  return elems.reduce((accm, elem) => accm + elem.textContent, "");
+  let text = "";
+  for (let i = 0; i < elems.count(); i++) {
+    text += elems.search(i).textContent;
+  }
+  return text;
 };

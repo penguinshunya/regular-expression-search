@@ -7,10 +7,10 @@ let Marker = (() => {
     position: "fixed",
     margin: 0,
     padding: 0,
-    width: 16,
-    height: "calc(100% - 8px)",
     top: 0,
     right: 0,
+    width: 16,
+    height: "calc(100% - 8px)",
   }).appendTo("body");
 
   return function() {

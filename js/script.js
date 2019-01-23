@@ -32,7 +32,7 @@ chrome.runtime.onConnect.addListener((() => {
   let search = false;
   let process = false;
   let regex;
-  let list;
+  let texts;
   let content;
   let index = 0;
   let length = 0;
@@ -57,26 +57,26 @@ chrome.runtime.onConnect.addListener((() => {
     let elems = [];
     let range = document.createRange();
 
-    while (result.index >= length + list[index].data.length) {
-      length += list[index++].data.length;
+    while (result.index >= length + texts.search(index).data.length) {
+      length += texts.search(index++).data.length;
     }
-    range.setStart(list[index], result.index - length);
+    range.setStart(texts.search(index), result.index - length);
     {
       let latter = range.startContainer.splitText(range.startOffset);
-      list.splice(index + 1, 0, latter);
-      length += list[index++].data.length;
+      texts.insert(index + 1, latter);
+      length += texts.search(index++).data.length;
     }
     
-    while (result.index + result[0].length > length + list[index].data.length) {
-      elems.push(list[index]);
-      length += list[index++].data.length;
+    while (result.index + result[0].length > length + texts.search(index).data.length) {
+      elems.push(texts.search(index));
+      length += texts.search(index++).data.length;
     }
-    elems.push(list[index]);
-    range.setEnd(list[index], result.index + result[0].length - length);
+    elems.push(texts.search(index));
+    range.setEnd(texts.search(index), result.index + result[0].length - length);
     {
       let latter = range.endContainer.splitText(range.endOffset);
-      list.splice(index + 1, 0, latter);
-      length += list[index++].data.length;
+      texts.insert(index + 1, latter);
+      length += texts.search(index++).data.length;
     }
 
     return elems;
@@ -146,8 +146,8 @@ chrome.runtime.onConnect.addListener((() => {
           cain = request.cain;
 
           regex = new RegExp(text, cain ? "gmi" : "gm");
-          list = collectTextElement(document.body);
-          content = collectTextContent(list);
+          texts = collectTextElement(document.body);
+          content = collectTextContent(texts);
           search = true;
           process = true;
         case "process":
@@ -167,5 +167,5 @@ chrome.runtime.onConnect.addListener((() => {
         postMessage();
       }
     });
-  }
+  };
 })());
