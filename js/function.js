@@ -1,5 +1,5 @@
-let collectTextElement = (() => {
-  let exclusions = [
+const collectTextElement = (() => {
+  const exclusions = [
     "script",
     "noscript",
     "style",
@@ -16,7 +16,7 @@ let collectTextElement = (() => {
       if (elem.nodeType !== Node.ELEMENT_NODE) {
         return;
       }
-      let tagName = elem.tagName.toLowerCase();
+      const tagName = elem.tagName.toLowerCase();
       if (exclusions.indexOf(tagName) >= 0) {
         return;
       }
@@ -26,7 +26,7 @@ let collectTextElement = (() => {
       if (tagName === "iframe") {
         try {
           // Error occurs in this line when cross domain.
-          let body = elem.contentWindow.document.body;
+          const body = elem.contentWindow.document.body;
           
           collectTextElement(body, elems);
         } catch (e) {
@@ -39,7 +39,7 @@ let collectTextElement = (() => {
   };
 })();
 
-let collectTextContent = (elems) => {
+const collectTextContent = (elems) => {
   let text = "";
   for (let i = 0; i < elems.count(); i++) {
     text += elems.search(i).textContent;

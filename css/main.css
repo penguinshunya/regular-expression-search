@@ -7,7 +7,7 @@
 }
 #search_wrapper {
     display: flex;
-    width: 320px;
+    width: 300px;
 }
 #search {
     font-family: 'Courier New', Courier, monospace;

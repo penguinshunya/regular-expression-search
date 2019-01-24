@@ -22,8 +22,8 @@ chrome.runtime.onMessage.addListener((() => {
 })());
 
 chrome.runtime.onConnect.addListener((() => {
-  // The smaller the FPS, the quicker the search ends.
-  const FPS = 30;
+  // The smaller the FPS, the quicker the search ends but the page gets stiff.
+  const FPS = 120;
 
   let marker = new Marker();
 
@@ -39,7 +39,7 @@ chrome.runtime.onConnect.addListener((() => {
   let port = null;
   let current = "";
 
-  let clearSearchResult = () => {
+  const clearSearchResult = () => {
     marker.clear();
     text = "";
     cain = false;
@@ -49,21 +49,21 @@ chrome.runtime.onConnect.addListener((() => {
     length = 0;
   };
 
-  let sliceMatchedElems = () => {
-    let result = regex.exec(content);
+  const sliceMatchedElems = () => {
+    const result = regex.exec(content);
     if (result == null) {
       return null;
     }
 
-    let elems = [];
-    let range = document.createRange();
+    const elems = [];
+    const range = document.createRange();
 
     while (result.index >= length + texts.search(index).data.length) {
       length += texts.search(index++).data.length;
     }
     range.setStart(texts.search(index), result.index - length);
     {
-      let latter = range.startContainer.splitText(range.startOffset);
+      const latter = range.startContainer.splitText(range.startOffset);
       texts.insert(index + 1, latter);
       length += texts.search(index++).data.length;
     }
@@ -75,7 +75,7 @@ chrome.runtime.onConnect.addListener((() => {
     elems.push(texts.search(index));
     range.setEnd(texts.search(index), result.index + result[0].length - length);
     {
-      let latter = range.endContainer.splitText(range.endOffset);
+      const latter = range.endContainer.splitText(range.endOffset);
       texts.insert(index + 1, latter);
       length += texts.search(index++).data.length;
     }
@@ -83,7 +83,7 @@ chrome.runtime.onConnect.addListener((() => {
     return elems;
   };
 
-  let postSearchProcess = () => {
+  const postSearchProcess = () => {
     port.postMessage({
       search: search,
       process: process,
@@ -94,13 +94,13 @@ chrome.runtime.onConnect.addListener((() => {
     });
   };
 
-  let searchNext = (e) => {
+  const searchNext = (e) => {
     if (e.source !== window || !e.data.startsWith("res")) return;
     if (current > e.data) return;
     if (!search) return;
-    let start = new Date().getTime();
+    const start = new Date().getTime();
     do {
-      let elems = sliceMatchedElems();
+      const elems = sliceMatchedElems();
       if (elems === null) {
         process = false;
         break;
@@ -124,9 +124,7 @@ chrome.runtime.onConnect.addListener((() => {
     });
 
     p.onMessage.addListener(request => {
-      let kind = request.kind;
-    
-      switch (kind) {
+      switch (request.kind) {
         case "prepare":
           port = p;
           break;

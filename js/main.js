@@ -2,13 +2,13 @@ $(() => {
   // use async function. return value is promise.
   // it may make strange movements.
   chrome.tabs.query({active: true, currentWindow: true}, async (tabs) => {
-    let port  = chrome.tabs.connect(tabs[0].id);
+    const port  = chrome.tabs.connect(tabs[0].id);
     port.onDisconnect.addListener(window.close);
 
-    let texts = await getStorageValue("texts", []);
-    let cain  = await getStorageValue("cain", false);
+    const texts = await getStorageValue("texts", []);
+    const cain  = await getStorageValue("cain", false);
 
-    let page = (await sendMessage({kind: "page"}));
+    const page = (await sendMessage({kind: "page"}));
   
     main(port, texts, cain, page.input, page.text, page.cain);
 
@@ -17,43 +17,43 @@ $(() => {
   });
 });
 
-let main = (port, texts, cain, input, prevText, prevCain) => {
+const main = (port, texts, cain, input, prevText, prevCain) => {
   let index = texts.length;
 
-  let movePrevSearchResult = () => {
+  const movePrevSearchResult = () => {
     port.postMessage({kind: "prev"});
   };
 
-  let moveNextSearchResult = () => {
+  const moveNextSearchResult = () => {
     port.postMessage({kind: "next"});
   };
 
-  let clearSearchResult = () => {
+  const clearSearchResult = () => {
     port.postMessage({kind: "close"});
     prevText = "";
     index = texts.length;
   };
 
-  let getCain = () => {
+  const getCain = () => {
     return $("#cain")[0].dataset.select === "true";
   };
   
-  let setCain = (ci) => {
+  const setCain = (ci) => {
     $("#cain")[0].dataset.select = ci ? "true" : "false";
   };
   
-  let saveCain = async (ci) => {
+  const saveCain = async (ci) => {
     await setStorageValue("cain", ci);
   };
 
-  let backPrevHistory = () => {
+  const backPrevHistory = () => {
     if (index > 0) {
       $("#search").val(texts[--index]);
       $("#search").select();
     }
   };
 
-  let forwardNextHistory = () => {
+  const forwardNextHistory = () => {
     if (index < texts.length - 1) {
       $("#search").val(texts[++index]);
       $("#search").select();
@@ -63,7 +63,7 @@ let main = (port, texts, cain, input, prevText, prevCain) => {
     }
   };
 
-  let saveHistory = async (text) => {
+  const saveHistory = async (text) => {
     // If it is a same as last search text, don't save.
     if (texts[texts.length - 1] !== text) {
       texts.push(text);
@@ -75,7 +75,7 @@ let main = (port, texts, cain, input, prevText, prevCain) => {
   port.onMessage.addListener((()=> {
     // Only here can change the state of COUNT, PREV, NEXT element.
     // Trigger for change should not be a popup script.
-    let modifyCount = (index, count) => {
+    const modifyCount = (index, count) => {
       if (index === 0) {
         $("#count").text(count);
       } else {
@@ -83,7 +83,7 @@ let main = (port, texts, cain, input, prevText, prevCain) => {
       }
     };
 
-    let changeButtonStatus = (enabled) => {
+    const changeButtonStatus = (enabled) => {
       $("#prev").prop("disabled", !enabled);
       $("#next").prop("disabled", !enabled);
     };
@@ -131,13 +131,13 @@ let main = (port, texts, cain, input, prevText, prevCain) => {
       case "Enter":
         e.preventDefault();
 
-        let text = $("#search").val();
+        const text = $("#search").val();
         if (text === "") {
           clearSearchResult();
           return;
         }
 
-        let cain = getCain();
+        const cain = getCain();
 
         if (e.shiftKey && text === prevText && cain === prevCain) {
           movePrevSearchResult();
@@ -208,14 +208,14 @@ let main = (port, texts, cain, input, prevText, prevCain) => {
   $("#cain").on("keydown", async (e) => {
     if (e.key !== "Enter" && e.key !== " ") return;
     e.preventDefault();
-    let ci = !getCain();
+    const ci = !getCain();
     setCain(ci);
     await saveCain(ci);
   });
 
   $("#cain").on("click", async (e) => {
     e.preventDefault();
-    let ci = !getCain();
+    const ci = !getCain();
     setCain(ci);
     await saveCain(ci);
   });
@@ -243,9 +243,9 @@ let main = (port, texts, cain, input, prevText, prevCain) => {
   $("#search").focus();
 };
 
-let getStorageValue = async (key, defaultValue) => {
-  let promise = new Promise(resolve => {
-    let param = {};
+const getStorageValue = async (key, defaultValue) => {
+  const promise = new Promise(resolve => {
+    const param = {};
     param[key] = defaultValue;
     chrome.storage.local.get(param, (response) => {
       resolve(response[key]);
@@ -254,9 +254,9 @@ let getStorageValue = async (key, defaultValue) => {
   return promise;
 };
 
-let setStorageValue = async (key, value, callback = () => {}) => {
-  let promise = new Promise(resolve => {
-    let param = {};
+const setStorageValue = async (key, value, callback = () => {}) => {
+  const promise = new Promise(resolve => {
+    const param = {};
     param[key] = value;
     chrome.storage.local.set(param, (response) => {
       callback(response);
@@ -266,8 +266,8 @@ let setStorageValue = async (key, value, callback = () => {}) => {
   return promise;
 };
 
-let sendMessage = async (params) => {
-  let promise = new Promise(resolve => {
+const sendMessage = async (params) => {
+  const promise = new Promise(resolve => {
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
       chrome.tabs.sendMessage(tabs[0].id, params, (response) => {
         resolve(response);
