@@ -95,15 +95,9 @@ chrome.runtime.onConnect.addListener((() => {
   };
 
   let searchNext = (e) => {
-    if (e.source !== window || !e.data.startsWith("res")) {
-      return;
-    }
-    if (current > e.data) {
-      return;
-    }
-    if (!search) {
-      return;
-    }
+    if (e.source !== window || !e.data.startsWith("res")) return;
+    if (current > e.data) return;
+    if (!search) return;
     let start = new Date().getTime();
     do {
       let elems = sliceMatchedElems();
