@@ -36,7 +36,11 @@ const Marker = function() {
     cursor: "pointer",
   });
 
-  const focus = (marks, markers, prevIndex, currIndex) => {
+  const focus = (m, prevIndex, currIndex) => {
+    const
+      marks = m._marks,
+      markers = m._markers;
+    
     marks[prevIndex].forEach(mark => {
       mark.css("background-color", markerColor);
     });
@@ -57,9 +61,9 @@ const Marker = function() {
 
   const clickMark = function(m) {
     return function() {
-      let i = m._index;
+      const i = m._index;
       m._index = $(this).data("index");
-      focus(m._marks, m._markers, i, m._index);
+      focus(m, i, m._index);
     };
   };
 
@@ -81,10 +85,9 @@ const Marker = function() {
     marker.css("top", top * 100 + "%");
     marker.height(height);
     marker.data("index", index);
-    marker.appendTo($wrapper);
     marker.on("click", clickMark(m));
 
-    return marker;
+    return marker.appendTo($wrapper);
   };
 
   Marker.prototype.index = function() {
@@ -118,7 +121,7 @@ const Marker = function() {
     if (prevIndex < 0) {
       prevIndex = this._index;
     }
-    focus(this._marks, this._markers, prevIndex, this._index);
+    focus(this, prevIndex, this._index);
   };
 
   Marker.prototype.focusNext = function() {
@@ -137,7 +140,7 @@ const Marker = function() {
     if (prevIndex < 0) {
       prevIndex = this._index;
     }
-    focus(this._marks, this._markers, prevIndex, this._index);
+    focus(this, prevIndex, this._index);
   };
 
   Marker.prototype.clear = function() {
