@@ -1,8 +1,15 @@
-let Marker = (() => {
-  let MARKER_COLOR = "yellow";
-  let FOCUSED_MARKER_COLOR = "orange";
+const Marker = function() {
+  this._marks = [];
+  this._markers = [];
+  this._count = 0;
+  this._index = -1;
+};
 
-  let wrapper = $("<div>").css({
+{
+  const markerColor = "yellow";
+  const focusedMarkerColor = "orange";
+
+  const $wrapper = $("<div>").css({
     zIndex: 65536,
     position: "fixed",
     margin: 0,
@@ -13,141 +20,134 @@ let Marker = (() => {
     height: "calc(100% - 5px)",
   }).appendTo("body");
 
-  return function() {
-    let obj = {};
+  const $mark = $("<mark>").attr("tabindex", "-1").css({
+    margin: 0,
+    padding: 0,
+    backgroundColor: markerColor,
+  });
 
-    let marks = [];
-    let markers = [];
-    let count = 0;
-    let currIndex = -1;
-  
-    let $mark = $("<mark>").attr("tabindex", "-1").css({
-      margin: 0,
-      padding: 0,
-      backgroundColor: MARKER_COLOR,
+  const $marker = $("<div>").css({
+    position: "absolute",
+    margin: 0,
+    padding: 0,
+    left: 0,
+    width: "100%",
+    backgroundColor: markerColor,
+    cursor: "pointer",
+  });
+
+  const focus = (marks, markers, prevIndex, currIndex) => {
+    marks[prevIndex].forEach(mark => {
+      mark.css("background-color", markerColor);
     });
-  
-    let $marker = $("<div>").css({
-      position: "absolute",
-      margin: 0,
-      padding: 0,
-      left: 0,
-      width: "100%",
-      backgroundColor: MARKER_COLOR,
-      cursor: "pointer",
-    });
-
-    let makeMark = (node, index) => {
-      let mark = $mark.clone(true);
-      mark.data("index", index);
-      return $(node).wrap(mark).parent();
-    };
-
-    let makeMarker = (elem, index) => {
-      let marker = $marker.clone(true);
-      let height = elem.height() / $(document).height() * window.innerHeight;
-      if (height < 5) height = 5;
-  
-      let top = elem.offset().top / ($(document).height() - elem.height());
-      marker.css("top", top * 100 + "%");
-      marker.height(height);
-      marker.data("index", index);
-      marker.appendTo(wrapper);
-  
-      return marker;
-    };
-  
-    let focus = (prevIndex, currIndex) => {
-      if (count === 0) {
-        return;
-      }
-      if (prevIndex < 0) {
-        prevIndex = currIndex;
-      }
-
-      marks[prevIndex].forEach(mark => {
-        mark.css("background-color", MARKER_COLOR);
-      });
-      marks[currIndex].forEach(mark => {
-        mark.css("background-color", FOCUSED_MARKER_COLOR);
-      });
-    
-      marks[currIndex][0].focus();
-    
-      markers[prevIndex].css({
-        backgroundColor: MARKER_COLOR,
-        zIndex: 0,
-      });
-      markers[currIndex].css({
-        backgroundColor: FOCUSED_MARKER_COLOR,
-        zIndex: 1,
-      });
-    };
-
-    $mark.on("click", function() {
-      let index = currIndex;
-      currIndex = $(this).data("index");
-      focus(index, currIndex);
+    markers[prevIndex].css({
+      backgroundColor: markerColor,
+      zIndex: 0,
     });
 
-    $marker.on("click", function() {
-      let index = currIndex;
-      currIndex = $(this).data("index");
-      focus(index, currIndex);
+    marks[currIndex].forEach(mark => {
+      mark.css("background-color", focusedMarkerColor);
     });
-    
-    obj.index = () => currIndex + 1;
-    obj.count = () => count;
-  
-    obj.add = textNodes => {
-      marks.push(textNodes.map(node => makeMark(node, count)));
-      markers.push(makeMarker(marks[count][0], count));
-      count++;
-    };
-
-    obj.focusPrev = () => {
-      if (count === 0) {
-        return;
-      }
-      if (currIndex === -1) {
-        currIndex = count - 1;
-        focus(currIndex, currIndex);
-        return;
-      }
-      let prevIndex = currIndex--;
-      if (currIndex < 0) {
-        currIndex = count - 1;
-      }
-      focus(prevIndex, currIndex);
-    };
-
-    obj.focusNext = () => {
-      if (count === 0) {
-        return;
-      }
-      if (currIndex === -1) {
-        currIndex = 0;
-        focus(currIndex, currIndex);
-        return;
-      }
-      let prevIndex = currIndex++;
-      if (currIndex >= count) {
-        currIndex = 0;
-      }
-      focus(prevIndex, currIndex);
-    };
-
-    obj.clear = () => {
-      marks.forEach(mark => {
-        mark.forEach(m => m.contents().unwrap().parent()[0].normalize());
-      });
-      wrapper.empty();
-      marks = [];
-      markers = [];
-      count = 0;
-      currIndex = -1;
-    };
-
-    return obj;
+    markers[currIndex].css({
+      backgroundColor: focusedMarkerColor,
+      zIndex: 1,
+    });
+    marks[currIndex][0].focus();
   };
-})();
+
+  const clickMark = function(m) {
+    return function() {
+      let i = m._index;
+      m._index = $(this).data("index");
+      focus(m._marks, m._markers, i, m._index);
+    };
+  };
+
+  const makeMark = (m, node, index) => {
+    const mark = $mark.clone();
+    mark.data("index", index);
+    mark.on("click", clickMark(m));
+    return $(node).wrap(mark).parent();
+  };
+
+  const makeMarker = (m, elem, index) => {
+    const
+      marker = $marker.clone(),
+      height = elem.height() / $(document).height() * window.innerHeight,
+      top = elem.offset().top / ($(document).height() - elem.height());
+
+    if (height < 5) height = 5;
+
+    marker.css("top", top * 100 + "%");
+    marker.height(height);
+    marker.data("index", index);
+    marker.appendTo($wrapper);
+    marker.on("click", clickMark(m));
+
+    return marker;
+  };
+
+  Marker.prototype.index = function() {
+    return this._index;
+  };
+
+  Marker.prototype.count = function() {
+    return this._count;
+  };
+  
+  Marker.prototype.add = function(texts) {
+    const count = this._count;
+    this._marks.push(texts.map(node => makeMark(this, node, count)));
+    this._markers.push(makeMarker(this, this._marks[count][0], count));
+    this._count = count + 1;
+  };
+
+  Marker.prototype.focusPrev = function() {
+    if (this._count === 0) {
+      return;
+    }
+    let prevIndex;
+    if (this._index === -1) {
+      prevIndex = this._index = this._count - 1;
+    } else {
+      prevIndex = this._index--;
+      if (this._index < 0) {
+        this._index = this._count - 1;
+      }
+    }
+    if (prevIndex < 0) {
+      prevIndex = this._index;
+    }
+    focus(this._marks, this._markers, prevIndex, this._index);
+  };
+
+  Marker.prototype.focusNext = function() {
+    if (this._count === 0) {
+      return;
+    }
+    let prevIndex;
+    if (this._index === -1) {
+      prevIndex = this._index = 0;
+    } else {
+      prevIndex = this._index++;
+      if (this._index >= this._count) {
+        this._index = 0;
+      }
+    }
+    if (prevIndex < 0) {
+      prevIndex = this._index;
+    }
+    focus(this._marks, this._markers, prevIndex, this._index);
+  };
+
+  Marker.prototype.clear = function() {
+    $wrapper.empty();
+    this._marks.forEach(mark => {
+      mark.forEach(m => m.contents().unwrap().parent()[0].normalize());
+    });
+    this._marks = [];
+    this._markers = [];
+    this._count = 0;
+    this._index = -1;
+  };
+}
