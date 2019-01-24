@@ -73,15 +73,15 @@ const Treap = function() {
   };
 
   Treap.prototype.insert = function(k, v) {
-    return this._root = insert(this._root, k, v);
+    this._root = insert(this._root, k, v);
   };
 
   Treap.prototype.push = function(v) {
-    return this.insert(count(this._root), v);
+    this._root = insert(this._root, count(this._root), v);
   };
 
   Treap.prototype.erase = function(k) {
-    return this._root = erase(this._root, k);
+    this._root = erase(this._root, k);
   };
 
   Treap.prototype.search = function(k) {
