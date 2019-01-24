@@ -1,5 +1,9 @@
-let Treap = function() {
-  let Node = function(v) {
+const Treap = function() {
+  this._root = null;
+};
+
+{
+  const Node = function(v) {
     this.val = v;
     this.lch = null;
     this.rch = null;
@@ -7,14 +11,14 @@ let Treap = function() {
     this.cnt = 1;
   };
 
-  let count = (t) => !t ? 0 : t.cnt;
+  const count = t => !t ? 0 : t.cnt;
 
-  let update = (t) => {
+  const update = t => {
     t.cnt = count(t.lch) + count(t.rch) + 1;
     return t;
   };
 
-  let merge = (l, r) => {
+  const merge = (l, r) => {
     if (!l || !r) return !l ? r : l;
 
     if (l.pri > r.pri) {
@@ -26,7 +30,7 @@ let Treap = function() {
     }
   };
 
-  let split = (t, k) => {
+  const split = (t, k) => {
     if (!t) return [null, null];
 
     if (k <= count(t.lch)) {
@@ -40,19 +44,19 @@ let Treap = function() {
     }
   };
 
-  let insert = (t, k, v) => {
+  const insert = (t, k, v) => {
     let s = split(t, k);
     let l = merge(s[0], new Node(v));
     return merge(l, s[1]);
   };
 
-  let erase = (t, k) => {
+  const erase = (t, k) => {
     let r = split(t, k + 1);
     let l = split(t, k);
     return merge(l[0], r[1]);
   };
 
-  let search = (t, k) => {
+  const search = (t, k) => {
     if (k < 0 || k >= count(t)) return null;
 
     if (count(t.lch) === k) {
@@ -64,11 +68,23 @@ let Treap = function() {
     }
   };
 
-  let root = null;
+  Treap.prototype.count = function() {
+    return count(this._root);
+  };
 
-  this.count = () => count(root);
-  this.insert = (k, v) => root = insert(root, k, v);
-  this.push = (v) => root = insert(root, count(root), v);
-  this.erase = (k) => root = erase(root, k);
-  this.search = (k) => search(root, k);
-};
+  Treap.prototype.insert = function(k, v) {
+    return this._root = insert(this._root, k, v);
+  };
+
+  Treap.prototype.push = function(v) {
+    return this.insert(count(this._root), v);
+  };
+
+  Treap.prototype.erase = function(k) {
+    return this._root = erase(this._root, k);
+  };
+
+  Treap.prototype.search = function(k) {
+    return search(this._root, k);
+  };
+}
