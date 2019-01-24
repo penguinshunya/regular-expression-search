@@ -75,11 +75,10 @@ const Marker = function() {
   };
 
   const makeMarker = (m, elem, index) => {
-    const
-      marker = $marker.clone(),
-      height = elem.height() / $(document).height() * window.innerHeight,
-      top = elem.offset().top / ($(document).height() - elem.height());
-
+    const marker = $marker.clone();
+    const top = elem.offset().top / ($(document).height() - elem.height());
+    
+    let height = elem.height() / $(document).height() * window.innerHeight;
     if (height < 5) height = 5;
 
     marker.css("top", top * 100 + "%");
