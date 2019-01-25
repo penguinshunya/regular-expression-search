@@ -105,9 +105,10 @@ chrome.runtime.onConnect.addListener((() => {
         process = false;
         break;
       } else {
-        marker.add(elems);
+        marker.addMarks(elems);
       }
     } while (new Date().getTime() - start < 1000 / FPS);
+    marker.addMarkers();
     if (process) {
       window.postMessage(e.data);
     }

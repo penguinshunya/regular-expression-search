@@ -4,6 +4,7 @@ const Marker = function() {
   this._count = 0;
   this._index = -1;
   this._bottom = 0;
+  this._previous = 0;
 };
 
 {
@@ -106,11 +107,17 @@ const Marker = function() {
     return this._count;
   };
   
-  Marker.prototype.add = function(texts) {
+  Marker.prototype.addMarks = function(texts) {
     const count = this._count;
     this._marks.push(texts.map(node => makeMark(this, node, count)));
-    this._markers.push(makeMarker(this, this._marks[count][0], count));
     this._count = count + 1;
+  };
+
+  Marker.prototype.addMarkers = function() {
+    for (let i = this._previous; i < this._count; i++) {
+      this._markers.push(makeMarker(this, this._marks[i][0], i));
+    }
+    this._previous = this._count;
   };
 
   Marker.prototype.focusPrev = function() {
