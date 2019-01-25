@@ -23,7 +23,7 @@ chrome.runtime.onMessage.addListener((() => {
 
 chrome.runtime.onConnect.addListener((() => {
   // The smaller the FPS, the quicker the search ends but the page gets stiff.
-  const FPS = 120;
+  const FPS = 30;
 
   let marker = new Marker();
 

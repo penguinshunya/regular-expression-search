@@ -162,5 +162,6 @@ const Marker = function() {
     this._count = 0;
     this._index = -1;
     this._bottom = 0;
+    this._previous = 0;
   };
 }
