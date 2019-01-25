@@ -1,3 +1,26 @@
+const getStorageValue = async (key, defaultValue) => {
+  const promise = new Promise(resolve => {
+    const param = {};
+    param[key] = defaultValue;
+    chrome.storage.local.get(param, (response) => {
+      resolve(response[key]);
+    });
+  });
+  return promise;
+};
+
+const setStorageValue = async (key, value, callback = () => {}) => {
+  const promise = new Promise(resolve => {
+    const param = {};
+    param[key] = value;
+    chrome.storage.local.set(param, (response) => {
+      callback(response);
+      resolve();
+    });
+  });
+  return promise;
+};
+
 const collectTextElement = (() => {
   const exclusions = [
     "script",

@@ -23,8 +23,7 @@ chrome.runtime.onMessage.addListener((() => {
 
 chrome.runtime.onConnect.addListener((() => {
   // The smaller the FPS, the quicker the search ends but the page gets stiff.
-  const FPS = 30;
-
+  let FPS = 60;
   let marker = new Marker();
 
   // search process information
@@ -94,7 +93,7 @@ chrome.runtime.onConnect.addListener((() => {
     });
   };
 
-  const searchNext = (e) => {
+  const searchNext = e => {
     if (e.source !== window || !e.data.startsWith("res")) return;
     if (current > e.data) return;
     if (!search) return;
@@ -118,6 +117,27 @@ chrome.runtime.onConnect.addListener((() => {
   };
 
   window.addEventListener("message", searchNext, false);
+
+  chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
+    if (request.fps == null) return;
+    FPS = request.fps;
+    sendResponse();
+  });
+
+  chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
+    if (request.markerColor == null || request.focusedMarkerColor == null) return;
+    Marker.setMarkerColor(request.markerColor);
+    Marker.setFocusedMarkerColor(request.focusedMarkerColor);
+    sendResponse();
+  });
+
+  (async () => {
+    FPS = await getStorageValue("fps", 60);
+    const markerColor = await getStorageValue("markerColor", "yellow");
+    const focusedMarkerColor = await getStorageValue("focusedMarkerColor", "orange");
+    Marker.setMarkerColor(markerColor, true);
+    Marker.setFocusedMarkerColor(focusedMarkerColor, true);
+  })();
 
   return p => {
     p.onDisconnect.addListener(() => {

@@ -8,8 +8,10 @@ const Marker = function() {
 };
 
 {
-  const markerColor = "yellow";
-  const focusedMarkerColor = "orange";
+  let markerColor = "yellow";
+  let focusedMarkerColor = "orange";
+  let nextMarkerColor = markerColor;
+  let nextFocusedMarkerColor = focusedMarkerColor;
 
   const $wrapper = $("<div>").css({
     zIndex: 65536,
@@ -24,7 +26,6 @@ const Marker = function() {
   const $mark = $("<mark>").attr("tabindex", "-1").css({
     margin: 0,
     padding: 0,
-    backgroundColor: markerColor,
   });
 
   const $marker = $("<div>").css({
@@ -33,7 +34,6 @@ const Marker = function() {
     padding: 0,
     left: 0,
     width: "100%",
-    backgroundColor: markerColor,
     cursor: "pointer",
   });
 
@@ -74,6 +74,7 @@ const Marker = function() {
   const makeMark = (m, node, index) => {
     const mark = $mark.clone();
     mark.data("index", index);
+    mark.css("backgroundColor", markerColor);
     mark.on("click", clickMark(m));
     return $(node).wrap(mark).parent();
   };
@@ -86,6 +87,7 @@ const Marker = function() {
     if (height < 5) height = 5;
 
     marker.css("top", `${top * 100}%`);
+    marker.css("backgroundColor", markerColor);
     marker.height(height);
     marker.data("index", index);
     marker.on("click", clickMark(m));
@@ -97,6 +99,24 @@ const Marker = function() {
     }
 
     return marker.appendTo($wrapper);
+  };
+
+  Marker.setMarkerColor = (mc, immediate = false) => {
+    if (immediate) {
+      markerColor = mc;
+      nextMarkerColor = mc;
+    } else {
+      nextMarkerColor = mc;
+    }
+  };
+
+  Marker.setFocusedMarkerColor = (fc, immediate = false) => {
+    if (immediate) {
+      focusedMarkerColor = fc;
+      nextFocusedMarkerColor = fc;
+    } else {
+      nextFocusedMarkerColor = fc;
+    }
   };
 
   Marker.prototype.index = function() {
@@ -163,5 +183,7 @@ const Marker = function() {
     this._index = -1;
     this._bottom = 0;
     this._previous = 0;
+    markerColor = nextMarkerColor;
+    focusedMarkerColor = nextFocusedMarkerColor;
   };
 }
