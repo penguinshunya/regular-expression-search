@@ -18,7 +18,13 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["js/jquery-3.3.1.min.js", "js/treap.js", "js/function.js", "js/marker.js", "js/script.js"]
+      "js": [
+        "js/treap.js",
+        "js/function.js",
+        "js/jquery-3.3.1.min.js",
+        "js/marker.js",
+        "js/script.js"
+      ]
     }
   ],
   "background": {

@@ -23,3 +23,9 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
   });
   sendResponse();
 });
+
+chrome.runtime.onConnect.addListener(port => {
+  port.onMessage.addListener(date => {
+    port.postMessage(date);
+  });
+});

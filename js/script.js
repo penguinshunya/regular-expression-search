@@ -36,6 +36,7 @@ chrome.runtime.onConnect.addListener((() => {
   let length = 0;
 
   let port = null;
+  let backport = chrome.runtime.connect();
   let current = "";
 
   const clearSearchResult = () => {
@@ -93,9 +94,8 @@ chrome.runtime.onConnect.addListener((() => {
     });
   };
 
-  const searchNext = e => {
-    if (e.source !== window || !e.data.startsWith("res")) return;
-    if (current > e.data) return;
+  const searchNext = date => {
+    if (current > date) return;
     if (!search) return;
     const start = new Date().getTime();
     do {
@@ -109,14 +109,14 @@ chrome.runtime.onConnect.addListener((() => {
     } while (new Date().getTime() - start < 1000 / FPS);
     marker.addMarkers();
     if (process) {
-      window.postMessage(e.data);
+      backport.postMessage(date);
     }
     if (port !== null) {
       postSearchProcess();
     }
   };
 
-  window.addEventListener("message", searchNext, false);
+  backport.onMessage.addListener(searchNext);
 
   chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
     if (request.fps == null) return;
@@ -160,8 +160,8 @@ chrome.runtime.onConnect.addListener((() => {
           content = collectTextContent(texts);
           search = true;
           process = true;
-          current = "res" + new Date().getTime();
-          window.postMessage(current);
+          current = performance.now();
+          backport.postMessage(current);
           break;
         case "prev":
           marker.focusPrev();
