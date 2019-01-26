@@ -175,7 +175,11 @@ const Marker = function() {
   Marker.prototype.clear = function() {
     $wrapper.empty();
     this._marks.forEach(mark => {
-      mark.forEach(m => m.contents().unwrap().parent()[0].normalize());
+      mark.forEach(m => {
+        const par = m.contents().unwrap().parent()[0];
+        // In dynamic page, element may not exist.
+        if (par) par.normalize();
+      });
     });
     this._marks = [];
     this._markers = [];
