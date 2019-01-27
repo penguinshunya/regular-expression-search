@@ -1,11 +1,11 @@
 #color {
     display: flex;
+    flex-wrap: wrap;
 }
 #color svg {
     cursor: pointer;
-}
-#color svg:not(:last-child) {
     margin-right: 10px;
+    margin-bottom: 10px;
 }
 #color svg.selected {
     border: 1px solid #ced4da;

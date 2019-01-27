@@ -52,6 +52,7 @@ const Marker = function() {
 
     marks[prevIndex].forEach(mark => {
       mark.css("background-color", markerColor);
+      mark.css("color", blackOrWhite(markerColor));
     });
     markers[prevIndex].css({
       backgroundColor: markerColor,
@@ -60,6 +61,7 @@ const Marker = function() {
 
     marks[currIndex].forEach(mark => {
       mark.css("background-color", focusedMarkerColor);
+      mark.css("color", blackOrWhite(focusedMarkerColor));
     });
     markers[currIndex].css({
       backgroundColor: focusedMarkerColor,
@@ -80,6 +82,7 @@ const Marker = function() {
     const mark = $mark.clone();
     mark.data("index", index);
     mark.css("backgroundColor", markerColor);
+    mark.css("color", blackOrWhite(markerColor));
     mark.on("click", clickMark(m));
     return $(node).wrap(mark).parent();
   };
@@ -93,6 +96,7 @@ const Marker = function() {
 
     marker.css("top", `${top * 100}%`);
     marker.css("backgroundColor", markerColor);
+    marker.css("color", blackOrWhite(markerColor));
     marker.height(height);
     marker.data("index", i);
     marker.on("click", clickMark(m));
