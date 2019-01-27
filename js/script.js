@@ -107,7 +107,7 @@ chrome.runtime.onConnect.addListener((() => {
           marker.addMarks(elems);
         }
       } while (new Date().getTime() - start < 1000 / FPS);
-      if (++count % interval === 0 || !process) {
+      if (++count === interval || !process) {
         marker.addMarkers();
         count = 0;
       }
