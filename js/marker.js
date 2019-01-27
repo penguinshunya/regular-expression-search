@@ -1,6 +1,8 @@
 const Marker = function() {
   this._marks = [];
   this._markers = [];
+  this._tops = [];
+  this._heights = [];
   this._count = 0;
   this._index = -1;
   this._bottom = 0;
@@ -12,6 +14,9 @@ const Marker = function() {
   let focusedMarkerColor = "orange";
   let nextMarkerColor = markerColor;
   let nextFocusedMarkerColor = focusedMarkerColor;
+
+  let docHeight;
+  let winHeight;
 
   const $wrapper = $("<div>").css({
     zIndex: 65536,
@@ -79,20 +84,20 @@ const Marker = function() {
     return $(node).wrap(mark).parent();
   };
 
-  const makeMarker = (m, elem, index) => {
+  const makeMarker = (m, i) => {
     const marker = $marker.clone();
-    const top = elem.offset().top / ($(document).height() - elem.height());
+    const top = m._tops[i] / (docHeight - m._heights[i]);
     
-    let height = elem.height() / $(document).height() * window.innerHeight;
+    let height = m._heights[i] / docHeight * winHeight;
     if (height < 5) height = 5;
 
     marker.css("top", `${top * 100}%`);
     marker.css("backgroundColor", markerColor);
     marker.height(height);
-    marker.data("index", index);
+    marker.data("index", i);
     marker.on("click", clickMark(m));
 
-    const bottom = elem.offset().top + elem.height();
+    const bottom = m._tops[i] + m._heights[i];
     if (bottom >= m._bottom) {
       m._bottom = bottom;
       $wrapper.css("height", `calc(100% - ${height}px)`);
@@ -134,8 +139,18 @@ const Marker = function() {
   };
 
   Marker.prototype.addMarkers = function() {
+    docHeight = $(document).height();
+    winHeight = window.innerHeight;
+
+    const {top: btop, height: bheight} = document.body.getBoundingClientRect();
+
     for (let i = this._previous; i < this._count; i++) {
-      this._markers.push(makeMarker(this, this._marks[i][0], i));
+      const rect = this._marks[i][0][0].getBoundingClientRect();
+      this._tops.push(rect.top - btop);
+      this._heights.push(rect.height - bheight);
+    }
+    for (let i = this._previous; i < this._count; i++) {
+      this._markers.push(makeMarker(this, i));
     }
     this._previous = this._count;
   };
@@ -183,6 +198,8 @@ const Marker = function() {
     });
     this._marks = [];
     this._markers = [];
+    this._tops = [];
+    this._heights = [];
     this._count = 0;
     this._index = -1;
     this._bottom = 0;

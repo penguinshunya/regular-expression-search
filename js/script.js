@@ -72,7 +72,7 @@ chrome.runtime.onConnect.addListener((() => {
     }
     elems.push(texts.search(index));
     {
-      const latter = texts.search(index).splitText(result.index + result[0].length - length);
+      const latter = texts.search(index).splitText(regex.lastIndex - length);
       texts.insert(index + 1, latter);
       length += texts.search(index++).data.length;
     }
@@ -91,27 +91,34 @@ chrome.runtime.onConnect.addListener((() => {
     });
   };
 
-  const searchNext = date => {
-    if (current > date) return;
-    if (!search) return;
-    const start = new Date().getTime();
-    do {
-      const elems = sliceMatchedElems();
-      if (elems === null) {
-        process = false;
-        break;
-      } else {
-        marker.addMarks(elems);
+  const searchNext = (() => {
+    let count = 0;
+    let interval = 1;
+    return date => {
+      if (current > date) return;
+      if (!search) return;
+      const start = new Date().getTime();
+      do {
+        const elems = sliceMatchedElems();
+        if (elems === null) {
+          process = false;
+          break;
+        } else {
+          marker.addMarks(elems);
+        }
+      } while (new Date().getTime() - start < 1000 / FPS);
+      if (++count % interval === 0 || !process) {
+        marker.addMarkers();
+        count = 0;
       }
-    } while (new Date().getTime() - start < 1000 / FPS);
-    marker.addMarkers();
-    if (process) {
-      backport.postMessage(date);
-    }
-    if (port !== null) {
-      postSearchProcess();
-    }
-  };
+      if (process) {
+        backport.postMessage(date);
+      }
+      if (port !== null) {
+        postSearchProcess();
+      }
+    };
+  })(); 
 
   backport.onMessage.addListener(searchNext);
 
