@@ -47,20 +47,41 @@ const main = (port, texts, cain, input, prevText, prevCain) => {
   };
 
   const backPrevHistory = () => {
-    if (index > 0) {
+    if (index <= 0) return;
+
+    if (index < texts.length) {
       $("#search").val(texts[--index]);
-      $("#search").select();
+    } else {
+      if ($("#search").val() === "") {
+        if (input === texts[index - 1]) {
+          $("#search").val(texts[--index]);
+        } else {
+          $("#search").val(input);
+        }
+      } else {
+        if (input === texts[index - 1]) {
+          index--;
+        }
+        $("#search").val(texts[--index]);
+      }
     }
+    $("#search").select();
   };
 
   const forwardNextHistory = () => {
     if (index < texts.length - 1) {
       $("#search").val(texts[++index]);
-      $("#search").select();
     } else {
       index = texts.length;
-      $("#search").val("");
+      if ($("#search").val() !== "") {
+        if ($("#search").val() === input) {
+          $("#search").val("")
+        } else {
+          $("#search").val(input);
+        }
+      }
     }
+    $("#search").select();
   };
 
   const saveHistory = async (text) => {
@@ -164,7 +185,7 @@ const main = (port, texts, cain, input, prevText, prevCain) => {
         }
 
         await saveHistory(text);
-        index = texts.length - 1;
+        index = texts.length;
 
         prevText = text;
         prevCain = cain;
@@ -175,12 +196,18 @@ const main = (port, texts, cain, input, prevText, prevCain) => {
           cain: cain,
         });
         break;
-      default:
-        sendMessage({
-          kind: "change",
-          input: $("#search").val(),
-        });
     }
+  });
+
+  $("#search").on("keyup", _ => {
+    if (index !== texts.length || $("#search").val() === "") {
+      return;
+    }
+    input = $("#search").val();
+    sendMessage({
+      kind: "change",
+      input: input,
+    });
   });
 
   $("#prev").on("keydown", (e) => {
@@ -236,7 +263,8 @@ const main = (port, texts, cain, input, prevText, prevCain) => {
   setCain(cain);
 
   if (input === "" || input === texts[texts.length - 1]) {
-    backPrevHistory();
+    input = texts[--index];
+    $("#search").val(input);
   } else {
     $("#search").val(input);
   }
