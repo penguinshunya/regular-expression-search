@@ -171,12 +171,9 @@ const main = (port, texts, cain, input, prevText, prevCain) => {
         }
 
         try {
-          let regex = new RegExp(text);
-          if (regex.test("")) {
-            throw new Error("Invalid regular expression: Match empty string");
-          }
+          new RegExp(text);
         } catch (e) {
-          alert(e.message);
+          $("#search").select();
           return;
         }
 

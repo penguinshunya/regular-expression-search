@@ -54,6 +54,10 @@ chrome.runtime.onConnect.addListener((() => {
     if (result == null) {
       return null;
     }
+    // Avoid infinite loop.
+    if (result.index === regex.lastIndex) {
+      return null;
+    }
 
     const elems = [];
 
