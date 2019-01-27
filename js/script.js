@@ -56,14 +56,12 @@ chrome.runtime.onConnect.addListener((() => {
     }
 
     const elems = [];
-    const range = document.createRange();
 
     while (result.index >= length + texts.search(index).data.length) {
       length += texts.search(index++).data.length;
     }
-    range.setStart(texts.search(index), result.index - length);
     {
-      const latter = range.startContainer.splitText(range.startOffset);
+      const latter = texts.search(index).splitText(result.index - length);
       texts.insert(index + 1, latter);
       length += texts.search(index++).data.length;
     }
@@ -73,9 +71,8 @@ chrome.runtime.onConnect.addListener((() => {
       length += texts.search(index++).data.length;
     }
     elems.push(texts.search(index));
-    range.setEnd(texts.search(index), result.index + result[0].length - length);
     {
-      const latter = range.endContainer.splitText(range.endOffset);
+      const latter = texts.search(index).splitText(result.index + result[0].length - length);
       texts.insert(index + 1, latter);
       length += texts.search(index++).data.length;
     }
