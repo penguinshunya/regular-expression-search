@@ -166,7 +166,7 @@ chrome.runtime.onConnect.addListener((() => {
           process = true;
           current = performance.now();
           backport.postMessage(current);
-          break;
+          return;
         case "prev":
           marker.focusPrev();
           break;
