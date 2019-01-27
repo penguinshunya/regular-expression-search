@@ -142,12 +142,12 @@ const Marker = function() {
     docHeight = $(document).height();
     winHeight = window.innerHeight;
 
-    const {top: btop, height: bheight} = document.body.getBoundingClientRect();
+    const btop = document.body.getBoundingClientRect().top;
 
     for (let i = this._previous; i < this._count; i++) {
       const rect = this._marks[i][0][0].getBoundingClientRect();
       this._tops.push(rect.top - btop);
-      this._heights.push(rect.height - bheight);
+      this._heights.push(rect.height);
     }
     for (let i = this._previous; i < this._count; i++) {
       this._markers.push(makeMarker(this, i));

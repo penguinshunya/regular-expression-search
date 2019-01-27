@@ -93,7 +93,7 @@ chrome.runtime.onConnect.addListener((() => {
 
   const searchNext = (() => {
     let count = 0;
-    let interval = 1;
+    let interval = 5;
     return date => {
       if (current > date) return;
       if (!search) return;
