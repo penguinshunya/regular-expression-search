@@ -25,19 +25,18 @@ chrome.runtime.onConnect.addListener((() => {
   // The smaller the FPS, the quicker the search ends but the page gets stiff.
   let FPS = 60;
   let marker = new Marker();
+  let texts = [];
+  let rects = [];
+  let srch = null;
+  let rect = null;
+  let mark = null;
 
   // search process information
   let search = false;
   let process = false;
-  let regex;
-  let texts;
-  let content;
-  let index = 0;
-  let length = 0;
 
   let port = null;
-  let backport = chrome.runtime.connect();
-  let current = "";
+  let current = 0;
 
   const clearSearchResult = () => {
     marker.clear();
@@ -45,43 +44,11 @@ chrome.runtime.onConnect.addListener((() => {
     cain = false;
     search = false;
     process = false;
-    index = 0;
-    length = 0;
-  };
-
-  const sliceMatchedElems = () => {
-    const result = regex.exec(content);
-    if (result == null) {
-      return null;
-    }
-    // Avoid infinite loop.
-    if (result.index === regex.lastIndex) {
-      return null;
-    }
-
-    const elems = [];
-
-    while (result.index >= length + texts.search(index).data.length) {
-      length += texts.search(index++).data.length;
-    }
-    {
-      const latter = texts.search(index).splitText(result.index - length);
-      texts.insert(index + 1, latter);
-      length += texts.search(index++).data.length;
-    }
-    
-    while (result.index + result[0].length > length + texts.search(index).data.length) {
-      elems.push(texts.search(index));
-      length += texts.search(index++).data.length;
-    }
-    elems.push(texts.search(index));
-    {
-      const latter = texts.search(index).splitText(regex.lastIndex - length);
-      texts.insert(index + 1, latter);
-      length += texts.search(index++).data.length;
-    }
-
-    return elems;
+    texts = [];
+    rects = [];
+    srch = null;
+    rect = null;
+    mark = null;
   };
 
   const postSearchProcess = () => {
@@ -95,36 +62,75 @@ chrome.runtime.onConnect.addListener((() => {
     });
   };
 
-  const searchNext = (() => {
-    let count = 0;
-    let interval = 5;
-    return date => {
-      if (current > date) return;
-      if (!search) return;
-      const start = new Date().getTime();
-      do {
-        const elems = sliceMatchedElems();
-        if (elems === null) {
-          process = false;
-          break;
-        } else {
-          marker.addMarks(elems);
-        }
-      } while (new Date().getTime() - start < 1000 / FPS);
-      if (++count === interval || !process) {
-        marker.addMarkers();
-        count = 0;
+  const searchNext = date => {
+    if (current !== date) return;
+    const start = performance.now();
+    let finished = false;
+    do {
+      const result = srch.next();
+      if (result.done) {
+        finished = true;
+        break;
+      } else {
+        texts.push(result.value);
       }
-      if (process) {
-        backport.postMessage(date);
-      }
-      if (port !== null) {
-        postSearchProcess();
-      }
-    };
-  })(); 
+    } while (performance.now() - start < 1000 / FPS);
+    if (finished) {
+      rect = Rect(texts);
+      window.setTimeout(layoutNext, 0, date);
+    } else {
+      window.setTimeout(searchNext, 0, date);
+    }
+  };
 
-  backport.onMessage.addListener(searchNext);
+  const layoutNext = date => {
+    if (current !== date) return;
+    const start = performance.now();
+    let finished = false;
+    do {
+      const result = rect.next();
+      if (result.done) {
+        finished = true;
+        break;
+      } else {
+        const r = result.value;
+        rects.push({top: r.top, height: r.height});
+      }
+    } while (performance.now() - start < 1000 / FPS);
+    if (finished) {
+      mark = marker.generate(texts, rects);
+      window.setTimeout(markerNext, 0, date);
+    } else {
+      window.setTimeout(layoutNext, 0, date);
+    }
+  };
+
+  const markerNext = date => {
+    if (current !== date) return;
+    const start = performance.now();
+    do {
+      const result = mark.next();
+      if (result.done) {
+        process = false;
+        break;
+      }
+    } while (performance.now() - start < 1000 / FPS);
+    marker.redraw();
+    if (process) {
+      window.setTimeout(markerNext, 0, date);
+    }
+    if (port !== null) {
+      postSearchProcess();
+    }
+  };
+
+  $(window).resize(() => {
+    marker.redraw();
+  });
+
+  $(Marker.canvas).click(e => {
+    marker.select(e.offsetY);
+  });
 
   chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
     if (request.fps == null) return;
@@ -133,18 +139,18 @@ chrome.runtime.onConnect.addListener((() => {
   });
 
   chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
-    if (request.markerColor == null || request.focusedMarkerColor == null) return;
-    Marker.setMarkerColor(request.markerColor);
-    Marker.setFocusedMarkerColor(request.focusedMarkerColor);
+    if (request.mc == null || request.fc == null) return;
+    Marker.setMarkerColor(request.mc);
+    Marker.setFocusedMarkerColor(request.fc);
     sendResponse();
   });
 
   (async () => {
     FPS = await getStorageValue("fps", 60);
-    const markerColor = await getStorageValue("markerColor", "yellow");
-    const focusedMarkerColor = await getStorageValue("focusedMarkerColor", "orange");
-    Marker.setMarkerColor(markerColor, true);
-    Marker.setFocusedMarkerColor(focusedMarkerColor, true);
+    const mc = await getStorageValue("markerColor", "yellow");
+    const fc = await getStorageValue("focusedMarkerColor", "orange");
+    Marker.setMarkerColor(mc, true);
+    Marker.setFocusedMarkerColor(fc, true);
   })();
 
   return p => {
@@ -153,24 +159,25 @@ chrome.runtime.onConnect.addListener((() => {
     });
 
     p.onMessage.addListener(request => {
+      if (request.kind !== "new") return;
+
+      clearSearchResult();
+
+      text = request.text;
+      cain = request.cain;
+
+      srch = Search(text, cain);
+      search = true;
+      process = true;
+      current = performance.now();
+      window.setTimeout(searchNext, 0, current);
+    });
+
+    p.onMessage.addListener(request => {
       switch (request.kind) {
         case "prepare":
           port = p;
           break;
-        case "new":
-          clearSearchResult();
-
-          text = request.text;
-          cain = request.cain;
-
-          regex = new RegExp(text, cain ? "gi" : "g");
-          texts = collectTextElement(document.body);
-          content = collectTextContent(texts);
-          search = true;
-          process = true;
-          current = performance.now();
-          backport.postMessage(current);
-          return;
         case "prev":
           marker.focusPrev();
           break;

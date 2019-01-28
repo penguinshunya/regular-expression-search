@@ -25,15 +25,15 @@ $(async () => {
     $("#color svg").each((_, e) => $(e).removeClass("selected"));
     svg.addClass("selected");
 
-    const markerColor = svg.find("rect:eq(0)").attr("fill");
-    const focusedMarkerColor = svg.find("rect:eq(1)").attr("fill");
+    const mc = svg.find("rect:eq(0)").attr("fill");
+    const fc = svg.find("rect:eq(1)").attr("fill");
     
-    await setStorageValue("markerColor", markerColor);
-    await setStorageValue("focusedMarkerColor", focusedMarkerColor);
+    await setStorageValue("markerColor", mc);
+    await setStorageValue("focusedMarkerColor", fc);
 
     chrome.runtime.sendMessage({
-      markerColor: markerColor,
-      focusedMarkerColor: focusedMarkerColor,
+      mc: mc,
+      fc: fc,
     }, () => {});
   });
 });

@@ -11,13 +11,13 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
 });
 
 chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
-  if (request.markerColor == null || request.focusedMarkerColor == null) return;
+  if (request.mc == null || request.fc == null) return;
 
   chrome.tabs.query({}, (tabs) => {
     tabs.forEach(tab => {
       chrome.tabs.sendMessage(tab.id, {
-        markerColor: request.markerColor,
-        focusedMarkerColor: request.focusedMarkerColor,
+        mc: request.mc,
+        fc: request.fc,
       }, () => {});
     });
   });
