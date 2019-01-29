@@ -20,6 +20,34 @@ $(() => {
 const main = (port, texts, cain, input, prevText, prevCain) => {
   let index = texts.length;
 
+  const Status = {
+    Empty: 1,
+    Invalid: 2,
+    Same: 3,
+    Valid: 4,
+  };
+
+  const verify = () => {
+    const text = $("#search").val();
+    if (text === "") {
+      return { status: Status.Empty };
+    }
+
+    const cain = getCain();
+
+    if (text === prevText && cain === prevCain) {
+      return { status: Status.Same, text: text, cain: cain };
+    }
+    
+    try {
+      new RegExp(text);
+    } catch (e) {
+      return { status: Status.Invalid };
+    }
+
+    return { status: Status.Valid, text: text, cain: cain };
+  };
+
   const movePrevSearchResult = () => {
     port.postMessage({kind: "prev"});
   };
@@ -92,7 +120,7 @@ const main = (port, texts, cain, input, prevText, prevCain) => {
       await setStorageValue("texts", texts);
     }
   };
-  
+
   port.onMessage.addListener((()=> {
     // Only here can change the state of COUNT, PREV, NEXT element.
     // Trigger for change should not be a popup script.
@@ -152,58 +180,52 @@ const main = (port, texts, cain, input, prevText, prevCain) => {
       case "Enter":
         e.preventDefault();
 
-        const text = $("#search").val();
-        if (text === "") {
+        const r = verify();
+
+        if (r.status === Status.Empty) {
           clearSearchResult();
           return;
-        }
-
-        const cain = getCain();
-
-        if (e.shiftKey && text === prevText && cain === prevCain) {
+        } else if (r.status === Status.Same && e.shiftKey) {
           movePrevSearchResult();
-          break;
-        }
-        
-        if (!e.ctrlKey && text === prevText && cain === prevCain) {
+          return;
+        } else if (r.status === Status.Same && !e.ctrlKey) {
           moveNextSearchResult();
           return;
-        }
-
-        try {
-          new RegExp(text);
-        } catch (e) {
+        } else if (r.status === Status.Invalid) {
           $("#search").select();
           return;
         }
 
-        if (e.ctrlKey) {
-          clearSearchResult();
-        }
-
-        await saveHistory(text);
+        await saveHistory(r.text);
         index = texts.length;
 
-        prevText = text;
-        prevCain = cain;
+        prevText = r.text;
+        prevCain = r.cain;
 
         port.postMessage({
           kind: "new",
-          text: text,
-          cain: cain,
+          text: r.text,
+          cain: r.cain,
         });
-        break;
     }
   });
 
   $("#search").on("keyup", _ => {
-    if (index !== texts.length || $("#search").val() === "") {
+    const r = verify();
+    
+    if (r.status === Status.Empty) {
+      clearSearchResult();
+      return;
+    } else if (r.status === Status.Same) {
+      return;
+    } else if (r.status === Status.Invalid) {
       return;
     }
-    input = $("#search").val();
-    sendMessage({
-      kind: "change",
-      input: input,
+
+    port.postMessage({
+      kind: "new",
+      text: r.text,
+      cain: r.cain,
     });
   });
 

@@ -27,9 +27,9 @@ chrome.runtime.onConnect.addListener((() => {
   let marker = new Marker();
   let texts = [];
   let rects = [];
-  let srch = null;
-  let rect = null;
-  let mark = null;
+  let srch = (function*(){})();
+  let rect = (function*(){})();
+  let mark = (function*(){})();
 
   // search process information
   let search = false;
@@ -46,9 +46,9 @@ chrome.runtime.onConnect.addListener((() => {
     process = false;
     texts = [];
     rects = [];
-    srch = null;
-    rect = null;
-    mark = null;
+    srch = (function*(){})();
+    rect = (function*(){})();
+    mark = (function*(){})();
   };
 
   const postSearchProcess = () => {
@@ -126,6 +126,10 @@ chrome.runtime.onConnect.addListener((() => {
 
   $(window).resize(() => {
     marker.redraw();
+  });
+
+  $(Marker.canvas).on("mousemove", e => {
+    marker.changeCursor(e.offsetY);
   });
 
   $(Marker.canvas).click(e => {

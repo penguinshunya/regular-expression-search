@@ -13,7 +13,6 @@ Marker.canvas = $("<canvas>").css({
   padding: 0,
   top: 0,
   right: 0,
-  cursor: "pointer",
 }).appendTo("body")[0];
 Marker.context = Marker.canvas.getContext("2d");
 
@@ -49,6 +48,20 @@ Marker.context = Marker.canvas.getContext("2d");
       return $(node).wrap(mark).parent();
     };
   })();
+
+  const getIndexFromY = (m, y) => {
+    const t = y / Marker.canvas.height;
+
+    for (let i = 0; i < m._count; i++) {
+      const top = m._rects[i].top;
+      const height = m._rects[i].height / Marker.canvas.height;
+
+      if (t >= top && t <= top + height) {
+        return i;
+      }
+    }
+    return -1;
+  };
 
   Marker.setMarkerColor = (mc, immediate = false) => {
     if (immediate) {
@@ -136,18 +149,19 @@ Marker.context = Marker.canvas.getContext("2d");
   };
 
   Marker.prototype.select = function(y) {
-    const t = y / Marker.canvas.height;
+    const i = getIndexFromY(this, y);
+    if (i >= 0) {
+      this._prevx = this._index;
+      this._index = i;
+      this.focus();
+    }
+  };
 
-    for (let i = 0; i < this._count; i++) {
-      const top = this._rects[i].top;
-      const height = this._rects[i].height / Marker.canvas.height;
-
-      if (t >= top && t <= top + height) {
-        this._prevx = this._index;
-        this._index = i;
-        this.focus();
-        return;
-      }
+  Marker.prototype.changeCursor = function(y) {
+    if (getIndexFromY(this, y) >= 0) {
+      $(Marker.canvas).css("cursor", "pointer");
+    } else {
+      $(Marker.canvas).css("cursor", "default");
     }
   };
 
