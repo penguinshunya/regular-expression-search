@@ -3,21 +3,11 @@ let text = "";
 let cain = false;
 
 chrome.runtime.onMessage.addListener((() => {
-  let input = "";
-
-  return (request, _, sendResponse) => {
-    switch (request.kind) {
-      case "page":
-        sendResponse({
-          text: text,
-          cain: cain,
-          input: input,
-        });
-        break;
-      case "change":
-        input = request.input;
-        break;
-    }
+  return (_request, _sender, sendResponse) => {
+    sendResponse({
+      text: text,
+      cain: cain,
+    });
   };
 })());
 
@@ -25,18 +15,13 @@ chrome.runtime.onConnect.addListener((() => {
   // The smaller the FPS, the quicker the search ends but the page gets stiff.
   let FPS = 60;
   let marker = new Marker();
-  let texts = [];
-  let rects = [];
-  let srch = (function*(){})();
-  let rect = (function*(){})();
-  let mark = (function*(){})();
+  let current;
 
   // search process information
   let search = false;
   let process = false;
 
   let port = null;
-  let current = 0;
 
   const clearSearchResult = () => {
     marker.clear();
@@ -44,11 +29,6 @@ chrome.runtime.onConnect.addListener((() => {
     cain = false;
     search = false;
     process = false;
-    texts = [];
-    rects = [];
-    srch = (function*(){})();
-    rect = (function*(){})();
-    mark = (function*(){})();
   };
 
   const postSearchProcess = () => {
@@ -62,66 +42,43 @@ chrome.runtime.onConnect.addListener((() => {
     });
   };
 
-  const searchNext = date => {
-    if (current !== date) return;
-    
-    const start = performance.now();
-    let finished = false;
-    do {
-      const result = srch.next();
-      if (result.done) {
-        finished = true;
-        break;
-      } else {
-        texts.push(result.value);
+  const searching = async date => {
+    const texts = [];
+    const rects = [];
+
+    let now = performance.now();
+
+    for (let t of Search(text, cain)) {
+      texts.push(t);
+
+      if (performance.now() - now > 1000 / FPS) {
+        await sleep(0);
+        if (current !== date) return;
+        now = performance.now();
       }
-    } while (performance.now() - start < 1000 / FPS);
-    if (finished) {
-      rect = Rect(texts);
-      window.setTimeout(layoutNext, 0, date);
-    } else {
-      window.setTimeout(searchNext, 0, date);
     }
-  };
+    for (let r of Rect(texts)) {
+      rects.push({top: r.top, height: r.height});
 
-  const layoutNext = date => {
-    if (current !== date) return;
-
-    const start = performance.now();
-    let finished = false;
-    do {
-      const result = rect.next();
-      if (result.done) {
-        finished = true;
-        break;
-      } else {
-        const r = result.value;
-        rects.push({top: r.top, height: r.height});
+      if (performance.now() - now > 1000 / FPS) {
+        await sleep(0);
+        if (current !== date) return;
+        now = performance.now();
       }
-    } while (performance.now() - start < 1000 / FPS);
-    if (finished) {
-      mark = marker.generate(texts, rects);
-      window.setTimeout(markerNext, 0, date);
-    } else {
-      window.setTimeout(layoutNext, 0, date);
     }
-  };
-
-  const markerNext = date => {
-    if (current !== date) return;
-
-    const start = performance.now();
-    do {
-      const result = mark.next();
-      if (result.done) {
-        process = false;
-        break;
+    for (let _ of marker.generate(texts, rects)) {
+      if (performance.now() - now > 1000 / FPS) {
+        marker.redraw();
+        if (port !== null) {
+          postSearchProcess();
+        }
+        await sleep(0);
+        if (current !== date) return;
+        now = performance.now();
       }
-    } while (performance.now() - start < 1000 / FPS);
+    }
+    process = false;
     marker.redraw();
-    if (process) {
-      window.setTimeout(markerNext, 0, date);
-    }
     if (port !== null) {
       postSearchProcess();
     }
@@ -173,11 +130,11 @@ chrome.runtime.onConnect.addListener((() => {
       text = request.text;
       cain = request.cain;
 
-      srch = Search(text, cain);
       search = true;
       process = true;
       current = performance.now();
-      window.setTimeout(searchNext, 0, current);
+
+      searching(current);
     });
 
     p.onMessage.addListener(request => {

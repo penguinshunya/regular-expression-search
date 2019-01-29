@@ -1,4 +1,4 @@
-const Search = function*(text, cain) {
+const Search = function* (text, cain) {
   const r = new RegExp(text, cain ? "gi" : "g");
   const t = collectTextElement(document.body);
   const c = collectTextContent(t);
@@ -31,10 +31,10 @@ const Search = function*(text, cain) {
   }
 };
 
-const Rect = function*(texts) {
+const Rect = function* (texts) {
   const r = document.createRange();
-  for (let i = 0; i < texts.length; i++) {
-    r.selectNodeContents(texts[i][0]);
+  for (let nodes of texts) {
+    r.selectNodeContents(nodes[0]);
     const rect = r.getBoundingClientRect();
     yield {top: rect.top, height: rect.height};
   }

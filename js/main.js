@@ -10,7 +10,7 @@ $(() => {
 
     const page = (await sendMessage({kind: "page"}));
   
-    main(port, texts, cain, page.input, page.text, page.cain);
+    main(port, texts, cain, page.text, page.text, page.cain);
 
     // If have searched in this page, display count.
     port.postMessage({kind: "prepare"});
@@ -167,7 +167,7 @@ const main = (port, texts, cain, input, prevText, prevCain) => {
     $(this).select();
   });
 
-  $("#search").on("keydown", async (e) => {
+  $("#search").on("keydown", e => {
     switch (e.key) {
       case "ArrowUp":
         e.preventDefault();
@@ -177,37 +177,42 @@ const main = (port, texts, cain, input, prevText, prevCain) => {
         e.preventDefault();
         forwardNextHistory();
         break;
-      case "Enter":
-        e.preventDefault();
-
-        const r = verify();
-
-        if (r.status === Status.Empty) {
-          clearSearchResult();
-          return;
-        } else if (r.status === Status.Same && e.shiftKey) {
-          movePrevSearchResult();
-          return;
-        } else if (r.status === Status.Same && !e.ctrlKey) {
-          moveNextSearchResult();
-          return;
-        } else if (r.status === Status.Invalid) {
-          $("#search").select();
-          return;
-        }
-
-        await saveHistory(r.text);
-        index = texts.length;
-
-        prevText = r.text;
-        prevCain = r.cain;
-
-        port.postMessage({
-          kind: "new",
-          text: r.text,
-          cain: r.cain,
-        });
     }
+  });
+
+  $("#search").on("keydown", e => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+
+    const r = verify();
+
+    if (r.status === Status.Empty) {
+      clearSearchResult();
+      return;
+    } else if (r.status === Status.Same && e.shiftKey) {
+      movePrevSearchResult();
+      return;
+    } else if (r.status === Status.Same && !e.ctrlKey) {
+      moveNextSearchResult();
+      return;
+    } else if (r.status === Status.Invalid) {
+      $("#search").select();
+      return;
+    }
+
+    (async () => {
+      await saveHistory(r.text);
+      index = texts.length;
+  
+      prevText = r.text;
+      prevCain = r.cain;
+  
+      port.postMessage({
+        kind: "new",
+        text: r.text,
+        cain: r.cain,
+      });
+    })();
   });
 
   $("#search").on("keyup", _ => {
@@ -222,6 +227,9 @@ const main = (port, texts, cain, input, prevText, prevCain) => {
       return;
     }
 
+    prevText = r.text;
+    prevCain = r.cain;
+
     port.postMessage({
       kind: "new",
       text: r.text,
@@ -229,51 +237,51 @@ const main = (port, texts, cain, input, prevText, prevCain) => {
     });
   });
 
-  $("#prev").on("keydown", (e) => {
+  $("#prev").on("keydown", e => {
     if (e.key !== "Enter" && e.key !== " ") return;
     e.preventDefault();
     movePrevSearchResult();
   });
   
-  $("#prev").on("click", (e) => {
+  $("#prev").on("click", e => {
     e.preventDefault();
     movePrevSearchResult();
   });
 
-  $("#next").on("keydown", (e) => {
+  $("#next").on("keydown", e => {
     if (e.key !== "Enter" && e.key !== " ") return;
     e.preventDefault();
     moveNextSearchResult();
   });
 
-  $("#next").on("click", (e) => {
+  $("#next").on("click", e => {
     e.preventDefault();
     moveNextSearchResult();
   });
 
-  $("#cain").on("keydown", async (e) => {
+  $("#cain").on("keydown", e => {
     if (e.key !== "Enter" && e.key !== " ") return;
     e.preventDefault();
     const ci = !getCain();
     setCain(ci);
-    await saveCain(ci);
+    saveCain(ci);
   });
 
-  $("#cain").on("click", async (e) => {
+  $("#cain").on("click", e => {
     e.preventDefault();
     const ci = !getCain();
     setCain(ci);
-    await saveCain(ci);
+    saveCain(ci);
   });
 
-  $("#close").on("keydown", (e) => {
+  $("#close").on("keydown", e => {
     if (e.key !== "Enter" && e.key !== " ") return;
     e.preventDefault();
     clearSearchResult();
     window.close();
   });
 
-  $("#close").on("click", (e) => {
+  $("#close").on("click", e => {
     e.preventDefault();
     clearSearchResult();
     window.close();
@@ -290,7 +298,7 @@ const main = (port, texts, cain, input, prevText, prevCain) => {
   $("#search").focus();
 };
 
-const sendMessage = async (params) => {
+const sendMessage = async params => {
   const promise = new Promise(resolve => {
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
       chrome.tabs.sendMessage(tabs[0].id, params, (response) => {

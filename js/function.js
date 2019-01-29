@@ -1,3 +1,9 @@
+const sleep = async msec => {
+  return new Promise(resolve => {
+    window.setTimeout(resolve, msec);
+  });
+};
+
 const getStorageValue = async (key, defaultValue) => {
   const promise = new Promise(resolve => {
     const param = {};

@@ -14,6 +14,8 @@ Marker.canvas = $("<canvas>").css({
   top: 0,
   right: 0,
 }).appendTo("body")[0];
+Marker.canvas.width = 0;
+Marker.canvas.height = 0;
 Marker.context = Marker.canvas.getContext("2d");
 
 {
@@ -196,6 +198,7 @@ Marker.context = Marker.canvas.getContext("2d");
     this._index = -1;
     markerColor = nextMarkerColor;
     focusedMarkerColor = nextFocusedMarkerColor;
-    this.redraw();
+    Marker.canvas.width = 0;
+    Marker.canvas.height = 0;
   };
 }
