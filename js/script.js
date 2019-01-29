@@ -64,6 +64,7 @@ chrome.runtime.onConnect.addListener((() => {
 
   const searchNext = date => {
     if (current !== date) return;
+    
     const start = performance.now();
     let finished = false;
     do {
@@ -85,6 +86,7 @@ chrome.runtime.onConnect.addListener((() => {
 
   const layoutNext = date => {
     if (current !== date) return;
+
     const start = performance.now();
     let finished = false;
     do {
@@ -107,6 +109,7 @@ chrome.runtime.onConnect.addListener((() => {
 
   const markerNext = date => {
     if (current !== date) return;
+
     const start = performance.now();
     do {
       const result = mark.next();
@@ -178,6 +181,8 @@ chrome.runtime.onConnect.addListener((() => {
     });
 
     p.onMessage.addListener(request => {
+      if (request.kind === "new") return;
+
       switch (request.kind) {
         case "prepare":
           port = p;
