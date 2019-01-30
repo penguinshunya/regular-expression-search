@@ -7,34 +7,30 @@
 }
 #search_wrapper {
     display: flex;
-    width: 300px;
+    align-items: center;
+    width: 480px;
+    font-size: 0.8em;
 }
 #search {
     font-family: 'Courier New', Courier, monospace;
-    font-size: 0.8em;
-    padding: 0.5em 1em;
+    margin-left: 1em;
     border: 0;
     width: 100%;
 }
 #count {
-    margin: 0.5em 2em 0 0;
-    font-size: 0.8em;
+    margin-right: 1.2em;
     text-align: right;
     white-space: nowrap;
 }
 #count.spinner-border {
-    margin: 0.37em 1em 0 0;
-    font-size: 1.5em;
-    color: #dddddd;
+    width: 1.4rem;
+    color: #aaaaaa;
 }
 #cain {
     font-family: 'Courier New', Courier, monospace;
-    margin: 0.5em;
-    padding: 0.5em;
-    font-size: 0.5em;
-    width: 2.5em;
-    height: 2.5em;
-    text-align: center;
+    margin: 0.5em 0.6em;
+    padding: 0.5em 0.9em;
+    font-size: 0.7em;
     cursor: pointer;
 }
 #cain:focus {
@@ -51,13 +47,10 @@
 }
 .chevron {
     margin: 0.5em;
-    padding: 0.5em;
+    padding: 0.5em 0.8em;
     border: none;
     background-color: inherit;
     font-size: 0.5em;
-    width: 2.5em;
-    height: 2.5em;
-    text-align: center;
     cursor: pointer;
 }
 .chevron:disabled {
