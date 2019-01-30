@@ -87,10 +87,6 @@ Marker.context = Marker.canvas.getContext("2d");
     return this._index;
   };
 
-  Marker.prototype.count = function() {
-    return this._count;
-  };
-
   Marker.prototype.focusMark = function() {
     if (this._prevx < 0) this._prevx = this._index;
 
