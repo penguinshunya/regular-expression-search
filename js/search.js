@@ -1,6 +1,9 @@
 const Search = function* (text, cain) {
   const r = new RegExp(text, cain ? "gi" : "g");
-  const t = collectTextElement(document.body);
+  const t = new Treap();
+  for (const text of collectTextElement(document.body)) {
+    t.push(text);
+  }
   const c = collectTextContent(t);
   let a;
   let i = 0, l = 0;
@@ -18,7 +21,7 @@ const Search = function* (text, cain) {
     }
     t.insert(i + 1, t.search(i).splitText(a.index - l));
     l += t.search(i++).data.length;
-    
+
     while (a.index + a[0].length > l + t.search(i).data.length) {
       texts.push(t.search(i));
       l += t.search(i++).data.length;

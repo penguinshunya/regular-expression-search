@@ -38,7 +38,7 @@ Marker.context = Marker.canvas.getContext("2d");
         m.focus();
       };
     };
-  
+
     return (m, node, index) => {
       const mark = origin.clone();
       mark.data("index", index);
@@ -113,7 +113,7 @@ Marker.context = Marker.canvas.getContext("2d");
 
     Marker.canvas.width = 16;
     Marker.canvas.height = window.innerHeight;
-    
+
     for (const r of this._rects) {
       Marker.context.rect(0, r.top * Marker.canvas.height, 16, r.height);
     }
@@ -144,7 +144,7 @@ Marker.context = Marker.canvas.getContext("2d");
 
   Marker.prototype.focusNext = function() {
     if (this._count === 0) return;
-    
+
     this._prevx = this._index;
     this._index = this._index < 0 ? 0 : (this._index + 1) % this._count;
     this.focus();
@@ -182,7 +182,7 @@ Marker.context = Marker.canvas.getContext("2d");
       yield;
     }
   };
-  
+
   Marker.prototype.clear = function() {
     this._marks.forEach(mark => {
       mark.forEach(m => {

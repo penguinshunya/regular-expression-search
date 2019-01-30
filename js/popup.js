@@ -3,13 +3,14 @@ $(() => {
   // it may make strange movements.
   chrome.tabs.query({active: true, currentWindow: true}, tabs => {
     const port  = chrome.tabs.connect(tabs[0].id);
+    port.onDisconnect.addListener(window.close.bind(window));
 
     (async () => {
       const texts = await getStorageValue("texts", []);
       const cain  = await getStorageValue("cain", false);
-  
+
       main(port, texts, cain);
-  
+
       // If have searched in this page, display count.
       port.postMessage({kind: "init"});
     })();
@@ -42,7 +43,7 @@ const main = (port, texts, cain) => {
     if (text === prevText && cain === prevCain) {
       return { status: Status.Same, text: text, cain: cain };
     }
-    
+
     try {
       new RegExp(text);
     } catch (e) {
@@ -68,11 +69,11 @@ const main = (port, texts, cain) => {
   const getCain = () => {
     return $("#cain")[0].dataset.select === "true";
   };
-  
+
   const setCain = ci => {
     $("#cain")[0].dataset.select = ci ? "true" : "false";
   };
-  
+
   const saveCain = async ci => {
     await setStorageValue("cain", ci);
   };
@@ -124,7 +125,7 @@ const main = (port, texts, cain) => {
 
   const searchWithoutSaving = () => {
     const r = verify();
-    
+
     if (r.status === Status.Empty) {
       clearSearchResult();
       return;
@@ -194,10 +195,6 @@ const main = (port, texts, cain) => {
     };
   })());
 
-  port.onDisconnect.addListener(() => {
-    window.close();
-  });
-
   $("#search").focus(function() {
     $(this).select();
   });
@@ -228,7 +225,7 @@ const main = (port, texts, cain) => {
       $("#search").select();
       return;
     }
-    
+
     if (!e.ctrlKey) {
       if (e.shiftKey) {
         movePrevSearchResult();
@@ -243,10 +240,10 @@ const main = (port, texts, cain) => {
 
     (async () => {
       await saveHistory(r.text);
-  
+
       prevText = r.text;
       prevCain = r.cain;
-  
+
       port.postMessage({
         kind: "new",
         text: r.text,
@@ -284,7 +281,7 @@ const main = (port, texts, cain) => {
     e.preventDefault();
     movePrevSearchResult();
   });
-  
+
   $("#prev").on("click", e => {
     e.preventDefault();
     movePrevSearchResult();
