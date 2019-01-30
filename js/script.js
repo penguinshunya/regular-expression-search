@@ -45,26 +45,26 @@ chrome.runtime.onConnect.addListener((() => {
     const texts = [];
     const rects = [];
 
-    let now = performance.now();
+    let now = new Date().getTime();
 
     for (let t of Search(text, cain)) {
       texts.push(t);
 
-      if (performance.now() - now > 1000 / FPS) {
+      if (new Date().getTime() - now > 1000 / FPS) {
         await sleep(0);
         if (current !== date) return;
         if (process !== Process.Prepare) return;
-        now = performance.now();
+        now = new Date().getTime();
       }
     }
     for (let r of Rect(texts)) {
       rects.push({top: r.top, height: r.height});
 
-      if (performance.now() - now > 1000 / FPS) {
+      if (new Date().getTime() - now > 1000 / FPS) {
         await sleep(0);
         if (current !== date) return;
         if (process !== Process.Prepare) return;
-        now = performance.now();
+        now = new Date().getTime();
       }
     }
     count = texts.length;
@@ -73,12 +73,12 @@ chrome.runtime.onConnect.addListener((() => {
       postSearchProcess();
     }
     for (let _n of marker.generate(_.zip(texts, rects))) {
-      if (performance.now() - now > 1000 / FPS) {
+      if (new Date().getTime() - now > 1000 / FPS) {
         marker.redraw();
         await sleep(0);
         if (current !== date) return;
         if (process !== Process.Searching) return;
-        now = performance.now();
+        now = new Date().getTime();
       }
     }
     marker.redraw();
