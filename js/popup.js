@@ -113,7 +113,6 @@ const main = (port, texts, cain) => {
     if (text !== "") {
       history.push("");
     }
-    $("#search").val(history[index]);
   };
 
   const saveTempHistory = () => {
@@ -182,9 +181,13 @@ const main = (port, texts, cain) => {
           prevCain = response.cain;
           break;
         default:
+          prevText = response.text == null ? "" : response.text;
+          prevCain = response.cain == null ? cain : response.cain;
+
           initTempHistory(response.text);
+          $("#search").val(history[index]);
           $("#search").focus();
-          setCain(response.cain == null ? cain : response.cain);
+          setCain(prevCain);
           port.postMessage({kind: "prepare"});
       }
     };
