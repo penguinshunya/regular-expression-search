@@ -111,6 +111,7 @@ chrome.runtime.onConnect.addListener((() => {
   return p => {
     p.onDisconnect.addListener(() => {
       (async () => {
+        if (text == null || text === "") return;
         const texts = await getStorageValue("texts", []);
         if (texts[texts.length - 1] !== text) {
           texts.push(text);
