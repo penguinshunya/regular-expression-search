@@ -110,6 +110,14 @@ chrome.runtime.onConnect.addListener((() => {
 
   return p => {
     p.onDisconnect.addListener(() => {
+      (async () => {
+        const texts = await getStorageValue("texts", []);
+        if (texts[texts.length - 1] !== text) {
+          texts.push(text);
+          while (texts.length > 1000) texts.shift();
+          await setStorageValue("texts", texts);
+        }
+      })();
       port = null;
     });
 
