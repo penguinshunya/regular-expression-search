@@ -13,12 +13,13 @@ chrome.runtime.onMessage.addListener((() => {
 
 chrome.runtime.onConnect.addListener((() => {
   // The smaller the FPS, the quicker the search ends but the page gets stiff.
-  let FPS = 60;
+  let FPS = 30;
   let marker = new Marker();
   let current;
 
   // search process information
   let process = Process.DoNothing;
+  let count = 0;
 
   let port = null;
 
@@ -26,6 +27,7 @@ chrome.runtime.onConnect.addListener((() => {
     marker.clear();
     text = "";
     cain = false;
+    count = 0;
     process = Process.DoNothing;
   };
 
@@ -35,7 +37,7 @@ chrome.runtime.onConnect.addListener((() => {
       text: text,
       cain: cain,
       index: marker.index() + 1,
-      count: marker.count(),
+      count: count,
     });
   };
 
@@ -51,6 +53,7 @@ chrome.runtime.onConnect.addListener((() => {
       if (performance.now() - now > 1000 / FPS) {
         await sleep(0);
         if (current !== date) return;
+        if (process !== Process.Prepare) return;
         now = performance.now();
       }
     }
@@ -60,25 +63,26 @@ chrome.runtime.onConnect.addListener((() => {
       if (performance.now() - now > 1000 / FPS) {
         await sleep(0);
         if (current !== date) return;
+        if (process !== Process.Prepare) return;
         now = performance.now();
       }
+    }
+    count = texts.length;
+    process = Process.Searching;
+    if (port !== null) {
+      postSearchProcess();
     }
     for (let _n of marker.generate(_.zip(texts, rects))) {
       if (performance.now() - now > 1000 / FPS) {
         marker.redraw();
-        if (port !== null) {
-          postSearchProcess();
-        }
         await sleep(0);
         if (current !== date) return;
+        if (process !== Process.Searching) return;
         now = performance.now();
       }
     }
     marker.redraw();
     process = Process.Finish;
-    if (port !== null) {
-      postSearchProcess();
-    }
   };
 
   $(window).resize(() => {
@@ -95,12 +99,6 @@ chrome.runtime.onConnect.addListener((() => {
   });
 
   chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
-    if (request.fps == null) return;
-    FPS = request.fps;
-    sendResponse();
-  });
-
-  chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
     if (request.mc == null || request.fc == null) return;
     Marker.setMarkerColor(request.mc);
     Marker.setFocusedMarkerColor(request.fc);
@@ -108,7 +106,6 @@ chrome.runtime.onConnect.addListener((() => {
   });
 
   (async () => {
-    FPS = await getStorageValue("fps", 60);
     const mc = await getStorageValue("markerColor", "yellow");
     const fc = await getStorageValue("focusedMarkerColor", "orange");
     Marker.setMarkerColor(mc, true);
@@ -128,7 +125,11 @@ chrome.runtime.onConnect.addListener((() => {
       text = request.text;
       cain = request.cain;
 
-      process = Process.Searching;
+      process = Process.Prepare;
+      if (port !== null) {
+        postSearchProcess();
+      }
+
       current = new Date();
 
       // Asynchronous search.

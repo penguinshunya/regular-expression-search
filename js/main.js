@@ -19,6 +19,7 @@ $(() => {
 
 const main = (port, texts, cain, input, prevText, prevCain) => {
   let index = texts.length;
+  const spinner = "spinner-border spinner-border-sm";
 
   const Status = {
     Empty: 1,
@@ -121,9 +122,29 @@ const main = (port, texts, cain, input, prevText, prevCain) => {
     }
   };
 
+  const searchWithoutSaving = () => {
+    const r = verify();
+    
+    if (r.status === Status.Empty) {
+      clearSearchResult();
+      return;
+    } else if (r.status === Status.Same) {
+      return;
+    } else if (r.status === Status.Invalid) {
+      return;
+    }
+
+    prevText = r.text;
+    prevCain = r.cain;
+
+    port.postMessage({
+      kind: "new",
+      text: r.text,
+      cain: r.cain,
+    });
+  };
+
   port.onMessage.addListener((()=> {
-    // Only here can change the state of COUNT, PREV, NEXT element.
-    // Trigger for change should not be a popup script.
     const modifyCount = (index, count) => {
       if (index === 0) {
         $("#count").text(count);
@@ -141,13 +162,20 @@ const main = (port, texts, cain, input, prevText, prevCain) => {
       switch (response.process) {
         case Process.DoNothing:
           $("#count").text("");
+          $("#count").removeClass(spinner);
           changeButtonStatus(false);
           break;
+        case Process.Prepare:
+          $("#count").text("");
+          $("#count").addClass(spinner);
+          break;
         case Process.Searching:
+          $("#count").removeClass(spinner);
           modifyCount(response.index, response.count);
           changeButtonStatus(true);
           break;
         case Process.Finish:
+          $("#count").removeClass(spinner);
           modifyCount(response.index, response.count);
           prevText = response.text;
           prevCain = response.cain;
@@ -215,26 +243,27 @@ const main = (port, texts, cain, input, prevText, prevCain) => {
     })();
   });
 
-  $("#search").on("keyup", _ => {
-    const r = verify();
-    
-    if (r.status === Status.Empty) {
-      clearSearchResult();
-      return;
-    } else if (r.status === Status.Same) {
-      return;
-    } else if (r.status === Status.Invalid) {
-      return;
-    }
+  $("#search").on("keyup", e => {
+    if (e.key === "Enter") return;
+    e.preventDefault();
+    searchWithoutSaving();
+  });
 
-    prevText = r.text;
-    prevCain = r.cain;
+  $("#cain").on("keydown", e => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    e.preventDefault();
+    const ci = !getCain();
+    setCain(ci);
+    saveCain(ci);
+    searchWithoutSaving();
+  });
 
-    port.postMessage({
-      kind: "new",
-      text: r.text,
-      cain: r.cain,
-    });
+  $("#cain").on("click", e => {
+    e.preventDefault();
+    const ci = !getCain();
+    setCain(ci);
+    saveCain(ci);
+    searchWithoutSaving();
   });
 
   $("#prev").on("keydown", e => {
@@ -259,21 +288,6 @@ const main = (port, texts, cain, input, prevText, prevCain) => {
     moveNextSearchResult();
   });
 
-  $("#cain").on("keydown", e => {
-    if (e.key !== "Enter" && e.key !== " ") return;
-    e.preventDefault();
-    const ci = !getCain();
-    setCain(ci);
-    saveCain(ci);
-  });
-
-  $("#cain").on("click", e => {
-    e.preventDefault();
-    const ci = !getCain();
-    setCain(ci);
-    saveCain(ci);
-  });
-
   $("#close").on("keydown", e => {
     if (e.key !== "Enter" && e.key !== " ") return;
     e.preventDefault();
@@ -296,15 +310,5 @@ const main = (port, texts, cain, input, prevText, prevCain) => {
     $("#search").val(input);
   }
   $("#search").focus();
-};
-
-const sendMessage = async params => {
-  const promise = new Promise(resolve => {
-    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-      chrome.tabs.sendMessage(tabs[0].id, params, (response) => {
-        resolve(response);
-      });
-    });
-  });
-  return promise;
+  searchWithoutSaving();
 };

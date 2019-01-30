@@ -27,6 +27,17 @@ const setStorageValue = async (key, value, callback = () => {}) => {
   return promise;
 };
 
+const sendMessage = async params => {
+  const promise = new Promise(resolve => {
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+      chrome.tabs.sendMessage(tabs[0].id, params, (response) => {
+        resolve(response);
+      });
+    });
+  });
+  return promise;
+};
+
 const collectTextElement = (() => {
   const exclusions = [
     "script",

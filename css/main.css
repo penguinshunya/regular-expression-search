@@ -17,10 +17,15 @@
     width: 100%;
 }
 #count {
-    padding: 0.5em 2em 0 0;
+    margin: 0.5em 2em 0 0;
     font-size: 0.8em;
     text-align: right;
     white-space: nowrap;
+}
+#count.spinner-border {
+    margin: 0.37em 1em 0 0;
+    font-size: 1.5em;
+    color: #dddddd;
 }
 #cain {
     font-family: 'Courier New', Courier, monospace;
