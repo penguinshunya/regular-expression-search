@@ -1,24 +1,27 @@
 $(() => {
   // use async function. return value is promise.
   // it may make strange movements.
-  chrome.tabs.query({active: true, currentWindow: true}, async (tabs) => {
+  chrome.tabs.query({active: true, currentWindow: true}, tabs => {
     const port  = chrome.tabs.connect(tabs[0].id);
-    port.onDisconnect.addListener(window.close);
 
-    const texts = await getStorageValue("texts", []);
-    const cain  = await getStorageValue("cain", false);
-
-    const page = (await sendMessage({kind: "page"}));
+    (async () => {
+      const texts = await getStorageValue("texts", []);
+      const cain  = await getStorageValue("cain", false);
   
-    main(port, texts, cain, page.text, page.text, page.cain);
-
-    // If have searched in this page, display count.
-    port.postMessage({kind: "prepare"});
+      main(port, texts, cain);
+  
+      // If have searched in this page, display count.
+      port.postMessage({kind: "init"});
+    })();
   });
 });
 
-const main = (port, texts, cain, input, prevText, prevCain) => {
-  let index = texts.length;
+const main = (port, texts, cain) => {
+  let history;
+  let index;
+  let prevText;
+  let prevCain;
+
   const spinner = "spinner-border spinner-border-sm";
 
   const Status = {
@@ -60,65 +63,63 @@ const main = (port, texts, cain, input, prevText, prevCain) => {
   const clearSearchResult = () => {
     port.postMessage({kind: "close"});
     prevText = "";
-    index = texts.length;
   };
 
   const getCain = () => {
     return $("#cain")[0].dataset.select === "true";
   };
   
-  const setCain = (ci) => {
+  const setCain = ci => {
     $("#cain")[0].dataset.select = ci ? "true" : "false";
   };
   
-  const saveCain = async (ci) => {
+  const saveCain = async ci => {
     await setStorageValue("cain", ci);
   };
 
   const backPrevHistory = () => {
-    if (index <= 0) return;
-
-    if (index < texts.length) {
-      $("#search").val(texts[--index]);
-    } else {
-      if ($("#search").val() === "") {
-        if (input === texts[index - 1]) {
-          $("#search").val(texts[--index]);
-        } else {
-          $("#search").val(input);
-        }
-      } else {
-        if (input === texts[index - 1]) {
-          index--;
-        }
-        $("#search").val(texts[--index]);
-      }
+    if (index > 0) {
+      $("#search").val(history[--index]);
     }
     $("#search").select();
   };
 
   const forwardNextHistory = () => {
-    if (index < texts.length - 1) {
-      $("#search").val(texts[++index]);
-    } else {
-      index = texts.length;
-      if ($("#search").val() !== "") {
-        if ($("#search").val() === input) {
-          $("#search").val("")
-        } else {
-          $("#search").val(input);
-        }
-      }
+    if (index < history.length - 1) {
+      $("#search").val(history[++index]);
     }
     $("#search").select();
   };
 
-  const saveHistory = async (text) => {
+  const saveHistory = async text => {
     // If it is a same as last search text, don't save.
     if (texts[texts.length - 1] !== text) {
       texts.push(text);
       while (texts.length > 1000) texts.shift();
       await setStorageValue("texts", texts);
+    }
+  };
+
+  const initTempHistory = text => {
+    history = texts.map(t => t);
+    if (text != null && history.length > 0 && history[history.length - 1] !== text) {
+      history.push(text);
+    }
+    if (history.length === 0) {
+      index = 0;
+    } else {
+      index = history.length - 1;
+    }
+    if (text !== "") {
+      history.push("");
+    }
+    $("#search").val(history[index]);
+  };
+
+  const saveTempHistory = () => {
+    history[index] = $("#search").val();
+    if (history[index] !== "" && index === history.length - 1) {
+      history.push("");
     }
   };
 
@@ -144,16 +145,16 @@ const main = (port, texts, cain, input, prevText, prevCain) => {
     });
   };
 
-  port.onMessage.addListener((()=> {
+  port.onMessage.addListener((() => {
     const modifyCount = (index, count) => {
       if (index === 0) {
         $("#count").text(count);
       } else {
-        $("#count").text(index + " / " + count);
+        $("#count").text(`${index} / ${count}`);
       }
     };
 
-    const changeButtonStatus = (enabled) => {
+    const changeButtonStatus = enabled => {
       $("#prev").prop("disabled", !enabled);
       $("#next").prop("disabled", !enabled);
     };
@@ -165,11 +166,11 @@ const main = (port, texts, cain, input, prevText, prevCain) => {
           $("#count").removeClass(spinner);
           changeButtonStatus(false);
           break;
-        case Process.Prepare:
+        case Process.Searching:
           $("#count").text("");
           $("#count").addClass(spinner);
           break;
-        case Process.Searching:
+        case Process.Marking:
           $("#count").removeClass(spinner);
           modifyCount(response.index, response.count);
           changeButtonStatus(true);
@@ -180,9 +181,18 @@ const main = (port, texts, cain, input, prevText, prevCain) => {
           prevText = response.text;
           prevCain = response.cain;
           break;
+        default:
+          initTempHistory(response.text);
+          $("#search").focus();
+          setCain(response.cain == null ? cain : response.cain);
+          port.postMessage({kind: "prepare"});
       }
     };
   })());
+
+  port.onDisconnect.addListener(() => {
+    window.close();
+  });
 
   $("#search").focus(function() {
     $(this).select();
@@ -223,14 +233,12 @@ const main = (port, texts, cain, input, prevText, prevCain) => {
       }
       (async () => {
         await saveHistory(r.text);
-        index = texts.length;
       })();
       return;
     }
 
     (async () => {
       await saveHistory(r.text);
-      index = texts.length;
   
       prevText = r.text;
       prevCain = r.cain;
@@ -246,6 +254,7 @@ const main = (port, texts, cain, input, prevText, prevCain) => {
   $("#search").on("keyup", e => {
     if (e.key === "Enter") return;
     e.preventDefault();
+    saveTempHistory();
     searchWithoutSaving();
   });
 
@@ -300,15 +309,4 @@ const main = (port, texts, cain, input, prevText, prevCain) => {
     clearSearchResult();
     window.close();
   });
-
-  setCain(cain);
-
-  if (input === "" || input === texts[texts.length - 1]) {
-    input = texts[--index];
-    $("#search").val(input);
-  } else {
-    $("#search").val(input);
-  }
-  $("#search").focus();
-  searchWithoutSaving();
 };

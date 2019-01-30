@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name" : "Regular Expression Search",
   "short_name": "regex search",
-  "version" : "2.0.0.0",
+  "version" : "2.0.1.0",
   "description" : "search using regular expression on chrome extension",
   "commands": {
     "_execute_browser_action": {
@@ -19,10 +19,10 @@
     {
       "matches": ["<all_urls>"],
       "js": [
-        "js/treap.js",
-        "js/function.js",
-        "js/underscore-min.js",
-        "js/jquery.min.js",
+        "lib/js/jquery.min.js",
+        "lib/js/underscore-min.js",
+        "lib/js/treap.js",
+        "lib/js/function.js",
         "js/marker.js",
         "js/process.js",
         "js/search.js",

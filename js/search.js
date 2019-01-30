@@ -31,7 +31,7 @@ const Search = function* (text, cain) {
   }
 };
 
-const Rect = function* (texts) {
+const Layout = function* (texts) {
   const r = document.createRange();
   for (let nodes of texts) {
     r.selectNodeContents(nodes[0]);

@@ -1,21 +1,12 @@
-// search information
-let text = "";
-let cain = false;
-
-chrome.runtime.onMessage.addListener((() => {
-  return (_request, _sender, sendResponse) => {
-    sendResponse({
-      text: text,
-      cain: cain,
-    });
-  };
-})());
-
 chrome.runtime.onConnect.addListener((() => {
   // The smaller the FPS, the quicker the search ends but the page gets stiff.
-  let FPS = 30;
+  let FPS = 60;
   let marker = new Marker();
   let current;
+
+  // search information
+  let text = null;
+  let cain = null;
 
   // search process information
   let process = Process.DoNothing;
@@ -26,7 +17,7 @@ chrome.runtime.onConnect.addListener((() => {
   const clearSearchResult = () => {
     marker.clear();
     text = "";
-    cain = false;
+    cain = null;
     count = 0;
     process = Process.DoNothing;
   };
@@ -45,39 +36,44 @@ chrome.runtime.onConnect.addListener((() => {
     const texts = [];
     const rects = [];
 
+    process = Process.Searching;
+    if (port !== null) {
+      postSearchProcess();
+    }
+
     let now = new Date().getTime();
 
-    for (let t of Search(text, cain)) {
+    for (const t of Search(text, cain)) {
       texts.push(t);
 
       if (new Date().getTime() - now > 1000 / FPS) {
         await sleep(0);
         if (current !== date) return;
-        if (process !== Process.Prepare) return;
+        if (process !== Process.Searching) return;
         now = new Date().getTime();
       }
     }
-    for (let r of Rect(texts)) {
-      rects.push({top: r.top, height: r.height});
+    for (const r of Layout(texts)) {
+      rects.push(r);
 
       if (new Date().getTime() - now > 1000 / FPS) {
         await sleep(0);
         if (current !== date) return;
-        if (process !== Process.Prepare) return;
+        if (process !== Process.Searching) return;
         now = new Date().getTime();
       }
     }
     count = texts.length;
-    process = Process.Searching;
+    process = Process.Marking;
     if (port !== null) {
       postSearchProcess();
     }
-    for (let _n of marker.generate(_.zip(texts, rects))) {
+    for (const _n of marker.generate(_.zip(texts, rects))) {
       if (new Date().getTime() - now > 1000 / FPS) {
         marker.redraw();
         await sleep(0);
         if (current !== date) return;
-        if (process !== Process.Searching) return;
+        if (process !== Process.Marking) return;
         now = new Date().getTime();
       }
     }
@@ -125,11 +121,6 @@ chrome.runtime.onConnect.addListener((() => {
       text = request.text;
       cain = request.cain;
 
-      process = Process.Prepare;
-      if (port !== null) {
-        postSearchProcess();
-      }
-
       current = new Date();
 
       // Asynchronous search.
@@ -137,11 +128,21 @@ chrome.runtime.onConnect.addListener((() => {
     });
 
     p.onMessage.addListener(request => {
+      if (request.kind !== "init") return;
+
+      port = p;
+      port.postMessage({
+        text: text,
+        cain: cain,
+      });
+    });
+
+    p.onMessage.addListener(request => {
       if (request.kind === "new") return;
+      if (request.kind === "init") return;
 
       switch (request.kind) {
         case "prepare":
-          port = p;
           break;
         case "prev":
           marker.focusPrev();

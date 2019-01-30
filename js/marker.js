@@ -107,15 +107,19 @@ Marker.context = Marker.canvas.getContext("2d");
   };
 
   Marker.prototype.redraw = function() {
+    if (this._count === 0) {
+      Marker.canvas.width = 0;
+      Marker.canvas.height = 0;
+      return;
+    }
+
     Marker.context.clearRect(0, 0, Marker.canvas.width, Marker.canvas.height);
 
     Marker.canvas.width = 16;
     Marker.canvas.height = window.innerHeight;
     
-    for (let i = 0; i < this._count; i++) {
-      const top = this._rects[i].top;
-      const height = this._rects[i].height;
-      Marker.context.rect(0, top * Marker.canvas.height, 16, height);
+    for (const r of this._rects) {
+      Marker.context.rect(0, r.top * Marker.canvas.height, 16, r.height);
     }
     Marker.context.fillStyle = markerColor;
     Marker.context.fill();
@@ -198,7 +202,6 @@ Marker.context = Marker.canvas.getContext("2d");
     this._index = -1;
     markerColor = nextMarkerColor;
     focusedMarkerColor = nextFocusedMarkerColor;
-    Marker.canvas.width = 0;
-    Marker.canvas.height = 0;
+    this.redraw();
   };
 }
