@@ -188,6 +188,7 @@ const main = (port, texts, cain) => {
           $("#search").val(history[index]);
           $("#search").focus();
           setCain(prevCain);
+          searchWithoutSaving();
           port.postMessage({kind: "prepare"});
       }
     };
