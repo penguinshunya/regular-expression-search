@@ -138,27 +138,20 @@ const main = (port, texts, cain, input, prevText, prevCain) => {
     };
 
     return response => {
-      if (!response.search) {
-        if (response.process) {
-          // Searching in progress, but stop searching.
-          modifyCount(response.index, response.count);
-          changeButtonStatus(true);
-        } else {
-          // Do nothing.
+      switch (response.process) {
+        case Process.DoNothing:
           $("#count").text("");
           changeButtonStatus(false);
-        }
-      } else {
-        if (response.process) {
-          // Searching in progress.
+          break;
+        case Process.Searching:
           modifyCount(response.index, response.count);
           changeButtonStatus(true);
-        } else {
-          // Finish searching.
+          break;
+        case Process.Finish:
           modifyCount(response.index, response.count);
           prevText = response.text;
           prevCain = response.cain;
-        }
+          break;
       }
     };
   })());
@@ -189,14 +182,21 @@ const main = (port, texts, cain, input, prevText, prevCain) => {
     if (r.status === Status.Empty) {
       clearSearchResult();
       return;
-    } else if (r.status === Status.Same && e.shiftKey) {
-      movePrevSearchResult();
-      return;
-    } else if (r.status === Status.Same && !e.ctrlKey) {
-      moveNextSearchResult();
-      return;
     } else if (r.status === Status.Invalid) {
       $("#search").select();
+      return;
+    }
+    
+    if (!e.ctrlKey) {
+      if (e.shiftKey) {
+        movePrevSearchResult();
+      } else {
+        moveNextSearchResult();
+      }
+      (async () => {
+        await saveHistory(r.text);
+        index = texts.length;
+      })();
       return;
     }
 

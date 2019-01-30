@@ -167,16 +167,16 @@ Marker.context = Marker.canvas.getContext("2d");
     }
   };
 
-  Marker.prototype.generate = function*(texts, rects) {
+  Marker.prototype.generate = function* (info) {
     const btop = document.body.getBoundingClientRect().top;
     const docHeight = $(document).height();
     const winHeight = window.innerHeight;
 
-    for (let i = 0; i < texts.length; i++) {
-      const top = (rects[i].top - btop) / (docHeight - rects[i].height);
-      const height = rects[i].height / docHeight * winHeight;
+    for (let [text, rect] of info) {
+      const top = (rect.top - btop) / (docHeight - rect.height);
+      const height = rect.height / docHeight * winHeight;
 
-      this._marks.push(texts[i].map(node => makeMark(this, node, i)));
+      this._marks.push(text.map(node => makeMark(this, node, this._count)));
       this._rects.push({top: top, height: height < 3 ? 3 : height});
       this._count++;
       yield;

@@ -18,8 +18,7 @@ chrome.runtime.onConnect.addListener((() => {
   let current;
 
   // search process information
-  let search = false;
-  let process = false;
+  let process = Process.DoNothing;
 
   let port = null;
 
@@ -27,13 +26,11 @@ chrome.runtime.onConnect.addListener((() => {
     marker.clear();
     text = "";
     cain = false;
-    search = false;
-    process = false;
+    process = Process.DoNothing;
   };
 
   const postSearchProcess = () => {
     port.postMessage({
-      search: search,
       process: process,
       text: text,
       cain: cain,
@@ -42,7 +39,7 @@ chrome.runtime.onConnect.addListener((() => {
     });
   };
 
-  const searching = async date => {
+  const search = async date => {
     const texts = [];
     const rects = [];
 
@@ -66,7 +63,7 @@ chrome.runtime.onConnect.addListener((() => {
         now = performance.now();
       }
     }
-    for (let _ of marker.generate(texts, rects)) {
+    for (let _n of marker.generate(_.zip(texts, rects))) {
       if (performance.now() - now > 1000 / FPS) {
         marker.redraw();
         if (port !== null) {
@@ -77,14 +74,15 @@ chrome.runtime.onConnect.addListener((() => {
         now = performance.now();
       }
     }
-    process = false;
     marker.redraw();
+    process = Process.Finish;
     if (port !== null) {
       postSearchProcess();
     }
   };
 
   $(window).resize(() => {
+    if (process === Process.DoNothing) return;
     marker.redraw();
   });
 
@@ -130,11 +128,11 @@ chrome.runtime.onConnect.addListener((() => {
       text = request.text;
       cain = request.cain;
 
-      search = true;
-      process = true;
-      current = performance.now();
+      process = Process.Searching;
+      current = new Date();
 
-      searching(current);
+      // Asynchronous search.
+      search(current);
     });
 
     p.onMessage.addListener(request => {
