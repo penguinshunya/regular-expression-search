@@ -4,10 +4,12 @@ $(async () => {
   const instant = await getStorageValue("instant", true);
   const shuffle = await getStorageValue("shuffle", false);
   const ignoreBlank = await getStorageValue("ignoreBlank", true);
+  const background = await getStorageValue("background", true);
 
   check("instant", instant);
   check("shuffle", shuffle);
   check("ignoreBlank", ignoreBlank);
+  check("background", background);
 
   $("#color svg").each((_, e) => {
     const mc = $(e).find("rect:eq(0)").attr("fill");
@@ -33,6 +35,12 @@ $(async () => {
     const ignoreBlank = $(this).val() === "on";
     sendToRuntime({ ignoreBlank: ignoreBlank });
     setStorageValue("ignoreBlank", ignoreBlank);
+  });
+
+  $("input[name=background]").change(function () {
+    const background = $(this).val() === "on";
+    sendToRuntime({ background: background });
+    setStorageValue("background", background);
   });
 
   $("#color svg").click(function () {

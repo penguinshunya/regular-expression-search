@@ -43,7 +43,7 @@ Marker.context = Marker.canvas.getContext("2d");
       return function () {
         m._prev = m._curr;
         m._curr = $(this).data("mark");
-        m.focus();
+        m._focus();
       };
     };
 
@@ -135,7 +135,7 @@ Marker.context = Marker.canvas.getContext("2d");
     }
   };
 
-  Marker.prototype.focus = function () {
+  Marker.prototype._focus = function () {
     this.focusMark();
     this.redraw();
   };
@@ -151,7 +151,7 @@ Marker.context = Marker.canvas.getContext("2d");
       const i = this._marks.searchRank(this._curr.index)[1];
       this._curr = this._marks.search(i - 1 < 0 ? this._marks.count() - 1 : i - 1);
     }
-    this.focus();
+    this._focus();
   };
 
   Marker.prototype.focusNext = function () {
@@ -165,7 +165,7 @@ Marker.context = Marker.canvas.getContext("2d");
       const i = this._marks.searchRank(this._curr.index)[1];
       this._curr = this._marks.search(i + 1 >= this._marks.count() ? 0 : i + 1);
     }
-    this.focus();
+    this._focus();
   };
 
   Marker.prototype.select = function (y) {
@@ -173,7 +173,7 @@ Marker.context = Marker.canvas.getContext("2d");
     if (mark !== null) {
       this._prev = this._curr;
       this._curr = mark;
-      this.focus();
+      this._focus();
     }
   };
 

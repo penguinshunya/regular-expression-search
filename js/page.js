@@ -13,8 +13,10 @@ chrome.runtime.onConnect.addListener((() => {
   let count = 0;
 
   let port = null;
+
   let shuffle = false;
   let ignoreBlank = true;
+  let background = true;
 
   // popup information
   let input = null;
@@ -51,7 +53,7 @@ chrome.runtime.onConnect.addListener((() => {
       marks.push(mark);
 
       if (new Date().getTime() - now > 1000 / FPS) {
-        await sleep(0);
+        await sleeping(background);
         if (current !== date) return;
         if (process !== Process.Searching) return;
         now = new Date().getTime();
@@ -62,7 +64,7 @@ chrome.runtime.onConnect.addListener((() => {
     postSearchProcess();
     for (const _ of CalcLayout(marks)) {
       if (new Date().getTime() - now > 1000 / FPS) {
-        await sleep(0);
+        await sleeping(background);
         if (current !== date) return;
         if (process !== Process.Calculating) return;
         now = new Date().getTime();
@@ -81,7 +83,7 @@ chrome.runtime.onConnect.addListener((() => {
     for (const _ of marker.generate(marks)) {
       if (new Date().getTime() - now > 1000 / FPS) {
         marker.redraw();
-        await sleep(0);
+        await sleeping(background);
         if (current !== date) return;
         if (process !== Process.Marking) return;
         now = new Date().getTime();
@@ -132,6 +134,12 @@ chrome.runtime.onConnect.addListener((() => {
     sendResponse();
   });
 
+  chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
+    if (request.background == null) return;
+    background = request.background;
+    sendResponse();
+  });
+
   (async () => {
     const mc = await getStorageValue("markerColor", "yellow");
     const fc = await getStorageValue("focusedMarkerColor", "orange");
@@ -139,6 +147,7 @@ chrome.runtime.onConnect.addListener((() => {
     Marker.setFocusedMarkerColor(fc, true);
     shuffle = await getStorageValue("shuffle", false);
     ignoreBlank = await getStorageValue("ignoreBlank", true);
+    background = await getStorageValue("background", true);
   })();
 
   return p => {
@@ -198,3 +207,22 @@ chrome.runtime.onConnect.addListener((() => {
     });
   };
 })());
+
+const sleeping = (() => {
+  let resolve;
+  const port = chrome.runtime.connect();
+  port.onMessage.addListener(response => {
+    if (response.sleep == null) return;
+    resolve();
+  });
+  return async work => {
+    if (work) {
+      return new Promise(r => {
+        resolve = r;
+        port.postMessage({ sleep: true });
+      });
+    } else {
+      await sleep(0);
+    }
+  };
+})();
