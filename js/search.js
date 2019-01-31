@@ -31,11 +31,13 @@ const Search = function* (text, cain) {
   }
 };
 
-const Layout = function* (texts) {
+const CalcLayout = function* (marks) {
   const r = document.createRange();
-  for (let nodes of texts) {
-    r.selectNodeContents(nodes[0]);
+  for (let mark of marks) {
+    r.selectNodeContents(mark.nodes[0]);
     const rect = r.getBoundingClientRect();
-    yield { top: rect.top, height: rect.height };
+    mark.top = rect.top;
+    mark.height = rect.height;
+    yield;
   }
 };

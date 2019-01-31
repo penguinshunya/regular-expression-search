@@ -22,6 +22,10 @@
     text-align: right;
     white-space: nowrap;
 }
+#count.spinner-grow {
+    width: 1.6rem;
+    color: #aaaaaa;
+}
 #count.spinner-border {
     width: 1.4rem;
     color: #aaaaaa;

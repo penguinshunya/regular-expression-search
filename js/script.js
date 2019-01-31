@@ -33,18 +33,18 @@ chrome.runtime.onConnect.addListener((() => {
   };
 
   const search = async date => {
-    const texts = [];
-    const rects = [];
+    const marks = [];
+
+    let now = new Date().getTime();
 
     process = Process.Searching;
     if (port !== null) {
       postSearchProcess();
     }
-
-    let now = new Date().getTime();
-
     for (const t of Search(text, cain)) {
-      texts.push(t);
+      const mark = new Mark();
+      mark.nodes = t;
+      marks.push(mark);
 
       if (new Date().getTime() - now > 1000 / FPS) {
         await sleep(0);
@@ -53,22 +53,41 @@ chrome.runtime.onConnect.addListener((() => {
         now = new Date().getTime();
       }
     }
-    for (const r of Layout(texts)) {
-      rects.push(r);
 
+    process = Process.Calculating;
+    if (port !== null) {
+      postSearchProcess();
+    }
+    for (const _ of CalcLayout(marks)) {
       if (new Date().getTime() - now > 1000 / FPS) {
         await sleep(0);
         if (current !== date) return;
-        if (process !== Process.Searching) return;
+        if (process !== Process.Calculating) return;
         now = new Date().getTime();
       }
     }
-    count = texts.length;
+    count = marks.length;
+    for (let i = 0; i < count; i++) {
+      const mark = marks[i];
+      mark.prev = marks[i === 0 ? count - 1 : i - 1];
+      mark.next = marks[i === count - 1 ? 0 : i + 1];
+      mark.index = i;
+    }
+    shuffle(marks);
+    for (let i = 1; i < count; i++) {
+      if (marks[i].index === 0) {
+        const m = marks[i];
+        marks[i] = marks[0];
+        marks[0] = m;
+        break;
+      }
+    }
+
     process = Process.Marking;
     if (port !== null) {
       postSearchProcess();
     }
-    for (const _ of marker.generate(zip(texts, rects))) {
+    for (const _ of marker.generate(marks)) {
       if (new Date().getTime() - now > 1000 / FPS) {
         marker.redraw();
         await sleep(0);
@@ -79,6 +98,9 @@ chrome.runtime.onConnect.addListener((() => {
     }
     marker.redraw();
     process = Process.Finish;
+    if (port !== null) {
+      postSearchProcess();
+    }
   };
 
   $(window).resize(() => {
@@ -133,6 +155,7 @@ chrome.runtime.onConnect.addListener((() => {
 
       port = p;
       port.postMessage({
+        init: true,
         text: text,
         cain: cain,
       });
@@ -143,7 +166,7 @@ chrome.runtime.onConnect.addListener((() => {
       if (request.kind === "init") return;
 
       switch (request.kind) {
-        case "prepare":
+        case "updatePopup":
           break;
         case "prev":
           marker.focusPrev();

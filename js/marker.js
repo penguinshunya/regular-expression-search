@@ -1,9 +1,20 @@
+const Mark = function () {
+  this.nodes;
+  this.rect;
+  this.top;
+  this.height;
+  this.rtop;
+  this.rheight;
+  this.prev;
+  this.next;
+  this.index;
+  this.visible = false;
+};
+
 const Marker = function () {
-  this._marks = [];
-  this._rects = [];
-  this._count = 0;
-  this._prevx = -1;
-  this._index = -1;
+  this._marks = new RankTreap();
+  this._curr = null;
+  this._prev = null;
 };
 
 Marker.canvas = $("<canvas>").css({
@@ -24,7 +35,7 @@ Marker.context = Marker.canvas.getContext("2d");
   let nextMarkerColor = markerColor;
   let nextFocusedMarkerColor = focusedMarkerColor;
 
-  const makeMark = (() => {
+  const wrapMark = (() => {
     const origin = $("<mark>").attr("tabindex", "-1").css({
       margin: 0,
       border: "none",
@@ -33,15 +44,15 @@ Marker.context = Marker.canvas.getContext("2d");
 
     const clickMark = function (m) {
       return function () {
-        m._prevx = m._index;
-        m._index = $(this).data("index");
+        m._prev = m._curr;
+        m._curr = $(this).data("mark");
         m.focus();
       };
     };
 
-    return (m, node, index) => {
+    return (m, node, mrk) => {
       const mark = origin.clone();
-      mark.data("index", index);
+      mark.data("mark", mrk);
       mark.on("click", clickMark(m));
       mark.css({
         backgroundColor: markerColor,
@@ -51,18 +62,18 @@ Marker.context = Marker.canvas.getContext("2d");
     };
   })();
 
-  const getIndexFromY = (m, y) => {
+  const getMarkFromY = (m, y) => {
     const t = y / Marker.canvas.height;
 
-    for (let i = 0; i < m._count; i++) {
-      const top = m._rects[i].top;
-      const height = m._rects[i].height / Marker.canvas.height;
+    for (const mark of m._marks) {
+      const top = mark.rtop;
+      const height = mark.rheight / Marker.canvas.height;
 
-      if (t >= top && t <= top + height) {
-        return i;
+      if (mark.visible && t >= top && t <= top + height) {
+        return mark;
       }
     }
-    return -1;
+    return null;
   };
 
   Marker.setMarkerColor = (mc, immediate = false) => {
@@ -84,26 +95,26 @@ Marker.context = Marker.canvas.getContext("2d");
   };
 
   Marker.prototype.index = function () {
-    return this._index;
+    return this._curr == null ? -1 : this._curr.index;
   };
 
   Marker.prototype.focusMark = function () {
-    if (this._prevx < 0) this._prevx = this._index;
+    if (this._prev === null) this._prev = this._curr;
 
-    this._marks[this._prevx].forEach(mark => mark.css({
+    this._prev.nodes.forEach(mark => mark.css({
       backgroundColor: markerColor,
       color: blackOrWhite(markerColor),
     }));
-    this._marks[this._index].forEach(mark => mark.css({
+    this._curr.nodes.forEach(mark => mark.css({
       backgroundColor: focusedMarkerColor,
       color: blackOrWhite(focusedMarkerColor),
     }));
 
-    this._marks[this._index][0].focus();
+    this._curr.nodes[0].focus();
   };
 
   Marker.prototype.redraw = function () {
-    if (this._count === 0) {
+    if (this._marks.count() === 0) {
       Marker.canvas.width = 0;
       Marker.canvas.height = 0;
       return;
@@ -114,18 +125,18 @@ Marker.context = Marker.canvas.getContext("2d");
     Marker.canvas.width = 16;
     Marker.canvas.height = window.innerHeight;
 
-    for (const r of this._rects) {
-      Marker.context.rect(0, r.top * Marker.canvas.height, 16, r.height);
+    for (const m of this._marks) {
+      if (m.visible) {
+        Marker.context.rect(0, m.rtop * Marker.canvas.height, 16, m.rheight);
+      }
     }
     Marker.context.fillStyle = markerColor;
     Marker.context.fill();
 
-    if (this._count > 0 && this._index !== -1) {
-      const top = this._rects[this._index].top;
-      const height = this._rects[this._index].height;
-
+    if (this._curr !== null) {
+      const m = this._curr;
       Marker.context.fillStyle = focusedMarkerColor;
-      Marker.context.fillRect(0, top * Marker.canvas.height, 16, height);
+      Marker.context.fillRect(0, m.rtop * Marker.canvas.height, 16, m.rheight);
     }
   };
 
@@ -135,67 +146,80 @@ Marker.context = Marker.canvas.getContext("2d");
   };
 
   Marker.prototype.focusPrev = function () {
-    if (this._count === 0) return;
+    if (this._marks.count() === 0) returnn;
 
-    this._prevx = this._index;
-    this._index = this._index <= 0 ? this._count - 1 : this._index - 1;
+    if (this._curr == null) {
+      this._curr = this._marks.search(0);
+    } else {
+      this._prev = this._curr;
+
+      const i = this._marks.searchRank(this._curr.index)[1];
+      this._curr = this._marks.search(i - 1 < 0 ? this._marks.count() - 1 : i - 1);
+    }
     this.focus();
   };
 
   Marker.prototype.focusNext = function () {
-    if (this._count === 0) return;
+    if (this._marks.count() === 0) returnn;
 
-    this._prevx = this._index;
-    this._index = this._index < 0 ? 0 : (this._index + 1) % this._count;
+    if (this._curr == null) {
+      this._curr = this._marks.search(0);
+    } else {
+      this._prev = this._curr;
+
+      const i = this._marks.searchRank(this._curr.index)[1];
+      this._curr = this._marks.search(i + 1 >= this._marks.count() ? 0 : i + 1);
+    }
     this.focus();
   };
 
   Marker.prototype.select = function (y) {
-    const i = getIndexFromY(this, y);
-    if (i >= 0) {
-      this._prevx = this._index;
-      this._index = i;
+    const mark = getMarkFromY(this, y);
+    if (mark !== null) {
+      this._prev = this._curr;
+      this._curr = mark;
       this.focus();
     }
   };
 
   Marker.prototype.changeCursor = function (y) {
-    if (getIndexFromY(this, y) >= 0) {
+    if (getMarkFromY(this, y) !== null) {
       $(Marker.canvas).css("cursor", "pointer");
     } else {
       $(Marker.canvas).css("cursor", "default");
     }
   };
 
-  Marker.prototype.generate = function* (info) {
+  Marker.prototype.generate = function* (marks) {
     const btop = document.body.getBoundingClientRect().top;
     const docHeight = $(document).height();
     const winHeight = window.innerHeight;
 
-    for (let [text, rect] of info) {
-      const top = (rect.top - btop) / (docHeight - rect.height);
-      const height = rect.height / docHeight * winHeight;
+    for (const m of marks) {
+      const t = (m.top - btop) / (docHeight - m.height);
+      const h = m.height / docHeight * winHeight;
 
-      this._marks.push(text.map(node => makeMark(this, node, this._count)));
-      this._rects.push({ top: top, height: height < 3 ? 3 : height });
-      this._count++;
+      m.nodes = m.nodes.map(n => wrapMark(this, n, m));
+      m.visible = true;
+      m.rtop = t;
+      m.rheight = h < 3 ? 3 : h;
+
+      this._marks.insertRank(m.index, m);
       yield;
     }
   };
 
   Marker.prototype.clear = function () {
-    this._marks.forEach(mark => {
-      mark.forEach(m => {
+    for (const mark of this._marks) {
+      mark.nodes.forEach(m => {
         const par = m.contents().unwrap().parent()[0];
         // In dynamic page, element may not exist.
         if (par) par.normalize();
       });
-    });
-    this._marks = [];
-    this._rects = [];
-    this._count = 0;
-    this._prevx = -1;
-    this._index = -1;
+    }
+    this._marks = new RankTreap();
+    this._curr = null;
+    this._prev = null;
     markerColor = nextMarkerColor;
     focusedMarkerColor = nextFocusedMarkerColor;
     this.redraw();

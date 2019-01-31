@@ -23,8 +23,6 @@ const main = (port, texts, cain) => {
   let prevText;
   let prevCain;
 
-  const spinner = "spinner-border spinner-border-sm";
-
   const Status = {
     Empty: 1,
     Invalid: 2,
@@ -140,7 +138,27 @@ const main = (port, texts, cain) => {
     });
   };
 
+  port.onMessage.addListener(response => {
+    if (response.init == null) return;
+
+    prevText = response.text == null ? "" : response.text;
+    prevCain = response.cain == null ? cain : response.cain;
+
+    initTempHistory(response.text);
+    $("#search").val(history[index]);
+    $("#search").focus();
+    setCain(prevCain);
+    searchWithoutSavingHistory();
+
+    port.postMessage({ kind: "updatePopup" });
+  });
+
   port.onMessage.addListener((() => {
+    const searching = "spinner-grow spinner-grow-sm";
+    const calculating = "spinner-border spinner-border-sm";
+
+    // Only here can change the state of COUNT, PREV, NEXT element.
+    // Trigger for change should not be a popup script.
     const modifyCount = (index, count) => {
       if (index === 0) {
         $("#count").text(count);
@@ -154,38 +172,43 @@ const main = (port, texts, cain) => {
       $("#next").prop("disabled", !enabled);
     };
 
+    const removeSpinner = () => {
+      $("#count").removeClass(searching);
+      $("#count").removeClass(calculating);
+    };
+
     return response => {
       switch (response.process) {
         case Process.DoNothing:
           $("#count").text("");
-          $("#count").removeClass(spinner);
+          removeSpinner();
           changeButtonStatus(false);
           break;
         case Process.Searching:
           $("#count").text("");
-          $("#count").addClass(spinner);
+          removeSpinner();
+          $("#count").css("color", "#aaaaaa");
+          $("#count").addClass(searching);
+          break;
+        case Process.Calculating:
+          $("#count").text("");
+          removeSpinner();
+          $("#count").css("color", "#aaaaaa");
+          $("#count").addClass(calculating);
           break;
         case Process.Marking:
-          $("#count").removeClass(spinner);
+          removeSpinner();
+          $("#count").css("color", "#aaaaaa");
           modifyCount(response.index, response.count);
           changeButtonStatus(true);
           break;
         case Process.Finish:
-          $("#count").removeClass(spinner);
+          removeSpinner();
+          $("#count").css("color", "black");
           modifyCount(response.index, response.count);
           prevText = response.text;
           prevCain = response.cain;
           break;
-        default:
-          prevText = response.text == null ? "" : response.text;
-          prevCain = response.cain == null ? cain : response.cain;
-
-          initTempHistory(response.text);
-          $("#search").val(history[index]);
-          $("#search").focus();
-          setCain(prevCain);
-          searchWithoutSavingHistory();
-          port.postMessage({ kind: "prepare" });
       }
     };
   })());
