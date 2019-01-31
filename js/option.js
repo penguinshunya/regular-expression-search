@@ -17,46 +17,32 @@ $(async () => {
     }
   });
 
-  $("input[name=instant]").change(async function () {
+  $("input[name=instant]").change(function () {
     const instant = $(this).val() === "on";
-    await setStorageValue("instant", instant);
-    chrome.runtime.sendMessage({
-      instant: instant,
-    });
+    sendToRuntime({ instant: instant });
+    setStorageValue("instant", instant);
   });
 
-  $("input[name=shuffle]").change(async function () {
+  $("input[name=shuffle]").change(function () {
     const shuffle = $(this).val() === "on";
-    await setStorageValue("shuffle", shuffle);
-    chrome.runtime.sendMessage({
-      shuffle: shuffle,
-    });
+    sendToRuntime({ shuffle: shuffle });
+    setStorageValue("shuffle", shuffle);
   });
 
-  $("input[name=ignoreBlank]").change(async function () {
+  $("input[name=ignoreBlank]").change(function () {
     const ignoreBlank = $(this).val() === "on";
-    await setStorageValue("ignoreBlank", ignoreBlank);
-    chrome.runtime.sendMessage({
-      ignoreBlank: ignoreBlank,
-    });
+    sendToRuntime({ ignoreBlank: ignoreBlank });
+    setStorageValue("ignoreBlank", ignoreBlank);
   });
 
-  $("#color svg").click(async function () {
-    const svg = $(this);
-
+  $("#color svg").click(function () {
     $("#color svg").each((_, e) => $(e).removeClass("selected"));
-    svg.addClass("selected");
-
-    const mc = svg.find("rect:eq(0)").attr("fill");
-    const fc = svg.find("rect:eq(1)").attr("fill");
-
-    await setStorageValue("markerColor", mc);
-    await setStorageValue("focusedMarkerColor", fc);
-
-    chrome.runtime.sendMessage({
-      mc: mc,
-      fc: fc,
-    }, () => { });
+    $(this).addClass("selected");
+    const mc = $(this).find("rect:eq(0)").attr("fill");
+    const fc = $(this).find("rect:eq(1)").attr("fill");
+    sendToRuntime({ mc: mc, fc: fc });
+    setStorageValue("markerColor", mc);
+    setStorageValue("focusedMarkerColor", fc);
   });
 });
 

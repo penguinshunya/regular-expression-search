@@ -179,10 +179,6 @@ chrome.runtime.onConnect.addListener((() => {
     });
 
     p.onMessage.addListener(request => {
-      if (request.kind === "new") return;
-      if (request.kind === "init") return;
-      if (request.kind === "input") return;
-
       switch (request.kind) {
         case "updatePopup":
           break;
@@ -195,6 +191,8 @@ chrome.runtime.onConnect.addListener((() => {
         case "close":
           clearSearchResult();
           break;
+        default:
+          return;
       }
       postSearchProcess();
     });
