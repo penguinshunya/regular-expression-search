@@ -1,14 +1,11 @@
 const Mark = function () {
+  this.texts;
   this.nodes;
-  this.rect;
   this.top;
   this.height;
   this.rtop;
   this.rheight;
-  this.prev;
-  this.next;
   this.index;
-  this.visible = false;
 };
 
 const Marker = function () {
@@ -69,7 +66,7 @@ Marker.context = Marker.canvas.getContext("2d");
       const top = mark.rtop;
       const height = mark.rheight / Marker.canvas.height;
 
-      if (mark.visible && t >= top && t <= top + height) {
+      if (t >= top && t <= top + height) {
         return mark;
       }
     }
@@ -126,9 +123,7 @@ Marker.context = Marker.canvas.getContext("2d");
     Marker.canvas.height = window.innerHeight;
 
     for (const m of this._marks) {
-      if (m.visible) {
-        Marker.context.rect(0, m.rtop * Marker.canvas.height, 16, m.rheight);
-      }
+      Marker.context.rect(0, m.rtop * Marker.canvas.height, 16, m.rheight);
     }
     Marker.context.fillStyle = markerColor;
     Marker.context.fill();
@@ -199,8 +194,7 @@ Marker.context = Marker.canvas.getContext("2d");
       const t = (m.top - btop) / (docHeight - m.height);
       const h = m.height / docHeight * winHeight;
 
-      m.nodes = m.nodes.map(n => wrapMark(this, n, m));
-      m.visible = true;
+      m.nodes = m.texts.map(n => wrapMark(this, n, m));
       m.rtop = t;
       m.rheight = h < 3 ? 3 : h;
 

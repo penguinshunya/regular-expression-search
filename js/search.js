@@ -34,7 +34,7 @@ const Search = function* (text, cain) {
 const CalcLayout = function* (marks) {
   const r = document.createRange();
   for (let mark of marks) {
-    r.selectNodeContents(mark.nodes[0]);
+    r.selectNodeContents(mark.texts[0]);
     const rect = r.getBoundingClientRect();
     mark.top = rect.top;
     mark.height = rect.height;

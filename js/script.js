@@ -43,7 +43,7 @@ chrome.runtime.onConnect.addListener((() => {
     }
     for (const t of Search(text, cain)) {
       const mark = new Mark();
-      mark.nodes = t;
+      mark.texts = t;
       marks.push(mark);
 
       if (new Date().getTime() - now > 1000 / FPS) {
@@ -67,21 +67,10 @@ chrome.runtime.onConnect.addListener((() => {
       }
     }
     count = marks.length;
-    for (let i = 0; i < count; i++) {
-      const mark = marks[i];
-      mark.prev = marks[i === 0 ? count - 1 : i - 1];
-      mark.next = marks[i === count - 1 ? 0 : i + 1];
-      mark.index = i;
+    for (const [i, m] of marks.entries()) {
+      m.index = i;
     }
     shuffle(marks);
-    for (let i = 1; i < count; i++) {
-      if (marks[i].index === 0) {
-        const m = marks[i];
-        marks[i] = marks[0];
-        marks[0] = m;
-        break;
-      }
-    }
 
     process = Process.Marking;
     if (port !== null) {
