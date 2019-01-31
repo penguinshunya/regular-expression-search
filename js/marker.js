@@ -27,8 +27,8 @@ Marker.canvas.height = 0;
 Marker.context = Marker.canvas.getContext("2d");
 
 {
-  let markerColor = "yellow";
-  let focusedMarkerColor = "orange";
+  let markerColor = MARKER_COLOR;
+  let focusedMarkerColor = FOCUSED_MARKER_COLOR;
   let nextMarkerColor = markerColor;
   let nextFocusedMarkerColor = focusedMarkerColor;
 
