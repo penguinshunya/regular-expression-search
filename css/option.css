@@ -9,9 +9,8 @@
     margin-bottom: 10px;
 }
 #color svg.selected {
-    border: 1px solid #343a40;
-    border-radius: 5px;
+    opacity: 1;
 }
 #color svg:not(.selected) {
-    padding: 1px;
+    opacity: 0.2;
 }
