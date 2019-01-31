@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Regular Expression Search",
   "short_name": "regex search",
-  "version": "2.2.0.0",
+  "version": "2.2.0.1",
   "description": "search using regular expression on chrome extension",
   "commands": {
     "_execute_browser_action": {
@@ -34,6 +34,7 @@
   ],
   "background": {
     "scripts": [
+      "lib/js/function.js",
       "js/background.js"
     ],
     "persistent": false

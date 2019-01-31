@@ -28,6 +28,7 @@ chrome.runtime.onConnect.addListener((() => {
   };
 
   const postSearchProcess = () => {
+    if (port === null) return;
     port.postMessage({
       process: process,
       text: text,
@@ -43,9 +44,7 @@ chrome.runtime.onConnect.addListener((() => {
     let now = new Date().getTime();
 
     process = Process.Searching;
-    if (port !== null) {
-      postSearchProcess();
-    }
+    postSearchProcess();
     for (const t of Search(text, cain, ignoreBlank)) {
       const mark = new Mark();
       mark.texts = t;
@@ -60,9 +59,7 @@ chrome.runtime.onConnect.addListener((() => {
     }
 
     process = Process.Calculating;
-    if (port !== null) {
-      postSearchProcess();
-    }
+    postSearchProcess();
     for (const _ of CalcLayout(marks)) {
       if (new Date().getTime() - now > 1000 / FPS) {
         await sleep(0);
@@ -77,13 +74,10 @@ chrome.runtime.onConnect.addListener((() => {
     }
     if (shuffle) {
       marks.shuffle();
-      console.log(marks[0]);
     }
 
     process = Process.Marking;
-    if (port !== null) {
-      postSearchProcess();
-    }
+    postSearchProcess();
     for (const _ of marker.generate(marks)) {
       if (new Date().getTime() - now > 1000 / FPS) {
         marker.redraw();
@@ -95,13 +89,10 @@ chrome.runtime.onConnect.addListener((() => {
     }
     marker.redraw();
     process = Process.Finish;
-    if (port !== null) {
-      postSearchProcess();
-    }
+    postSearchProcess();
   };
 
   $(window).resize(() => {
-    if (process === Process.DoNothing) return;
     marker.redraw();
   });
 
@@ -117,9 +108,7 @@ chrome.runtime.onConnect.addListener((() => {
     if (request.instant == null) return;
     instant = request.instant;
     if (port !== null) {
-      port.postMessage({
-        instant: instant,
-      });
+      port.postMessage({ instant: instant });
     }
     sendResponse();
   });
@@ -190,9 +179,9 @@ chrome.runtime.onConnect.addListener((() => {
     });
 
     p.onMessage.addListener(request => {
-      if (request.kind === "input") return;
       if (request.kind === "new") return;
       if (request.kind === "init") return;
+      if (request.kind === "input") return;
 
       switch (request.kind) {
         case "updatePopup":
@@ -207,9 +196,7 @@ chrome.runtime.onConnect.addListener((() => {
           clearSearchResult();
           break;
       }
-      if (port !== null) {
-        postSearchProcess();
-      }
+      postSearchProcess();
     });
   };
 })());
