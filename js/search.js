@@ -1,4 +1,4 @@
-const Search = function* (text, cain) {
+const Search = function* (text, cain, ignoreBlank) {
   const r = new RegExp(text, cain ? "gi" : "g");
   const t = reduce(collectTextNode(document.body), (t, n) => t.push(n), new Treap());
   const c = reduce(t, (c, e) => c + e.textContent, "");
@@ -11,7 +11,7 @@ const Search = function* (text, cain) {
       return;
     }
 
-    if (a[0].trim() === "") {
+    if (ignoreBlank && a[0].trim() === "") {
       continue;
     }
 

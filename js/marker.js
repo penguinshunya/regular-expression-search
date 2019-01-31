@@ -144,7 +144,7 @@ Marker.context = Marker.canvas.getContext("2d");
     if (this._marks.count() === 0) returnn;
 
     if (this._curr == null) {
-      this._curr = this._marks.search(0);
+      this._curr = this._marks.search(this._marks.count() - 1);
     } else {
       this._prev = this._curr;
 

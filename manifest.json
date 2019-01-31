@@ -28,7 +28,7 @@
         "js/marker.js",
         "js/process.js",
         "js/search.js",
-        "js/script.js"
+        "js/page.js"
       ]
     }
   ],

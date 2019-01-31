@@ -8,8 +8,9 @@ $(() => {
     (async () => {
       const texts = await getStorageValue("texts", []);
       const cain = await getStorageValue("cain", false);
+      const instant = await getStorageValue("instant", true);
 
-      main(port, texts, cain);
+      main(port, texts, cain, instant);
 
       // If have searched in this page, display count.
       port.postMessage({ kind: "init" });
@@ -17,7 +18,7 @@ $(() => {
   });
 });
 
-const main = (port, texts, cain) => {
+const main = (port, texts, cain, instant) => {
   let history;
   let index;
   let prevText;
@@ -117,6 +118,8 @@ const main = (port, texts, cain) => {
   };
 
   const searchWithoutSavingHistory = () => {
+    if (!instant) return;
+
     const r = verify();
 
     if (r.status === Status.Empty) {
@@ -144,13 +147,18 @@ const main = (port, texts, cain) => {
     prevText = response.text == null ? "" : response.text;
     prevCain = response.cain == null ? cain : response.cain;
 
-    initTempHistory(response.text);
+    initTempHistory(response.input);
     $("#search").val(history[index]);
     $("#search").focus();
     setCain(prevCain);
     searchWithoutSavingHistory();
 
     port.postMessage({ kind: "updatePopup" });
+  });
+
+  port.onMessage.addListener(response => {
+    if (response.instant == null) return;
+    instant = request.instant;
   });
 
   port.onMessage.addListener((() => {
@@ -244,13 +252,23 @@ const main = (port, texts, cain) => {
       return;
     }
 
-    if (!e.ctrlKey) {
+    if (instant && !e.ctrlKey) {
       if (e.shiftKey) {
         movePrevSearchResult();
       } else {
         moveNextSearchResult();
       }
       return;
+    }
+
+    if (!instant && r.status === Status.Same) {
+      if (e.shiftKey) {
+        movePrevSearchResult();
+        return;
+      } else if (!e.ctrlKey) {
+        moveNextSearchResult();
+        return;
+      }
     }
 
     // Asyncronous processing.
@@ -271,6 +289,10 @@ const main = (port, texts, cain) => {
     e.preventDefault();
     saveTempHistory();
     searchWithoutSavingHistory();
+    port.postMessage({
+      kind: "input",
+      input: $("#search").val(),
+    });
   });
 
   $("#cain").on("keydown", e => {

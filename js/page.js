@@ -13,6 +13,11 @@ chrome.runtime.onConnect.addListener((() => {
   let count = 0;
 
   let port = null;
+  let shuffle = false;
+  let ignoreBlank = true;
+
+  // popup information
+  let input = null;
 
   const clearSearchResult = () => {
     marker.clear();
@@ -41,7 +46,7 @@ chrome.runtime.onConnect.addListener((() => {
     if (port !== null) {
       postSearchProcess();
     }
-    for (const t of Search(text, cain)) {
+    for (const t of Search(text, cain, ignoreBlank)) {
       const mark = new Mark();
       mark.texts = t;
       marks.push(mark);
@@ -69,6 +74,10 @@ chrome.runtime.onConnect.addListener((() => {
     count = marks.length;
     for (const [i, m] of marks.entries()) {
       m.index = i;
+    }
+    if (shuffle) {
+      marks.shuffle();
+      console.log(marks[0]);
     }
 
     process = Process.Marking;
@@ -105,9 +114,32 @@ chrome.runtime.onConnect.addListener((() => {
   });
 
   chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
+    if (request.instant == null) return;
+    instant = request.instant;
+    if (port !== null) {
+      port.postMessage({
+        instant: instant,
+      });
+    }
+    sendResponse();
+  });
+
+  chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
     if (request.mc == null || request.fc == null) return;
     Marker.setMarkerColor(request.mc);
     Marker.setFocusedMarkerColor(request.fc);
+    sendResponse();
+  });
+
+  chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
+    if (request.shuffle == null) return;
+    shuffle = request.shuffle;
+    sendResponse();
+  });
+
+  chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
+    if (request.ignoreBlank == null) return;
+    ignoreBlank = request.ignoreBlank;
     sendResponse();
   });
 
@@ -116,12 +148,19 @@ chrome.runtime.onConnect.addListener((() => {
     const fc = await getStorageValue("focusedMarkerColor", "orange");
     Marker.setMarkerColor(mc, true);
     Marker.setFocusedMarkerColor(fc, true);
+    shuffle = await getStorageValue("shuffle", false);
+    ignoreBlank = await getStorageValue("ignoreBlank", true);
   })();
 
   return p => {
     p.onDisconnect.addListener(() => {
       saveHistory(text);
       port = null;
+    });
+
+    p.onMessage.addListener(request => {
+      if (request.kind !== "input") return;
+      input = request.input;
     });
 
     p.onMessage.addListener(request => {
@@ -146,10 +185,12 @@ chrome.runtime.onConnect.addListener((() => {
         init: true,
         text: text,
         cain: cain,
+        input: input,
       });
     });
 
     p.onMessage.addListener(request => {
+      if (request.kind === "input") return;
       if (request.kind === "new") return;
       if (request.kind === "init") return;
 
