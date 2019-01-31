@@ -68,7 +68,7 @@ chrome.runtime.onConnect.addListener((() => {
     if (port !== null) {
       postSearchProcess();
     }
-    for (const _n of marker.generate(_.zip(texts, rects))) {
+    for (const _n of marker.generate(zip(texts, rects))) {
       if (new Date().getTime() - now > 1000 / FPS) {
         marker.redraw();
         await sleep(0);

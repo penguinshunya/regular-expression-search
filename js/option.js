@@ -10,7 +10,7 @@ $(async () => {
     }
   });
 
-  $("#color svg").on("click", async function() {
+  $("#color svg").on("click", async function () {
     const svg = $(this);
 
     $("#color svg").each((_, e) => $(e).removeClass("selected"));
@@ -25,6 +25,6 @@ $(async () => {
     chrome.runtime.sendMessage({
       mc: mc,
       fc: fc,
-    }, () => {});
+    }, () => { });
   });
 });

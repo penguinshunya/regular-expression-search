@@ -1,18 +1,18 @@
 $(() => {
   // use async function. return value is promise.
   // it may make strange movements.
-  chrome.tabs.query({active: true, currentWindow: true}, tabs => {
-    const port  = chrome.tabs.connect(tabs[0].id);
+  chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+    const port = chrome.tabs.connect(tabs[0].id);
     port.onDisconnect.addListener(window.close.bind(window));
 
     (async () => {
       const texts = await getStorageValue("texts", []);
-      const cain  = await getStorageValue("cain", false);
+      const cain = await getStorageValue("cain", false);
 
       main(port, texts, cain);
 
       // If have searched in this page, display count.
-      port.postMessage({kind: "init"});
+      port.postMessage({ kind: "init" });
     })();
   });
 });
@@ -54,15 +54,15 @@ const main = (port, texts, cain) => {
   };
 
   const movePrevSearchResult = () => {
-    port.postMessage({kind: "prev"});
+    port.postMessage({ kind: "prev" });
   };
 
   const moveNextSearchResult = () => {
-    port.postMessage({kind: "next"});
+    port.postMessage({ kind: "next" });
   };
 
   const clearSearchResult = () => {
-    port.postMessage({kind: "close"});
+    port.postMessage({ kind: "close" });
     prevText = "";
   };
 
@@ -190,12 +190,12 @@ const main = (port, texts, cain) => {
           $("#search").focus();
           setCain(prevCain);
           searchWithoutSaving();
-          port.postMessage({kind: "prepare"});
+          port.postMessage({ kind: "prepare" });
       }
     };
   })());
 
-  $("#search").focus(function() {
+  $("#search").focus(function () {
     $(this).select();
   });
 

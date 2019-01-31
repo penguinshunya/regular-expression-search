@@ -6,7 +6,7 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
       chrome.tabs.sendMessage(tab.id, {
         mc: request.mc,
         fc: request.fc,
-      }, () => {});
+      }, () => { });
     });
   });
   sendResponse();

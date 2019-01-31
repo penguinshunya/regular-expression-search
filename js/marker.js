@@ -1,4 +1,4 @@
-const Marker = function() {
+const Marker = function () {
   this._marks = [];
   this._rects = [];
   this._count = 0;
@@ -31,8 +31,8 @@ Marker.context = Marker.canvas.getContext("2d");
       padding: 0,
     });
 
-    const clickMark = function(m) {
-      return function() {
+    const clickMark = function (m) {
+      return function () {
         m._prevx = m._index;
         m._index = $(this).data("index");
         m.focus();
@@ -83,11 +83,11 @@ Marker.context = Marker.canvas.getContext("2d");
     }
   };
 
-  Marker.prototype.index = function() {
+  Marker.prototype.index = function () {
     return this._index;
   };
 
-  Marker.prototype.focusMark = function() {
+  Marker.prototype.focusMark = function () {
     if (this._prevx < 0) this._prevx = this._index;
 
     this._marks[this._prevx].forEach(mark => mark.css({
@@ -102,7 +102,7 @@ Marker.context = Marker.canvas.getContext("2d");
     this._marks[this._index][0].focus();
   };
 
-  Marker.prototype.redraw = function() {
+  Marker.prototype.redraw = function () {
     if (this._count === 0) {
       Marker.canvas.width = 0;
       Marker.canvas.height = 0;
@@ -129,12 +129,12 @@ Marker.context = Marker.canvas.getContext("2d");
     }
   };
 
-  Marker.prototype.focus = function() {
+  Marker.prototype.focus = function () {
     this.focusMark();
     this.redraw();
   };
 
-  Marker.prototype.focusPrev = function() {
+  Marker.prototype.focusPrev = function () {
     if (this._count === 0) return;
 
     this._prevx = this._index;
@@ -142,7 +142,7 @@ Marker.context = Marker.canvas.getContext("2d");
     this.focus();
   };
 
-  Marker.prototype.focusNext = function() {
+  Marker.prototype.focusNext = function () {
     if (this._count === 0) return;
 
     this._prevx = this._index;
@@ -150,7 +150,7 @@ Marker.context = Marker.canvas.getContext("2d");
     this.focus();
   };
 
-  Marker.prototype.select = function(y) {
+  Marker.prototype.select = function (y) {
     const i = getIndexFromY(this, y);
     if (i >= 0) {
       this._prevx = this._index;
@@ -159,7 +159,7 @@ Marker.context = Marker.canvas.getContext("2d");
     }
   };
 
-  Marker.prototype.changeCursor = function(y) {
+  Marker.prototype.changeCursor = function (y) {
     if (getIndexFromY(this, y) >= 0) {
       $(Marker.canvas).css("cursor", "pointer");
     } else {
@@ -177,13 +177,13 @@ Marker.context = Marker.canvas.getContext("2d");
       const height = rect.height / docHeight * winHeight;
 
       this._marks.push(text.map(node => makeMark(this, node, this._count)));
-      this._rects.push({top: top, height: height < 3 ? 3 : height});
+      this._rects.push({ top: top, height: height < 3 ? 3 : height });
       this._count++;
       yield;
     }
   };
 
-  Marker.prototype.clear = function() {
+  Marker.prototype.clear = function () {
     this._marks.forEach(mark => {
       mark.forEach(m => {
         const par = m.contents().unwrap().parent()[0];

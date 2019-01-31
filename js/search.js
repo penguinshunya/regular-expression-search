@@ -1,10 +1,7 @@
 const Search = function* (text, cain) {
   const r = new RegExp(text, cain ? "gi" : "g");
-  const t = new Treap();
-  for (const text of collectTextElement(document.body)) {
-    t.push(text);
-  }
-  const c = collectTextContent(t);
+  const t = reduce(collectTextNode(document.body), (t, n) => t.push(n), new Treap());
+  const c = reduce(t, (c, e) => c + e.textContent, "");
   let a;
   let i = 0, l = 0;
 
@@ -39,6 +36,6 @@ const Layout = function* (texts) {
   for (let nodes of texts) {
     r.selectNodeContents(nodes[0]);
     const rect = r.getBoundingClientRect();
-    yield {top: rect.top, height: rect.height};
+    yield { top: rect.top, height: rect.height };
   }
 };
