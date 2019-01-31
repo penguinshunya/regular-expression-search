@@ -92,15 +92,6 @@ const main = (port, texts, cain) => {
     $("#search").select();
   };
 
-  const saveHistory = async text => {
-    // If it is a same as last search text, don't save.
-    if (texts[texts.length - 1] !== text) {
-      texts.push(text);
-      while (texts.length > 1000) texts.shift();
-      await setStorageValue("texts", texts);
-    }
-  };
-
   const initTempHistory = text => {
     history = texts.map(t => t);
     if (text != null && history.length > 0 && history[history.length - 1] !== text) {
@@ -120,10 +111,12 @@ const main = (port, texts, cain) => {
     history[index] = $("#search").val();
     if (history[index] !== "" && index === history.length - 1) {
       history.push("");
+    } else if (history[index] === "" && index < texts.length) {
+      history[index] = texts[index];
     }
   };
 
-  const searchWithoutSaving = () => {
+  const searchWithoutSavingHistory = () => {
     const r = verify();
 
     if (r.status === Status.Empty) {
@@ -189,7 +182,7 @@ const main = (port, texts, cain) => {
           $("#search").val(history[index]);
           $("#search").focus();
           setCain(prevCain);
-          searchWithoutSaving();
+          searchWithoutSavingHistory();
           port.postMessage({ kind: "prepare" });
       }
     };
@@ -226,37 +219,33 @@ const main = (port, texts, cain) => {
       return;
     }
 
+    // Asyncronous processing.
+    saveHistory(r.text);
+
     if (!e.ctrlKey) {
       if (e.shiftKey) {
         movePrevSearchResult();
       } else {
         moveNextSearchResult();
       }
-      (async () => {
-        await saveHistory(r.text);
-      })();
       return;
     }
 
-    (async () => {
-      await saveHistory(r.text);
+    prevText = r.text;
+    prevCain = r.cain;
 
-      prevText = r.text;
-      prevCain = r.cain;
-
-      port.postMessage({
-        kind: "new",
-        text: r.text,
-        cain: r.cain,
-      });
-    })();
+    port.postMessage({
+      kind: "new",
+      text: r.text,
+      cain: r.cain,
+    });
   });
 
   $("#search").on("keyup", e => {
     if (e.key === "Enter") return;
     e.preventDefault();
     saveTempHistory();
-    searchWithoutSaving();
+    searchWithoutSavingHistory();
   });
 
   $("#cain").on("keydown", e => {
@@ -265,7 +254,7 @@ const main = (port, texts, cain) => {
     const ci = !getCain();
     setCain(ci);
     saveCain(ci);
-    searchWithoutSaving();
+    searchWithoutSavingHistory();
   });
 
   $("#cain").on("click", e => {
@@ -273,7 +262,7 @@ const main = (port, texts, cain) => {
     const ci = !getCain();
     setCain(ci);
     saveCain(ci);
-    searchWithoutSaving();
+    searchWithoutSavingHistory();
   });
 
   $("#prev").on("keydown", e => {
