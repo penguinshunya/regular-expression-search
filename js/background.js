@@ -6,7 +6,7 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
 
 // from content page
 chrome.runtime.onConnect.addListener(port => {
-  port.onMessage.addListener((request, _, sendResponse) => {
+  port.onMessage.addListener(request => {
     if (request.sleep == null) return;
     port.postMessage({ sleep: true });
   });

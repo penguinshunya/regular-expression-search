@@ -1,18 +1,17 @@
 chrome.runtime.onConnect.addListener((() => {
   // The smaller the FPS, the quicker the search ends but the page gets stiff.
   let FPS = 60;
-  let marker = new Marker();
-  let current;
+  let port = null;
 
   // search information
   let text = null;
   let cain = null;
+  let marker = new Marker();
 
   // search process information
+  let current;
   let process = Process.DoNothing;
   let count = 0;
-
-  let port = null;
 
   let shuffle = SHUFFLE;
   let ignoreBlank = IGNORE_BLANK;
