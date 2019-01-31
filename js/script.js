@@ -70,7 +70,6 @@ chrome.runtime.onConnect.addListener((() => {
     for (const [i, m] of marks.entries()) {
       m.index = i;
     }
-    shuffle(marks);
 
     process = Process.Marking;
     if (port !== null) {

@@ -11,6 +11,10 @@ const Search = function* (text, cain) {
       return;
     }
 
+    if (a[0].trim() === "") {
+      continue;
+    }
+
     const texts = [];
 
     while (a.index >= l + t.search(i).data.length) {
