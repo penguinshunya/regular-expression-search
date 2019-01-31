@@ -14,9 +14,9 @@ chrome.runtime.onConnect.addListener((() => {
 
   let port = null;
 
-  let shuffle = false;
-  let ignoreBlank = true;
-  let background = true;
+  let shuffle = SHUFFLE;
+  let ignoreBlank = IGNORE_BLANK;
+  let background = BACKGROUND;
 
   // popup information
   let input = null;
@@ -107,47 +107,39 @@ chrome.runtime.onConnect.addListener((() => {
   });
 
   chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
-    if (request.instant == null) return;
-    instant = request.instant;
-    if (port !== null) {
-      port.postMessage({ instant: instant });
+    switch (request.key) {
+      case "markerColor":
+        Marker.setMarkerColor(request.value);
+        break;
+      case "focusedMarkerColor":
+        Marker.setFocusedMarkerColor(request.value);
+        break;
+      case "instant":
+        instant = request.value;
+        if (port !== null) port.postMessage({ instant: instant });
+        break;
+      case "shuffle":
+        shuffle = request.value;
+        break;
+      case "ignoreBlank":
+        ignoreBlank = request.value;
+        break;
+      case "background":
+        background = request.value;
+        break;
     }
     sendResponse();
   });
 
-  chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
-    if (request.mc == null || request.fc == null) return;
-    Marker.setMarkerColor(request.mc);
-    Marker.setFocusedMarkerColor(request.fc);
-    sendResponse();
-  });
-
-  chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
-    if (request.shuffle == null) return;
-    shuffle = request.shuffle;
-    sendResponse();
-  });
-
-  chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
-    if (request.ignoreBlank == null) return;
-    ignoreBlank = request.ignoreBlank;
-    sendResponse();
-  });
-
-  chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
-    if (request.background == null) return;
-    background = request.background;
-    sendResponse();
-  });
-
+  // initialize
   (async () => {
-    const mc = await getStorageValue("markerColor", "yellow");
-    const fc = await getStorageValue("focusedMarkerColor", "orange");
+    const mc = await getStorageValue("markerColor", MARKER_COLOR);
+    const fc = await getStorageValue("focusedMarkerColor", FOCUSED_MARKER_COLOR);
     Marker.setMarkerColor(mc, true);
     Marker.setFocusedMarkerColor(fc, true);
-    shuffle = await getStorageValue("shuffle", false);
-    ignoreBlank = await getStorageValue("ignoreBlank", true);
-    background = await getStorageValue("background", true);
+    shuffle = await getStorageValue("shuffle", SHUFFLE);
+    ignoreBlank = await getStorageValue("ignoreBlank", IGNORE_BLANK);
+    background = await getStorageValue("background", BACKGROUND);
   })();
 
   return p => {
@@ -209,16 +201,14 @@ chrome.runtime.onConnect.addListener((() => {
 })());
 
 const sleeping = (() => {
-  let resolve;
-  const port = chrome.runtime.connect();
-  port.onMessage.addListener(response => {
-    if (response.sleep == null) return;
-    resolve();
-  });
   return async work => {
     if (work) {
-      return new Promise(r => {
-        resolve = r;
+      const port = chrome.runtime.connect();
+      return new Promise(resolve => {
+        port.onMessage.addListener(response => {
+          if (response.sleep == null) return;
+          resolve();
+        });
         port.postMessage({ sleep: true });
       });
     } else {

@@ -1,10 +1,10 @@
 $(async () => {
-  const markerColor = await getStorageValue("markerColor", "yellow");
-  const focusedMarkerColor = await getStorageValue("focusedMarkerColor", "orange");
-  const instant = await getStorageValue("instant", true);
-  const shuffle = await getStorageValue("shuffle", false);
-  const ignoreBlank = await getStorageValue("ignoreBlank", true);
-  const background = await getStorageValue("background", true);
+  const markerColor = await getStorageValue("markerColor", MARKER_COLOR);
+  const focusedMarkerColor = await getStorageValue("focusedMarkerColor", FOCUSED_MARKER_COLOR);
+  const instant = await getStorageValue("instant", INSTANT);
+  const shuffle = await getStorageValue("shuffle", SHUFFLE);
+  const ignoreBlank = await getStorageValue("ignoreBlank", IGNORE_BLANK);
+  const background = await getStorageValue("background", BACKGROUND);
 
   check("instant", instant);
   check("shuffle", shuffle);
@@ -19,28 +19,11 @@ $(async () => {
     }
   });
 
-  $("input[name=instant]").change(function () {
-    const instant = $(this).val() === "on";
-    sendToRuntime({ instant: instant });
-    setStorageValue("instant", instant);
-  });
-
-  $("input[name=shuffle]").change(function () {
-    const shuffle = $(this).val() === "on";
-    sendToRuntime({ shuffle: shuffle });
-    setStorageValue("shuffle", shuffle);
-  });
-
-  $("input[name=ignoreBlank]").change(function () {
-    const ignoreBlank = $(this).val() === "on";
-    sendToRuntime({ ignoreBlank: ignoreBlank });
-    setStorageValue("ignoreBlank", ignoreBlank);
-  });
-
-  $("input[name=background]").change(function () {
-    const background = $(this).val() === "on";
-    sendToRuntime({ background: background });
-    setStorageValue("background", background);
+  $("input[type=radio]").change(function () {
+    const key = $(this).attr("name");
+    const checked = $(this).val() === "on";
+    sendToRuntime({ key: key, value: checked });
+    setStorageValue(key, checked);
   });
 
   $("#color svg").click(function () {
@@ -48,7 +31,8 @@ $(async () => {
     $(this).addClass("selected");
     const mc = $(this).find("rect:eq(0)").attr("fill");
     const fc = $(this).find("rect:eq(1)").attr("fill");
-    sendToRuntime({ mc: mc, fc: fc });
+    sendToRuntime({ key: "markerColor", value: mc });
+    sendToRuntime({ key: "focusedMarkerColor", value: fc });
     setStorageValue("markerColor", mc);
     setStorageValue("focusedMarkerColor", fc);
   });

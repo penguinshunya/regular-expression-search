@@ -6,9 +6,9 @@ $(() => {
     port.onDisconnect.addListener(window.close.bind(window));
 
     (async () => {
-      const texts = await getStorageValue("texts", []);
-      const cain = await getStorageValue("cain", false);
-      const instant = await getStorageValue("instant", true);
+      const texts = await getStorageValue("texts", TEXTS);
+      const cain = await getStorageValue("cain", CAIN);
+      const instant = await getStorageValue("instant", INSTANT);
 
       main(port, texts, cain, instant);
 
