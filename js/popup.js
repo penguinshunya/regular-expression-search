@@ -54,10 +54,12 @@ const main = (port, texts, cain) => {
   };
 
   const movePrevSearchResult = () => {
+    saveHistory(prevText);
     port.postMessage({ kind: "prev" });
   };
 
   const moveNextSearchResult = () => {
+    saveHistory(prevText);
     port.postMessage({ kind: "next" });
   };
 
@@ -219,9 +221,6 @@ const main = (port, texts, cain) => {
       return;
     }
 
-    // Asyncronous processing.
-    saveHistory(r.text);
-
     if (!e.ctrlKey) {
       if (e.shiftKey) {
         movePrevSearchResult();
@@ -230,6 +229,9 @@ const main = (port, texts, cain) => {
       }
       return;
     }
+
+    // Asyncronous processing.
+    saveHistory(r.text);
 
     prevText = r.text;
     prevCain = r.cain;
