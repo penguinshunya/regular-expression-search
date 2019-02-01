@@ -32,25 +32,6 @@
     width: 1.4rem;
     color: #aaaaaa;
 }
-#cain {
-    font-family: 'Courier New', Courier, monospace;
-    margin: 0.5em 0.6em;
-    padding: 0.5em 0.9em;
-    font-size: 0.7em;
-    cursor: pointer;
-}
-#cain:focus {
-    background-color: #e8e8e8;
-    border-radius: 0.2em;
-}
-#cain[data-select="true"] {
-    background-color: #cccccc;
-    border-radius: 1.25em;
-}
-#cain[data-select="true"]:focus {
-    background-color: #aaaaaa;
-    border-radius: 0.2em;
-}
 .chevron {
     margin: 0.5em;
     padding: 0.5em 0.8em;
@@ -63,6 +44,23 @@
     color: #cccccc;
 }
 .chevron:focus {
-    background-color: #e8e8e8;
+    background-color: #dfdfdf;
+    border-radius: 0.2em;
+    outline: 0;
+}
+#cain {
+    padding: 0.5em 0.9em;
+}
+#cain:focus {
+    background-color: #dfdfdf;
+    border-radius: 0.2em;
+}
+#cain[data-select="true"] {
+    background-color: #dfdfdf;
+    border-radius: 1.25em;
+}
+#cain[data-select="true"]:focus {
+    color: white;
+    background-color: #888888;
     border-radius: 0.2em;
 }
