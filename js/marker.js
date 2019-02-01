@@ -37,6 +37,7 @@ Marker.context = Marker.canvas.getContext("2d");
       margin: 0,
       border: "none",
       padding: 0,
+      font: "inherit",
     });
 
     const clickMark = function (m) {
