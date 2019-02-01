@@ -1,11 +1,11 @@
-const Mark = function () {
-  this.texts;
+const Mark = function (i, t) {
+  this.texts = t;
   this.nodes = [];
   this.top;
   this.height;
   this.rtop;
   this.rheight;
-  this.index;
+  this.index = i;
 };
 
 const Marker = function () {

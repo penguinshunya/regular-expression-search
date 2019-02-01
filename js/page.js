@@ -53,13 +53,9 @@ chrome.runtime.onConnect.addListener((() => {
     process = Process.Searching;
     postSearchProcess();
     for (const [i, t] of Search(text, cain, ignoreBlank)) {
-      const mark = new Mark();
-      mark.index = i;
-      mark.texts = t;
-      marker.add(mark);
+      marker.add(new Mark(i, t));
       if (await wait()) {
         if (current !== sym) return;
-        if (process !== Process.Searching) return;
       }
     }
 
@@ -68,7 +64,6 @@ chrome.runtime.onConnect.addListener((() => {
     for (const _ of marker.calc()) {
       if (await wait()) {
         if (current !== sym) return;
-        if (process !== Process.Calculating) return;
       }
     }
     count = marker.count();
@@ -79,7 +74,6 @@ chrome.runtime.onConnect.addListener((() => {
       if (await wait()) {
         marker.redraw();
         if (current !== sym) return;
-        if (process !== Process.Marking) return;
       }
     }
     marker.redraw();
@@ -179,6 +173,7 @@ chrome.runtime.onConnect.addListener((() => {
           marker.focusNext();
           break;
         case "close":
+          current = Symbol();
           clearSearchResult();
           break;
         default:
