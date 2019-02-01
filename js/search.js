@@ -4,6 +4,7 @@ const Search = function* (text, cain, ignoreBlank) {
   const c = reduce(t, (c, e) => c + e.textContent, "");
   let a;
   let i = 0, l = 0;
+  let index = 0;
 
   while (a = r.exec(c)) {
     // Avoid infinite loop.
@@ -31,17 +32,6 @@ const Search = function* (text, cain, ignoreBlank) {
     t.insert(i + 1, t.search(i).splitText(r.lastIndex - l));
     l += t.search(i++).data.length;
 
-    yield texts;
-  }
-};
-
-const CalcLayout = function* (marks) {
-  const r = document.createRange();
-  for (let mark of marks) {
-    r.selectNodeContents(mark.texts[0]);
-    const rect = r.getBoundingClientRect();
-    mark.top = rect.top;
-    mark.height = rect.height;
-    yield;
+    yield [index++, texts];
   }
 };

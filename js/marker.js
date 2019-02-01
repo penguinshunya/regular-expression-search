@@ -1,6 +1,6 @@
 const Mark = function () {
   this.texts;
-  this.nodes;
+  this.nodes = [];
   this.top;
   this.height;
   this.rtop;
@@ -186,28 +186,48 @@ Marker.context = Marker.canvas.getContext("2d");
     }
   };
 
-  Marker.prototype.generate = function* (marks) {
+  Marker.prototype.add = function (mark) {
+    this._marks.insertRank(mark.index, mark);
+  };
+
+  Marker.prototype.calc = function* () {
+    const r = document.createRange();
+    for (let mark of this._marks) {
+      r.selectNodeContents(mark.texts[0]);
+      const rect = r.getBoundingClientRect();
+      mark.top = rect.top;
+      mark.height = rect.height;
+      yield;
+    }
+  };
+
+  Marker.prototype.count = function () {
+    return this._marks.count();
+  };
+
+  Marker.prototype.wrap = function* () {
     const btop = document.body.getBoundingClientRect().top;
     const docHeight = $(document).height();
     const winHeight = window.innerHeight;
 
-    for (const m of marks) {
+    for (const m of this._marks) {
       const t = (m.top - btop) / (docHeight - m.height);
       const h = m.height / docHeight * winHeight;
 
       m.nodes = m.texts.map(n => wrapMark(this, n, m));
       m.rtop = t;
       m.rheight = h < 3 ? 3 : h;
-
-      this._marks.insertRank(m.index, m);
       yield;
     }
   };
 
-  Marker.prototype.clear = function () {
+  Marker.prototype.clean = function () {
     for (const mark of this._marks) {
       mark.nodes.forEach(m => {
-        m.contents().unwrap();
+        const p = m.contents().unwrap().parent();
+        if (p[0] != null && p.text().length <= 140) {
+          p[0].normalize();
+        }
       });
     }
     this._marks = new RankTreap();

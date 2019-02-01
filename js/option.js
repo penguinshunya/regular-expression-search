@@ -2,12 +2,10 @@ $(async () => {
   const markerColor = await getStorageValue("markerColor", MARKER_COLOR);
   const focusedMarkerColor = await getStorageValue("focusedMarkerColor", FOCUSED_MARKER_COLOR);
   const instant = await getStorageValue("instant", INSTANT);
-  const shuffle = await getStorageValue("shuffle", SHUFFLE);
   const ignoreBlank = await getStorageValue("ignoreBlank", IGNORE_BLANK);
   const background = await getStorageValue("background", BACKGROUND);
 
   check("instant", instant);
-  check("shuffle", shuffle);
   check("ignoreBlank", ignoreBlank);
   check("background", background);
 

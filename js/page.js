@@ -13,7 +13,6 @@ chrome.runtime.onConnect.addListener((() => {
   let process = Process.DoNothing;
   let count = 0;
 
-  let shuffle = SHUFFLE;
   let ignoreBlank = IGNORE_BLANK;
   let background = BACKGROUND;
 
@@ -21,7 +20,7 @@ chrome.runtime.onConnect.addListener((() => {
   let input = null;
 
   const clearSearchResult = () => {
-    marker.clear();
+    marker.clean();
     text = "";
     cain = null;
     count = 0;
@@ -51,15 +50,13 @@ chrome.runtime.onConnect.addListener((() => {
   })();
 
   const search = async sym => {
-    const marks = [];
-
     process = Process.Searching;
     postSearchProcess();
-    for (const t of Search(text, cain, ignoreBlank)) {
+    for (const [i, t] of Search(text, cain, ignoreBlank)) {
       const mark = new Mark();
+      mark.index = i;
       mark.texts = t;
-      marks.push(mark);
-
+      marker.add(mark);
       if (await wait()) {
         if (current !== sym) return;
         if (process !== Process.Searching) return;
@@ -68,23 +65,17 @@ chrome.runtime.onConnect.addListener((() => {
 
     process = Process.Calculating;
     postSearchProcess();
-    for (const _ of CalcLayout(marks)) {
+    for (const _ of marker.calc()) {
       if (await wait()) {
         if (current !== sym) return;
         if (process !== Process.Calculating) return;
       }
     }
-    count = marks.length;
-    for (const [i, m] of marks.entries()) {
-      m.index = i;
-    }
-    if (shuffle) {
-      marks.shuffle();
-    }
+    count = marker.count();
 
     process = Process.Marking;
     postSearchProcess();
-    for (const _ of marker.generate(marks)) {
+    for (const _ of marker.wrap()) {
       if (await wait()) {
         marker.redraw();
         if (current !== sym) return;
@@ -121,9 +112,6 @@ chrome.runtime.onConnect.addListener((() => {
         instant = request.value;
         postMessage(port, { instant: instant });
         break;
-      case "shuffle":
-        shuffle = request.value;
-        break;
       case "ignoreBlank":
         ignoreBlank = request.value;
         break;
@@ -140,7 +128,6 @@ chrome.runtime.onConnect.addListener((() => {
     const fc = await getStorageValue("focusedMarkerColor", FOCUSED_MARKER_COLOR);
     Marker.setMarkerColor(mc, true);
     Marker.setFocusedMarkerColor(fc, true);
-    shuffle = await getStorageValue("shuffle", SHUFFLE);
     ignoreBlank = await getStorageValue("ignoreBlank", IGNORE_BLANK);
     background = await getStorageValue("background", BACKGROUND);
   })();
