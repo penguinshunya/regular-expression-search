@@ -18,15 +18,17 @@
     width: 100%;
 }
 #count {
-    margin-right: 1.2em;
+    margin-right: 1.5em;
     text-align: right;
     white-space: nowrap;
 }
 #count.spinner-grow {
+    margin-right: 1.2em;
     width: 1.6rem;
     color: #aaaaaa;
 }
 #count.spinner-border {
+    margin-right: 1.2em;
     width: 1.4rem;
     color: #aaaaaa;
 }

@@ -29,8 +29,7 @@ chrome.runtime.onConnect.addListener((() => {
   };
 
   const postSearchProcess = () => {
-    if (port === null) return;
-    port.postMessage({
+    postMessage(port, {
       process: process,
       text: text,
       cain: cain,
@@ -115,7 +114,7 @@ chrome.runtime.onConnect.addListener((() => {
         break;
       case "instant":
         instant = request.value;
-        if (port !== null) port.postMessage({ instant: instant });
+        postMessage(port, { instant: instant });
         break;
       case "shuffle":
         shuffle = request.value;
@@ -144,7 +143,6 @@ chrome.runtime.onConnect.addListener((() => {
   return p => {
     p.onDisconnect.addListener(() => {
       saveHistory(text);
-      port = null;
     });
 
     p.onMessage.addListener(request => {
@@ -170,7 +168,7 @@ chrome.runtime.onConnect.addListener((() => {
       if (request.kind !== "init") return;
 
       port = p;
-      port.postMessage({
+      postMessage(port, {
         init: true,
         text: text,
         cain: cain,
@@ -208,7 +206,7 @@ const sleeping = (() => {
           if (response.sleep == null) return;
           resolve();
         });
-        port.postMessage({ sleep: true });
+        postMessage(port, { sleep: true });
       });
     } else {
       await sleep(0);

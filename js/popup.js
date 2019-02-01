@@ -3,7 +3,7 @@ $(() => {
   // it may make strange movements.
   chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
     const port = chrome.tabs.connect(tabs[0].id);
-    port.onDisconnect.addListener(window.close.bind(window));
+    port.onDisconnect.addListener(location.reload.bind(location));
 
     (async () => {
       const texts = await getStorageValue("texts", TEXTS);
@@ -13,7 +13,7 @@ $(() => {
       main(port, texts, cain, instant);
 
       // If have searched in this page, display count.
-      port.postMessage({ kind: "init" });
+      postMessage(port, { kind: "init" }) || location.reload();
     })();
   });
 });
@@ -54,16 +54,16 @@ const main = (port, texts, cain, instant) => {
 
   const movePrevSearchResult = () => {
     saveHistory(prevText);
-    port.postMessage({ kind: "prev" });
+    postMessage(port, { kind: "prev" });
   };
 
   const moveNextSearchResult = () => {
     saveHistory(prevText);
-    port.postMessage({ kind: "next" });
+    postMessage(port, { kind: "next" });
   };
 
   const clearSearchResult = () => {
-    port.postMessage({ kind: "close" });
+    postMessage(port, { kind: "close" });
     prevText = "";
   };
 
@@ -134,7 +134,7 @@ const main = (port, texts, cain, instant) => {
     prevText = r.text;
     prevCain = r.cain;
 
-    port.postMessage({
+    postMessage(port, {
       kind: "new",
       text: r.text,
       cain: r.cain,
@@ -153,7 +153,7 @@ const main = (port, texts, cain, instant) => {
     setCain(prevCain);
     searchWithoutSavingHistory();
 
-    port.postMessage({ kind: "updatePopup" });
+    postMessage(port, { kind: "updatePopup" });
   });
 
   port.onMessage.addListener(response => {
@@ -277,7 +277,7 @@ const main = (port, texts, cain, instant) => {
     prevText = r.text;
     prevCain = r.cain;
 
-    port.postMessage({
+    postMessage(port, {
       kind: "new",
       text: r.text,
       cain: r.cain,
@@ -289,7 +289,7 @@ const main = (port, texts, cain, instant) => {
     e.preventDefault();
     saveTempHistory();
     searchWithoutSavingHistory();
-    port.postMessage({
+    postMessage(port, {
       kind: "input",
       input: $("#search").val(),
     });
