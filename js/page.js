@@ -38,10 +38,20 @@ chrome.runtime.onConnect.addListener((() => {
     });
   };
 
+  const wait = (() => {
+    let now = new Date().getTime();
+    return async () => {
+      if (new Date().getTime() - now > 1000 / FPS) {
+        await sleeping(background);
+        now = new Date().getTime();
+        return true;
+      }
+      return false;
+    };
+  })();
+
   const search = async sym => {
     const marks = [];
-
-    let now = new Date().getTime();
 
     process = Process.Searching;
     postSearchProcess();
@@ -50,22 +60,18 @@ chrome.runtime.onConnect.addListener((() => {
       mark.texts = t;
       marks.push(mark);
 
-      if (new Date().getTime() - now > 1000 / FPS) {
-        await sleeping(background);
+      if (await wait()) {
         if (current !== sym) return;
         if (process !== Process.Searching) return;
-        now = new Date().getTime();
       }
     }
 
     process = Process.Calculating;
     postSearchProcess();
     for (const _ of CalcLayout(marks)) {
-      if (new Date().getTime() - now > 1000 / FPS) {
-        await sleeping(background);
+      if (await wait()) {
         if (current !== sym) return;
         if (process !== Process.Calculating) return;
-        now = new Date().getTime();
       }
     }
     count = marks.length;
@@ -79,15 +85,14 @@ chrome.runtime.onConnect.addListener((() => {
     process = Process.Marking;
     postSearchProcess();
     for (const _ of marker.generate(marks)) {
-      if (new Date().getTime() - now > 1000 / FPS) {
+      if (await wait()) {
         marker.redraw();
-        await sleeping(background);
         if (current !== sym) return;
         if (process !== Process.Marking) return;
-        now = new Date().getTime();
       }
     }
     marker.redraw();
+
     process = Process.Finish;
     postSearchProcess();
   };
