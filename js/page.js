@@ -39,7 +39,7 @@ chrome.runtime.onConnect.addListener((() => {
     });
   };
 
-  const search = async date => {
+  const search = async sym => {
     const marks = [];
 
     let now = new Date().getTime();
@@ -53,7 +53,7 @@ chrome.runtime.onConnect.addListener((() => {
 
       if (new Date().getTime() - now > 1000 / FPS) {
         await sleeping(background);
-        if (current !== date) return;
+        if (current !== sym) return;
         if (process !== Process.Searching) return;
         now = new Date().getTime();
       }
@@ -64,7 +64,7 @@ chrome.runtime.onConnect.addListener((() => {
     for (const _ of CalcLayout(marks)) {
       if (new Date().getTime() - now > 1000 / FPS) {
         await sleeping(background);
-        if (current !== date) return;
+        if (current !== sym) return;
         if (process !== Process.Calculating) return;
         now = new Date().getTime();
       }
@@ -83,7 +83,7 @@ chrome.runtime.onConnect.addListener((() => {
       if (new Date().getTime() - now > 1000 / FPS) {
         marker.redraw();
         await sleeping(background);
-        if (current !== date) return;
+        if (current !== sym) return;
         if (process !== Process.Marking) return;
         now = new Date().getTime();
       }
@@ -160,7 +160,7 @@ chrome.runtime.onConnect.addListener((() => {
       text = request.text;
       cain = request.cain;
 
-      current = new Date();
+      current = Symbol();
 
       // Asynchronous search.
       search(current);
