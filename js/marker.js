@@ -141,7 +141,7 @@ Marker.context = Marker.canvas.getContext("2d");
   };
 
   Marker.prototype.focusPrev = function () {
-    if (this._marks.count() === 0) returnn;
+    if (this._marks.count() === 0) return;
 
     if (this._curr == null) {
       this._curr = this._marks.search(this._marks.count() - 1);
@@ -155,7 +155,7 @@ Marker.context = Marker.canvas.getContext("2d");
   };
 
   Marker.prototype.focusNext = function () {
-    if (this._marks.count() === 0) returnn;
+    if (this._marks.count() === 0) return;
 
     if (this._curr == null) {
       this._curr = this._marks.search(0);
