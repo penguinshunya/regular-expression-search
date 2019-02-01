@@ -207,9 +207,7 @@ Marker.context = Marker.canvas.getContext("2d");
   Marker.prototype.clear = function () {
     for (const mark of this._marks) {
       mark.nodes.forEach(m => {
-        const par = m.contents().unwrap().parent()[0];
-        // In dynamic page, element may not exist.
-        if (par) par.normalize();
+        m.contents().unwrap();
       });
     }
     this._marks = new RankTreap();
