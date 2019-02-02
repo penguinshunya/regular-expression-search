@@ -15,4 +15,5 @@ const Process = {
   Calculating: 3,
   Marking: 4,
   Finish: 5,
+  Clearing: 6,
 };

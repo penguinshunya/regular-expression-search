@@ -164,6 +164,7 @@ const main = (port, texts, cain, instant) => {
   port.onMessage.addListener((() => {
     const searching = "spinner-grow spinner-grow-sm";
     const calculating = "spinner-border spinner-border-sm";
+    const clearing = calculating;
 
     // Only here can change the state of COUNT, PREV, NEXT element.
     // Trigger for change should not be a popup script.
@@ -216,6 +217,12 @@ const main = (port, texts, cain, instant) => {
           modifyCount(response.index, response.count);
           prevText = response.text;
           prevCain = response.cain;
+          break;
+        case Process.Clearing:
+          $("#count").text("");
+          removeSpinner();
+          $("#count").css("color", "#aaaaaa");
+          $("#count").addClass(clearing);
           break;
       }
     };

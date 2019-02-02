@@ -221,18 +221,14 @@ Marker.context = Marker.canvas.getContext("2d");
     }
   };
 
-  Marker.prototype.clean = function () {
+  Marker.prototype.destroy = function* () {
     for (const mark of this._marks) {
       mark.nodes.forEach(m => {
-        const p = m.contents().unwrap().parent();
-        if (p[0] != null && p.text().length <= 140) {
-          p[0].normalize();
-        }
+        m.contents().unwrap();
       });
+      yield;
     }
     this._marks = new RankTreap();
-    this._curr = null;
-    this._prev = null;
     markerColor = nextMarkerColor;
     focusedMarkerColor = nextFocusedMarkerColor;
     this.redraw();

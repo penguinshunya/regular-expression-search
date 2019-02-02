@@ -8,34 +8,18 @@ chrome.runtime.onConnect.addListener((() => {
   let cain = null;
   let marker = new Marker();
 
+  // delete marker list
+  let queue = [];
+
   // search process information
   let current;
   let process = Process.DoNothing;
-  let count = 0;
 
   let ignoreBlank = IGNORE_BLANK;
   let background = BACKGROUND;
 
   // popup information
   let input = null;
-
-  const clearSearchResult = () => {
-    marker.clean();
-    text = "";
-    cain = null;
-    count = 0;
-    process = Process.DoNothing;
-  };
-
-  const postSearchProcess = () => {
-    postMessage(port, {
-      process: process,
-      text: text,
-      cain: cain,
-      index: marker.index() + 1,
-      count: count,
-    });
-  };
 
   const wait = (() => {
     let now = new Date().getTime();
@@ -49,13 +33,23 @@ chrome.runtime.onConnect.addListener((() => {
     };
   })();
 
-  const search = async sym => {
+  const postSearchProcess = () => {
+    postMessage(port, {
+      process: process,
+      text: text,
+      cain: cain,
+      index: marker.index() + 1,
+      count: marker.count(),
+    });
+  };
+
+  const search = async curr => {
     process = Process.Searching;
     postSearchProcess();
     for (const [i, t] of Search(text, cain, ignoreBlank)) {
       marker.add(new Mark(i, t));
       if (await wait()) {
-        if (current !== sym) return;
+        if (current !== curr) return;
       }
     }
 
@@ -63,17 +57,16 @@ chrome.runtime.onConnect.addListener((() => {
     postSearchProcess();
     for (const _ of marker.calc()) {
       if (await wait()) {
-        if (current !== sym) return;
+        if (current !== curr) return;
       }
     }
-    count = marker.count();
 
     process = Process.Marking;
     postSearchProcess();
     for (const _ of marker.wrap()) {
       if (await wait()) {
         marker.redraw();
-        if (current !== sym) return;
+        if (current !== curr) return;
       }
     }
     marker.redraw();
@@ -124,6 +117,32 @@ chrome.runtime.onConnect.addListener((() => {
     Marker.setFocusedMarkerColor(fc, true);
     ignoreBlank = await getStorageValue("ignoreBlank", IGNORE_BLANK);
     background = await getStorageValue("background", BACKGROUND);
+
+    // When deleting the search result,
+    // add it to the queue without calling directly Marker.prototype.destroy().
+    // Leave deleting processing to this event loop.
+    while (true) {
+      let deleted = false;
+      while (queue.length) {
+        if (!deleted) {
+          process = Process.Clearing;
+          postSearchProcess();
+          deleted = true;
+        }
+        for (const _ of queue[0].destroy()) {
+          await wait();
+        }
+        queue.shift();
+      }
+      if (deleted) {
+        marker = new Marker();
+        text = "";
+        cain = null;
+        process = Process.DoNothing;
+        postSearchProcess();
+      }
+      await sleep(1000 / 30);
+    }
   })();
 
   return p => {
@@ -136,18 +155,23 @@ chrome.runtime.onConnect.addListener((() => {
       input = request.input;
     });
 
-    p.onMessage.addListener(request => {
+    p.onMessage.addListener(async request => {
       if (request.kind !== "new") return;
 
-      clearSearchResult();
+      // Update current variable and stop search currently being done.
+      const curr = Symbol();
+      current = curr;
+
+      queue.push(marker);
+      while (queue.length) {
+        await wait();
+        if (current !== curr) return;
+      }
 
       text = request.text;
       cain = request.cain;
 
-      current = Symbol();
-
-      // Asynchronous search.
-      search(current);
+      await search(curr);
     });
 
     p.onMessage.addListener(request => {
@@ -173,9 +197,10 @@ chrome.runtime.onConnect.addListener((() => {
           marker.focusNext();
           break;
         case "close":
+          // Update current variable and stop search currently being done.
           current = Symbol();
-          clearSearchResult();
-          break;
+          queue.push(marker);
+          return;
         default:
           return;
       }
