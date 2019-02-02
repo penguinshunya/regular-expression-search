@@ -248,5 +248,4 @@ Marker.context = Marker.canvas.getContext("2d");
       this.redraw();
     };
   })();
-
 }
