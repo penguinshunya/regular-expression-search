@@ -1,6 +1,4 @@
 $(() => {
-  // use async function. return value is promise.
-  // it may make strange movements.
   chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
     const port = chrome.tabs.connect(tabs[0].id);
     port.onDisconnect.addListener(location.reload.bind(location));
@@ -12,7 +10,6 @@ $(() => {
 
       main(port, texts, cain, instant);
 
-      // If have searched in this page, display count.
       postMessage(port, { kind: "init" }) || location.reload();
     })();
   });

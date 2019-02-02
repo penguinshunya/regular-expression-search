@@ -32,7 +32,7 @@ Marker.context = Marker.canvas.getContext("2d");
   let nextMarkerColor = markerColor;
   let nextFocusedMarkerColor = focusedMarkerColor;
 
-  const wrapMark = (() => {
+  const wrapWithMark = (() => {
     const origin = $("<mark>").attr("tabindex", "-1").css({
       margin: 0,
       border: "none",
@@ -192,7 +192,7 @@ Marker.context = Marker.canvas.getContext("2d");
 
   Marker.prototype.calc = function* () {
     const r = document.createRange();
-    for (let mark of this._marks) {
+    for (const mark of this._marks) {
       r.selectNodeContents(mark.texts[0]);
       const rect = r.getBoundingClientRect();
       mark.top = rect.top;
@@ -214,35 +214,39 @@ Marker.context = Marker.canvas.getContext("2d");
       const t = (m.top - btop) / (docHeight - m.height);
       const h = m.height / docHeight * winHeight;
 
-      m.nodes = m.texts.map(n => wrapMark(this, n, m));
+      m.nodes = m.texts.map(n => wrapWithMark(this, n, m));
       m.rtop = t;
       m.rheight = h < 3 ? 3 : h;
       yield;
     }
   };
 
-  Marker.prototype.destroy = function* () {
+  Marker.prototype.clear = (() => {
     const exclusions = [
       "pre",
     ];
 
-    for (const mark of this._marks) {
-      mark.nodes.forEach(m => {
-        const p = m.contents().unwrap().parent();
-        if (p[0] == null) return;
+    // It takes a long time to normalize an element with huge text.
+    // Don't normalize elements which are possibilities of having a huge text.
+    // Why not judge by the number of characters of text,
+    // textContent (or jQueryObject.text()) is a time-consuming process...
+    const normalize = parent => {
+      if (parent[0] == null) return;
+      if (exclusions.indexOf(parent[0].tagName.toLowerCase()) >= 0) return;
+      parent[0].normalize();
+    };
 
-        // It takes a long time to normalize an element with huge text.
-        // Don't normalize elements which are possibilities of having a huge text.
-        // Why not judge by the number of characters of text,
-        // textContent (or jQueryObject.text()) is a time-consuming process...
-        if (exclusions.indexOf(p[0].tagName.toLowerCase()) >= 0) return;
-        p[0].normalize();
-      });
-      yield;
-    }
-    this._marks = new RankTreap();
-    markerColor = nextMarkerColor;
-    focusedMarkerColor = nextFocusedMarkerColor;
-    this.redraw();
-  };
+    return function* () {
+      for (const mark of this._marks) {
+        mark.nodes.forEach(m => normalize(m.contents().unwrap().parent()));
+        mark.texts.forEach(t => normalize($(t).parent()));
+        yield;
+      }
+      this._marks = new RankTreap();
+      markerColor = nextMarkerColor;
+      focusedMarkerColor = nextFocusedMarkerColor;
+      this.redraw();
+    };
+  })();
+
 }

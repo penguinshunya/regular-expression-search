@@ -53,13 +53,13 @@ chrome.runtime.onConnect.addListener((() => {
 
     process = Process.Calculating;
     postSearchProcess();
-    for (const _ of marker.calc()) {
+    for (var _ of marker.calc()) {
       if (await wait() && current !== curr) return;
     }
 
     process = Process.Marking;
     postSearchProcess();
-    for (const _ of marker.wrap()) {
+    for (var _ of marker.wrap()) {
       if (await wait()) {
         marker.redraw();
         if (current !== curr) return;
@@ -83,6 +83,7 @@ chrome.runtime.onConnect.addListener((() => {
     marker.select(e.offsetY);
   });
 
+  // from background page
   chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
     switch (request.key) {
       case "markerColor":
@@ -105,7 +106,7 @@ chrome.runtime.onConnect.addListener((() => {
     sendResponse();
   });
 
-  // initialize
+  // Initialize and start event loop.
   (async () => {
     const mc = await getStorageValue("markerColor", MARKER_COLOR);
     const fc = await getStorageValue("focusedMarkerColor", FOCUSED_MARKER_COLOR);
@@ -115,7 +116,7 @@ chrome.runtime.onConnect.addListener((() => {
     background = await getStorageValue("background", BACKGROUND);
 
     // When deleting the search result,
-    // add it to the queue without calling directly Marker.prototype.destroy().
+    // add it to the queue without calling directly Marker.prototype.clear().
     // Leave deleting processing to this event loop.
     while (true) {
       let deleted = false;
@@ -125,7 +126,7 @@ chrome.runtime.onConnect.addListener((() => {
           postSearchProcess();
           deleted = true;
         }
-        for (const _ of queue[0].destroy()) {
+        for (var _ of queue[0].clear()) {
           await wait();
         }
         queue.shift();
@@ -208,6 +209,8 @@ chrome.runtime.onConnect.addListener((() => {
 const sleeping = (() => {
   return async work => {
     if (work) {
+      // Creating a connection object once,
+      // perhaps may lead to poor performance.
       const port = chrome.runtime.connect();
       return new Promise(resolve => {
         port.onMessage.addListener(response => {
