@@ -96,6 +96,10 @@ Marker.context = Marker.canvas.getContext("2d");
     return this._curr == null ? -1 : this._curr.index;
   };
 
+  Marker.prototype.count = function () {
+    return this._marks.count();
+  };
+
   Marker.prototype.focusMark = function () {
     if (this._prev === null) this._prev = this._curr;
 
@@ -112,7 +116,7 @@ Marker.context = Marker.canvas.getContext("2d");
   };
 
   Marker.prototype.redraw = function () {
-    if (this._marks.count() === 0) {
+    if (this.count() === 0) {
       Marker.canvas.width = 0;
       Marker.canvas.height = 0;
       return;
@@ -142,21 +146,21 @@ Marker.context = Marker.canvas.getContext("2d");
   };
 
   Marker.prototype.focusPrev = function () {
-    if (this._marks.count() === 0) return;
+    if (this.count() === 0) return;
 
     if (this._curr == null) {
-      this._curr = this._marks.search(this._marks.count() - 1);
+      this._curr = this._marks.search(this.count() - 1);
     } else {
       this._prev = this._curr;
 
       const i = this._marks.searchRank(this._curr.index)[1];
-      this._curr = this._marks.search(i - 1 < 0 ? this._marks.count() - 1 : i - 1);
+      this._curr = this._marks.search(i - 1 < 0 ? this.count() - 1 : i - 1);
     }
     this._focus();
   };
 
   Marker.prototype.focusNext = function () {
-    if (this._marks.count() === 0) return;
+    if (this.count() === 0) return;
 
     if (this._curr == null) {
       this._curr = this._marks.search(0);
@@ -164,7 +168,7 @@ Marker.context = Marker.canvas.getContext("2d");
       this._prev = this._curr;
 
       const i = this._marks.searchRank(this._curr.index)[1];
-      this._curr = this._marks.search(i + 1 >= this._marks.count() ? 0 : i + 1);
+      this._curr = this._marks.search(i + 1 >= this.count() ? 0 : i + 1);
     }
     this._focus();
   };
@@ -199,10 +203,6 @@ Marker.context = Marker.canvas.getContext("2d");
       mark.height = rect.height;
       yield;
     }
-  };
-
-  Marker.prototype.count = function () {
-    return this._marks.count();
   };
 
   Marker.prototype.wrap = function* () {
