@@ -50,13 +50,17 @@ chrome.runtime.onConnect.addListener((() => {
     postSearchProcess();
     for (const [i, t] of Search(text, cain, ignoreBlank)) {
       marker.add(new Mark(i, t));
-      if (await wait() && current !== curr) return;
+      if (await wait()) {
+        if (current !== curr) return;
+      }
     }
 
     process = Process.Calculating;
     postSearchProcess();
     for (var _ of marker.calc()) {
-      if (await wait() && current !== curr) return;
+      if (await wait()) {
+        if (current !== curr) return;
+      }
     }
 
     process = Process.Marking;
@@ -95,8 +99,7 @@ chrome.runtime.onConnect.addListener((() => {
         Marker.setFocusedMarkerColor(request.value);
         break;
       case "instant":
-        instant = request.value;
-        postMessage(port, { instant: instant });
+        postMessage(port, { instant: request.value });
         break;
       case "ignoreBlank":
         ignoreBlank = request.value;
