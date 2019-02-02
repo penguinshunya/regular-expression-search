@@ -21,6 +21,8 @@ chrome.runtime.onConnect.addListener((() => {
   // popup information
   let input = null;
 
+  // If return value is true, there is a possibility that
+  // another process may have intervened in the middle.
   const wait = (() => {
     let now = new Date().getTime();
     return async () => {
