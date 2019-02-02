@@ -48,17 +48,13 @@ chrome.runtime.onConnect.addListener((() => {
     postSearchProcess();
     for (const [i, t] of Search(text, cain, ignoreBlank)) {
       marker.add(new Mark(i, t));
-      if (await wait()) {
-        if (current !== curr) return;
-      }
+      if (await wait() && current !== curr) return;
     }
 
     process = Process.Calculating;
     postSearchProcess();
     for (const _ of marker.calc()) {
-      if (await wait()) {
-        if (current !== curr) return;
-      }
+      if (await wait() && current !== curr) return;
     }
 
     process = Process.Marking;
