@@ -222,9 +222,21 @@ Marker.context = Marker.canvas.getContext("2d");
   };
 
   Marker.prototype.destroy = function* () {
+    const exclusions = [
+      "pre",
+    ];
+
     for (const mark of this._marks) {
       mark.nodes.forEach(m => {
-        m.contents().unwrap();
+        const p = m.contents().unwrap().parent();
+        if (p[0] == null) return;
+
+        // It takes a long time to normalize an element with huge text.
+        // Don't normalize elements which are possibilities of having a huge text.
+        // Why not judge by the number of characters of text,
+        // textContent (or jQueryObject.text()) is a time-consuming process...
+        if (exclusions.indexOf(p[0].tagName.toLowerCase()) >= 0) return;
+        p[0].normalize();
       });
       yield;
     }
