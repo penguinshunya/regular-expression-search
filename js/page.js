@@ -152,6 +152,18 @@ chrome.runtime.onConnect.addListener((() => {
       input = request.input;
     });
 
+    p.onMessage.addListener(request => {
+      if (request.kind !== "init") return;
+
+      port = p;
+      postMessage(port, {
+        init: true,
+        text: text,
+        cain: cain,
+        input: input,
+      });
+    });
+
     p.onMessage.addListener(async request => {
       if (request.kind !== "new") return;
 
@@ -172,15 +184,11 @@ chrome.runtime.onConnect.addListener((() => {
     });
 
     p.onMessage.addListener(request => {
-      if (request.kind !== "init") return;
+      if (request.kind !== "close") return;
 
-      port = p;
-      postMessage(port, {
-        init: true,
-        text: text,
-        cain: cain,
-        input: input,
-      });
+      // Update current variable and stop search currently being done.
+      current = Symbol();
+      queue.push(marker);
     });
 
     p.onMessage.addListener(request => {
@@ -193,11 +201,6 @@ chrome.runtime.onConnect.addListener((() => {
         case "next":
           marker.focusNext();
           break;
-        case "close":
-          // Update current variable and stop search currently being done.
-          current = Symbol();
-          queue.push(marker);
-          return;
         default:
           return;
       }
@@ -205,22 +208,3 @@ chrome.runtime.onConnect.addListener((() => {
     });
   };
 })());
-
-const sleeping = (() => {
-  return async work => {
-    if (work) {
-      // Creating a connection object once,
-      // perhaps may lead to poor performance.
-      const port = chrome.runtime.connect();
-      return new Promise(resolve => {
-        port.onMessage.addListener(response => {
-          if (response.sleep == null) return;
-          resolve();
-        });
-        postMessage(port, { sleep: true });
-      });
-    } else {
-      await sleep(0);
-    }
-  };
-})();
