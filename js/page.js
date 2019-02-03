@@ -74,10 +74,11 @@ chrome.runtime.onConnect.addListener((() => {
 
     proc.status = Process.Marking;;
     postSearchProcess(pid);
+    let cnt = 0;
     for (var _ of marker.wrap()) {
       if (await wait()) {
         if (current !== pid) return;
-        marker.redraw();
+        if ((cnt = ++cnt % 15) === 0) marker.redraw();
       }
     }
     marker.redraw();
@@ -85,10 +86,6 @@ chrome.runtime.onConnect.addListener((() => {
     proc.status = Process.Finish;
     postSearchProcess(pid);
   };
-
-  // $(window).resize(() => {
-  //   process().marker.redraw();
-  // });
 
   // from background page
   chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
@@ -156,7 +153,7 @@ chrome.runtime.onConnect.addListener((() => {
         }
         let destroy = true;
         for (var _ of procs[pid].marker.destroy()) {
-          if (!(await wait())) continue;
+          if (!await wait()) continue;
           const s = procs[current].status;
           if (s !== Process.DoNothing && s !== Process.Finish) {
             destroy = false;
