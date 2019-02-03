@@ -3,20 +3,24 @@ chrome.runtime.onConnect.addListener((() => {
   let FPS = 60;
   let port = null;
 
-  // search information
-  let text = null;
-  let cain = null;
-  let marker = new Marker();
-
-  // delete marker list
-  let queue = [];
-
-  // search process information
-  let current;
-  let process = Process.DoNothing;
-
+  let mc = MARKER_COLOR;
+  let fc = FOCUSED_MARKER_COLOR;
+  let nmc = mc;
+  let nfc = fc;
   let ignoreBlank = IGNORE_BLANK;
   let background = BACKGROUND;
+
+  const idle = 0;
+  const procs = {
+    [idle]: {
+      status: Process.DoNothing,
+      marker: new Marker(),
+      text: null,
+      cain: null,
+    }
+  };
+  let maxpid = 1;
+  let current = idle;
 
   // popup information
   let input = null;
@@ -35,68 +39,65 @@ chrome.runtime.onConnect.addListener((() => {
     };
   })();
 
-  const postSearchProcess = () => {
+  const postSearchProcess = (pid = idle) => {
+    const p = procs[pid];
     postMessage(port, {
-      process: process,
-      text: text,
-      cain: cain,
-      index: marker.index() + 1,
-      count: marker.count(),
+      process: p.status,
+      text: p.text,
+      cain: p.cain,
+      index: p.marker.index() + 1,
+      count: p.marker.count(),
     });
   };
 
-  const search = async curr => {
-    process = Process.Searching;
-    postSearchProcess();
-    for (const [i, t] of Search(text, cain, ignoreBlank)) {
+  // It is possible to stop search by updating current variable.
+  const search = async pid => {
+    const proc = procs[pid];
+    const marker = proc.marker;
+
+    marker.init(mc, fc);
+
+    for (const [i, t] of SearchAndSplit(proc.text, proc.cain, ignoreBlank)) {
       marker.add(new Mark(i, t));
       if (await wait()) {
-        if (current !== curr) return;
+        if (current !== pid) return;
       }
     }
 
-    process = Process.Calculating;
-    postSearchProcess();
+    proc.status = Process.Calculating;
+    postSearchProcess(pid);
     for (var _ of marker.calc()) {
       if (await wait()) {
-        if (current !== curr) return;
+        if (current !== pid) return;
       }
     }
 
-    process = Process.Marking;
-    postSearchProcess();
+    proc.status = Process.Marking;;
+    postSearchProcess(pid);
     for (var _ of marker.wrap()) {
       if (await wait()) {
+        if (current !== pid) return;
         marker.redraw();
-        if (current !== curr) return;
       }
     }
     marker.redraw();
 
-    process = Process.Finish;
-    postSearchProcess();
+    proc.status = Process.Finish;
+    postSearchProcess(pid);
   };
 
-  $(window).resize(() => {
-    marker.redraw();
-  });
-
-  $(Marker.canvas).on("mousemove", e => {
-    marker.changeCursor(e.offsetY);
-  });
-
-  $(Marker.canvas).click(e => {
-    marker.select(e.offsetY);
-  });
+  // $(window).resize(() => {
+  //   process().marker.redraw();
+  // });
 
   // from background page
   chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
     switch (request.key) {
       case "markerColor":
-        Marker.setMarkerColor(request.value);
+        nmc = request.value;
         break;
       case "focusedMarkerColor":
-        Marker.setFocusedMarkerColor(request.value);
+        nfc = request.value;
         break;
       case "instant":
         postMessage(port, { instant: request.value });
@@ -113,43 +114,65 @@ chrome.runtime.onConnect.addListener((() => {
 
   // Initialize and start event loop.
   (async () => {
-    const mc = await getStorageValue("markerColor", MARKER_COLOR);
-    const fc = await getStorageValue("focusedMarkerColor", FOCUSED_MARKER_COLOR);
-    Marker.setMarkerColor(mc, true);
-    Marker.setFocusedMarkerColor(fc, true);
+    procs[idle].marker.init(mc, fc);
+
+    nmc = await getStorageValue("markerColor", MARKER_COLOR);
+    nfc = await getStorageValue("focusedMarkerColor", FOCUSED_MARKER_COLOR);
     ignoreBlank = await getStorageValue("ignoreBlank", IGNORE_BLANK);
     background = await getStorageValue("background", BACKGROUND);
 
-    // When deleting the search result,
-    // add it to the queue without calling directly Marker.prototype.clear().
-    // Leave deleting processing to this event loop.
     while (true) {
-      let deleted = false;
-      while (queue.length) {
-        if (!deleted) {
-          process = Process.Clearing;
-          postSearchProcess();
-          deleted = true;
-        }
-        for (var _ of queue[0].clear()) {
-          await wait();
-        }
-        queue.shift();
-      }
-      if (deleted) {
-        marker = new Marker();
-        text = "";
-        cain = null;
-        process = Process.DoNothing;
+      await sleep(1000 / 30);
+
+      // Clear mark elements.
+      if (current === idle) {
+        procs[idle].status = Process.Clearing;
         postSearchProcess();
       }
-      await sleep(1000 / 30);
+      for (const pid in procs) {
+        if (pid == idle) continue;
+        if (procs[pid].status !== Process.Clearing) {
+          continue;
+        }
+        for (var _ of procs[pid].marker.clear()) {
+          await wait();
+        }
+        procs[pid].status = Process.Zombie;
+      }
+      if (current === idle) {
+        procs[idle].status = Process.DoNothing;
+        postSearchProcess();
+      }
+
+      // Normalize text and destroy process.
+      for (const pid in procs) {
+        if (pid == idle) continue;
+        if (procs[pid].status !== Process.Zombie) {
+          continue;
+        }
+        const s = procs[current].status;
+        if (s !== Process.DoNothing && s !== Process.Finish) {
+          continue;
+        }
+        let destroy = true;
+        for (var _ of procs[pid].marker.destroy()) {
+          if (!(await wait())) continue;
+          const s = procs[current].status;
+          if (s !== Process.DoNothing && s !== Process.Finish) {
+            destroy = false;
+            break;
+          }
+        }
+        if (destroy) {
+          delete procs[pid];
+        }
+      }
     }
   })();
 
   return p => {
     p.onDisconnect.addListener(() => {
-      saveHistory(text);
+      saveHistory(procs[current].text);
     });
 
     p.onMessage.addListener(request => {
@@ -163,8 +186,8 @@ chrome.runtime.onConnect.addListener((() => {
       port = p;
       postMessage(port, {
         init: true,
-        text: text,
-        cain: cain,
+        text: procs[current].text,
+        cain: procs[current].cain,
         input: input,
       });
     });
@@ -172,28 +195,30 @@ chrome.runtime.onConnect.addListener((() => {
     p.onMessage.addListener(async request => {
       if (request.kind !== "new") return;
 
+      mc = nmc;
+      fc = nfc;
+
+      procs[current].status = Process.Clearing;
+
       // Update current variable and stop search currently being done.
-      const curr = Symbol();
-      current = curr;
+      current = maxpid++;
 
-      queue.push(marker);
-      while (queue.length) {
-        await wait();
-        if (current !== curr) return;
-      }
+      procs[current] = {
+        status: Process.Searching,
+        marker: new Marker(),
+        text: request.text,
+        cain: request.cain,
+      };
+      postSearchProcess(current);
 
-      text = request.text;
-      cain = request.cain;
-
-      await search(curr);
+      await search(current);
     });
 
     p.onMessage.addListener(request => {
       if (request.kind !== "close") return;
 
-      // Update current variable and stop search currently being done.
-      current = Symbol();
-      queue.push(marker);
+      procs[current].status = Process.Clearing;
+      current = idle;
     });
 
     p.onMessage.addListener(request => {
@@ -201,15 +226,15 @@ chrome.runtime.onConnect.addListener((() => {
         case "updatePopup":
           break;
         case "prev":
-          marker.focusPrev();
+          procs[current].marker.focusPrev();
           break;
         case "next":
-          marker.focusNext();
+          procs[current].marker.focusNext();
           break;
         default:
           return;
       }
-      postSearchProcess();
+      postSearchProcess(current);
     });
   };
 })());

@@ -12,28 +12,27 @@ const Marker = function () {
   this._marks = new RankTreap();
   this._curr = null;
   this._prev = null;
+  this._canvas;
+  this._context;
+  this._mc;
+  this._fc;
+  this._destroyed = 0;
 };
 
-Marker.canvas = $("<canvas>").css({
-  zIndex: 65536,
-  position: "fixed",
-  margin: 0,
-  padding: 0,
-  top: 0,
-  right: 0,
-}).appendTo("body")[0];
-Marker.canvas.width = 0;
-Marker.canvas.height = 0;
-Marker.context = Marker.canvas.getContext("2d");
-
 {
-  let markerColor = MARKER_COLOR;
-  let focusedMarkerColor = FOCUSED_MARKER_COLOR;
-  let nextMarkerColor = markerColor;
-  let nextFocusedMarkerColor = focusedMarkerColor;
+  const canvases = [];
+
+  const canvas = $("<canvas>").css({
+    zIndex: 65536,
+    position: "fixed",
+    margin: 0,
+    padding: 0,
+    top: 0,
+    right: 0,
+  });
 
   const wrapWithMark = (() => {
-    const origin = $("<mark>").attr("tabindex", "-1").css({
+    const org = $("<mark>").attr("tabindex", "-1").css({
       margin: 0,
       border: "none",
       padding: 0,
@@ -49,23 +48,23 @@ Marker.context = Marker.canvas.getContext("2d");
     };
 
     return (m, node, mrk) => {
-      const mark = origin.clone();
+      const mark = org.clone();
       mark.data("mark", mrk);
       mark.on("click", clickMark(m));
       mark.css({
-        backgroundColor: markerColor,
-        color: blackOrWhite(markerColor),
+        backgroundColor: m._mc,
+        color: blackOrWhite(m._mc),
       });
       return $(node).wrap(mark).parent();
     };
   })();
 
   const getMarkFromY = (m, y) => {
-    const t = y / Marker.canvas.height;
+    const t = y / m._canvas.height;
 
     for (const mark of m._marks) {
       const top = mark.rtop;
-      const height = mark.rheight / Marker.canvas.height;
+      const height = mark.rheight / m._canvas.height;
 
       if (t >= top && t <= top + height) {
         return mark;
@@ -74,21 +73,25 @@ Marker.context = Marker.canvas.getContext("2d");
     return null;
   };
 
-  Marker.setMarkerColor = (mc, immediate = false) => {
-    if (immediate) {
-      markerColor = mc;
-      nextMarkerColor = mc;
-    } else {
-      nextMarkerColor = mc;
+  Marker.prototype._focus = function () {
+    this.focusMark();
+    this.redraw();
+  };
+
+  Marker.prototype._select = function (y) {
+    const mark = getMarkFromY(this, y);
+    if (mark !== null) {
+      this._prev = this._curr;
+      this._curr = mark;
+      this._focus();
     }
   };
 
-  Marker.setFocusedMarkerColor = (fc, immediate = false) => {
-    if (immediate) {
-      focusedMarkerColor = fc;
-      nextFocusedMarkerColor = fc;
+  Marker.prototype._changeCursor = function (y) {
+    if (getMarkFromY(this, y) !== null) {
+      $(this._canvas).css("cursor", "pointer");
     } else {
-      nextFocusedMarkerColor = fc;
+      $(this._canvas).css("cursor", "default");
     }
   };
 
@@ -100,16 +103,37 @@ Marker.context = Marker.canvas.getContext("2d");
     return this._marks.count();
   };
 
+  Marker.prototype.init = function (mc, fc) {
+    this._mc = mc;
+    this._fc = fc;
+
+    this._canvas = canvas.clone().appendTo("body")[0];
+    this._context = this._canvas.getContext("2d");
+
+    $(this._canvas).on("click", e => this._select(e.offsetY));
+    $(this._canvas).on("mousemove", e => this._changeCursor(e.offsetY));
+    $(window).resize(this.redraw.bind(this));
+
+    canvases.push(this._canvas);
+    for (const c of canvases) {
+      if (c === this._canvas) {
+        $(c).css("zIndex", 65537);
+      } else {
+        $(c).css("zIndex", 65536);
+      }
+    }
+  };
+
   Marker.prototype.focusMark = function () {
     if (this._prev === null) this._prev = this._curr;
 
     this._prev.nodes.forEach(mark => mark.css({
-      backgroundColor: markerColor,
-      color: blackOrWhite(markerColor),
+      backgroundColor: this._mc,
+      color: blackOrWhite(this._mc),
     }));
     this._curr.nodes.forEach(mark => mark.css({
-      backgroundColor: focusedMarkerColor,
-      color: blackOrWhite(focusedMarkerColor),
+      backgroundColor: this._fc,
+      color: blackOrWhite(this._fc),
     }));
 
     this._curr.nodes[0].focus();
@@ -117,32 +141,27 @@ Marker.context = Marker.canvas.getContext("2d");
 
   Marker.prototype.redraw = function () {
     if (this.count() === 0) {
-      Marker.canvas.width = 0;
-      Marker.canvas.height = 0;
+      this._canvas.width = 0;
+      this._canvas.height = 0;
       return;
     }
 
-    Marker.context.clearRect(0, 0, Marker.canvas.width, Marker.canvas.height);
+    this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
 
-    Marker.canvas.width = 16;
-    Marker.canvas.height = window.innerHeight;
+    this._canvas.width = 16;
+    this._canvas.height = window.innerHeight;
 
     for (const m of this._marks) {
-      Marker.context.rect(0, m.rtop * Marker.canvas.height, 16, m.rheight);
+      this._context.rect(0, m.rtop * this._canvas.height, 16, m.rheight);
     }
-    Marker.context.fillStyle = markerColor;
-    Marker.context.fill();
+    this._context.fillStyle = this._mc;
+    this._context.fill();
 
     if (this._curr !== null) {
       const m = this._curr;
-      Marker.context.fillStyle = focusedMarkerColor;
-      Marker.context.fillRect(0, m.rtop * Marker.canvas.height, 16, m.rheight);
+      this._context.fillStyle = this._fc;
+      this._context.fillRect(0, m.rtop * this._canvas.height, 16, m.rheight);
     }
-  };
-
-  Marker.prototype._focus = function () {
-    this.focusMark();
-    this.redraw();
   };
 
   Marker.prototype.focusPrev = function () {
@@ -173,34 +192,17 @@ Marker.context = Marker.canvas.getContext("2d");
     this._focus();
   };
 
-  Marker.prototype.select = function (y) {
-    const mark = getMarkFromY(this, y);
-    if (mark !== null) {
-      this._prev = this._curr;
-      this._curr = mark;
-      this._focus();
-    }
-  };
-
-  Marker.prototype.changeCursor = function (y) {
-    if (getMarkFromY(this, y) !== null) {
-      $(Marker.canvas).css("cursor", "pointer");
-    } else {
-      $(Marker.canvas).css("cursor", "default");
-    }
-  };
-
-  Marker.prototype.add = function (mark) {
-    this._marks.insertRank(mark.index, mark);
+  Marker.prototype.add = function (m) {
+    this._marks.insertRank(m.index, m);
   };
 
   Marker.prototype.calc = function* () {
     const r = document.createRange();
-    for (const mark of this._marks) {
-      r.selectNodeContents(mark.texts[0]);
+    for (const m of this._marks) {
+      r.selectNodeContents(m.texts[0]);
       const rect = r.getBoundingClientRect();
-      mark.top = rect.top;
-      mark.height = rect.height;
+      m.top = rect.top;
+      m.height = rect.height;
       yield;
     }
   };
@@ -221,7 +223,16 @@ Marker.context = Marker.canvas.getContext("2d");
     }
   };
 
-  Marker.prototype.clear = (() => {
+  Marker.prototype.clear = function* () {
+    for (const m of this._marks) {
+      m.nodes.forEach(n => n.contents().unwrap());
+      yield;
+    }
+    this._canvas.width = 0;
+    this._canvas.height = 0;
+  };
+
+  Marker.prototype.destroy = (() => {
     const exclusions = [
       "pre",
     ];
@@ -230,22 +241,22 @@ Marker.context = Marker.canvas.getContext("2d");
     // Don't normalize elements which are possibilities of having a huge text.
     // Why not judge by the number of characters of text,
     // textContent (or jQueryObject.text()) is a time-consuming process...
-    const normalize = parent => {
-      if (parent[0] == null) return;
-      if (exclusions.indexOf(parent[0].tagName.toLowerCase()) >= 0) return;
-      parent[0].normalize();
+    const normalize = text => {
+      const parent = $(text).parent()[0];
+      if (parent == null) return;
+      if (exclusions.indexOf(parent.tagName.toLowerCase()) >= 0) return;
+      parent.normalize();
     };
 
     return function* () {
-      for (const mark of this._marks) {
-        mark.nodes.forEach(m => normalize(m.contents().unwrap().parent()));
-        mark.texts.forEach(t => normalize($(t).parent()));
+      for (let i = this._destroyed; i < this.count(); i++) {
+        this._marks.search(i).texts.forEach(normalize);
+        this._destroyed++;
         yield;
       }
-      this._marks = new RankTreap();
-      markerColor = nextMarkerColor;
-      focusedMarkerColor = nextFocusedMarkerColor;
-      this.redraw();
+      $(this._canvas).remove();
+      const i = canvases.indexOf(this._canvas);
+      canvases.splice(i, 1);
     };
   })();
 }

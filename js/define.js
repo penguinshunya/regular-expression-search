@@ -16,4 +16,5 @@ const Process = {
   Marking: 4,
   Finish: 5,
   Clearing: 6,
+  Zombie: 7,
 };
