@@ -72,7 +72,7 @@ chrome.runtime.onConnect.addListener((() => {
       }
     }
 
-    proc.status = Process.Marking;;
+    proc.status = Process.Marking;
     postSearchProcess(pid);
     let cnt = 0;
     for (var _ of marker.wrap()) {
