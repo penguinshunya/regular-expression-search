@@ -1,6 +1,6 @@
 #container {
     display: flex;
-    padding: 0.5em;
+    padding: 0.1em 0.2em;
 }
 *:focus {
     outline: 0;
@@ -8,7 +8,7 @@
 #search_wrapper {
     display: flex;
     align-items: center;
-    width: 480px;
+    width: 440px;
     font-size: 0.8em;
 }
 #search {
@@ -18,17 +18,15 @@
     width: 100%;
 }
 #count {
-    margin-right: 1.5em;
+    margin-right: 1.2em;
     text-align: right;
     white-space: nowrap;
 }
 #count.spinner-grow {
-    margin-right: 1.2em;
     width: 1.6rem;
     color: #aaaaaa;
 }
 #count.spinner-border {
-    margin-right: 1.2em;
     width: 1.4rem;
     color: #aaaaaa;
 }
