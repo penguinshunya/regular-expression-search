@@ -141,7 +141,7 @@ chrome.runtime.onConnect.addListener((() => {
         postSearchProcess();
       }
 
-      // Normalize text and destroy process.
+      // Normalize text and destroy zombie process.
       for (const pid in procs) {
         if (pid == idle) continue;
         if (procs[pid].status !== Process.Zombie) {

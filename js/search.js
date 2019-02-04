@@ -21,22 +21,20 @@ const SearchAndSplit = function* (text, cain, ignoreBlank) {
     while (a.index >= l + t.search(i).data.length) {
       l += t.search(i++).data.length;
     }
-    t.insert(i + 1, t.search(i).splitText(a.index - l));
-    l += t.search(i++).data.length;
+    if (a.index > l) {
+      t.insert(i + 1, t.search(i).splitText(a.index - l));
+      l += t.search(i++).data.length;
+    }
 
-    while (a.index + a[0].length > l + t.search(i).data.length) {
-      // If we search many times, there are times
-      // When we can create a text node with empty characters.
-      if (t.search(i).data === "") {
-        i++;
-        continue;
-      }
+    while (r.lastIndex > l + t.search(i).data.length) {
       texts.push(t.search(i));
       l += t.search(i++).data.length;
     }
     texts.push(t.search(i));
-    t.insert(i + 1, t.search(i).splitText(r.lastIndex - l));
-    l += t.search(i++).data.length;
+    if (r.lastIndex < l + t.search(i).data.length) {
+      t.insert(i + 1, t.search(i).splitText(r.lastIndex - l));
+      l += t.search(i++).data.length;
+    }
 
     yield [index++, texts];
   }

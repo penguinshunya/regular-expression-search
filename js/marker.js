@@ -244,7 +244,7 @@ const Marker = function () {
     // It takes a long time to normalize an element with huge text.
     // Don't normalize elements which are possibilities of having a huge text.
     // Why not judge by the number of characters of text,
-    // textContent (or jQueryObject.text()) is a time-consuming process...
+    // textContent (or jQueryObject.text()) is a time-consuming process.
     const normalize = text => {
       const parent = $(text).parent()[0];
       if (parent == null) return;
