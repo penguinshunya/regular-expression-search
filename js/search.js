@@ -25,6 +25,12 @@ const SearchAndSplit = function* (text, cain, ignoreBlank) {
     l += t.search(i++).data.length;
 
     while (a.index + a[0].length > l + t.search(i).data.length) {
+      // If we search many times, there are times
+      // When we can create a text node with empty characters.
+      if (t.search(i).data === "") {
+        i++;
+        continue;
+      }
       texts.push(t.search(i));
       l += t.search(i++).data.length;
     }

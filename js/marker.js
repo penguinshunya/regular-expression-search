@@ -10,6 +10,7 @@ const Mark = function (i, t) {
 
 const Marker = function () {
   this._marks = new RankTreap();
+  this._dispCount = 0;
   this._curr = null;
   this._prev = null;
   this._canvas;
@@ -122,6 +123,7 @@ const Marker = function () {
         $(c).css("zIndex", 65536);
       }
     }
+    this.redraw();
   };
 
   Marker.prototype.focusMark = function () {
@@ -140,7 +142,7 @@ const Marker = function () {
   };
 
   Marker.prototype.redraw = function () {
-    if (this.count() === 0) {
+    if (this._dispCount === 0) {
       this._canvas.width = 0;
       this._canvas.height = 0;
       return;
@@ -151,7 +153,8 @@ const Marker = function () {
     this._canvas.width = 16;
     this._canvas.height = window.innerHeight;
 
-    for (const m of this._marks) {
+    for (let i = 0; i < this._dispCount; i++) {
+      const m = this._marks.search(i);
       this._context.rect(0, m.rtop * this._canvas.height, 16, m.rheight);
     }
     this._context.fillStyle = this._mc;
@@ -165,21 +168,21 @@ const Marker = function () {
   };
 
   Marker.prototype.focusPrev = function () {
-    if (this.count() === 0) return;
+    if (this._dispCount === 0) return;
 
     if (this._curr == null) {
-      this._curr = this._marks.search(this.count() - 1);
+      this._curr = this._marks.search(this._dispCount - 1);
     } else {
       this._prev = this._curr;
 
       const i = this._marks.searchRank(this._curr.index)[1];
-      this._curr = this._marks.search(i - 1 < 0 ? this.count() - 1 : i - 1);
+      this._curr = this._marks.search(i - 1 < 0 ? this._dispCount - 1 : i - 1);
     }
     this._focus();
   };
 
   Marker.prototype.focusNext = function () {
-    if (this.count() === 0) return;
+    if (this._dispCount === 0) return;
 
     if (this._curr == null) {
       this._curr = this._marks.search(0);
@@ -187,7 +190,7 @@ const Marker = function () {
       this._prev = this._curr;
 
       const i = this._marks.searchRank(this._curr.index)[1];
-      this._curr = this._marks.search(i + 1 >= this.count() ? 0 : i + 1);
+      this._curr = this._marks.search(i + 1 >= this._dispCount ? 0 : i + 1);
     }
     this._focus();
   };
@@ -219,6 +222,7 @@ const Marker = function () {
       m.nodes = m.texts.map(n => wrapWithMark(this, n, m));
       m.rtop = t;
       m.rheight = h < 3 ? 3 : h;
+      this._dispCount++;
       yield;
     }
   };
