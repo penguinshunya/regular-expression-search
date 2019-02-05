@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Regular Expression Search",
   "short_name": "regex search",
-  "version": "2.5.0.3",
+  "version": "2.5.0.4",
   "description": "search using regular expression on chrome extension",
   "commands": {
     "_execute_browser_action": {
@@ -11,6 +11,11 @@
         "mac": "Command+Shift+F"
       }
     }
+  },
+  "icons": {
+    "16": "image/icon16.png",
+    "48": "image/icon48.png",
+    "128": "image/icon128.png"
   },
   "browser_action": {
     "default_popup": "popup.html"
