@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Regular Expression Search",
   "short_name": "regex search",
-  "version": "2.5.1.0",
+  "version": "2.5.2.0",
   "description": "search using regular expression on chrome extension",
   "commands": {
     "_execute_browser_action": {
@@ -51,5 +51,6 @@
     "storage",
     "*://*/*"
   ],
-  "default_locale": "en"
+  "default_locale": "en",
+  "content_security_policy": "script-src 'self' https://ssl.google-analytics.com; object-src 'self'"
 }
