@@ -1,0 +1,18 @@
+{
+  "instantSearch": {
+    "message": "Instant Search",
+    "description": ""
+  },
+  "ignoreBlank": {
+    "message": "Ignore Blank String",
+    "description": ""
+  },
+  "workInBackground": {
+    "message": "Work in Background",
+    "description": ""
+  },
+  "color": {
+    "message": "Marker Color",
+    "description": ""
+  }
+}

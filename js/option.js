@@ -5,6 +5,11 @@ $(async () => {
   const ignoreBlank = await getStorageValue("ignoreBlank", IGNORE_BLANK);
   const background = await getStorageValue("background", BACKGROUND);
 
+  $("label[for=instant]").text(chrome.i18n.getMessage("instantSearch"));
+  $("label[for=ignoreBlank]").text(chrome.i18n.getMessage("ignoreBlank"));
+  $("label[for=background]").text(chrome.i18n.getMessage("workInBackground"));
+  $("label[for=color]").text(chrome.i18n.getMessage("color"));
+
   check("instant", instant);
   check("ignoreBlank", ignoreBlank);
   check("background", background);

@@ -52,5 +52,6 @@
     "activeTab",
     "storage",
     "*://*/*"
-  ]
+  ],
+  "default_locale": "en"
 }

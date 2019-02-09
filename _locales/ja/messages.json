@@ -1,0 +1,18 @@
+{
+  "instantSearch": {
+    "message": "即時検索",
+    "description": ""
+  },
+  "ignoreBlank": {
+    "message": "空白文字の除外",
+    "description": ""
+  },
+  "workInBackground": {
+    "message": "バックグラウンドで実行",
+    "description": ""
+  },
+  "color": {
+    "message": "カラー",
+    "description": ""
+  }
+}
