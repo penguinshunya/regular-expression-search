@@ -1,4 +1,8 @@
 {
+  "description": {
+    "message": "正規表現を使ってページ内を検索します。",
+    "description": ""
+  },
   "instantSearch": {
     "message": "即時検索",
     "description": ""

@@ -1,4 +1,8 @@
 {
+  "description": {
+    "message": "Search using Regular Expression.",
+    "description": ""
+  },
   "instantSearch": {
     "message": "Instant Search",
     "description": ""
