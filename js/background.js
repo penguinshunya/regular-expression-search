@@ -8,6 +8,6 @@ chrome.storage.onChanged.addListener((changes, _) => {
 chrome.runtime.onConnect.addListener(port => {
   port.onMessage.addListener(request => {
     if (request.sleep == null) return;
-    port.postMessage({ sleep: true });
+    postMessage(port, { sleep: true });
   });
 });
