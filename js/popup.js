@@ -1,19 +1,34 @@
-$(() => {
-  chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-    const port = chrome.tabs.connect(tabs[0].id);
-    port.onDisconnect.addListener(location.reload.bind(location));
+$(async () => {
+  while (true) {
+    try {
+      await preprocess();
+      break;
+    } catch (_) {
+    }
+    await sleep(1000 / 30);
+  }
+});
 
-    (async () => {
+const preprocess = async () => {
+  return new Promise((resolve, reject) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, async tabs => {
+      if (tabs[0].status === "loading") {
+        reject();
+        return;
+      }
+      const port = chrome.tabs.connect(tabs[0].id);
+      port.onDisconnect.addListener(reject);
+
       const texts = await getStorageValue("texts", TEXTS);
       const cain = await getStorageValue("cain", CAIN);
       const instant = await getStorageValue("instant", INSTANT);
 
       main(port, texts, cain, instant);
 
-      postMessage(port, { kind: "init" }) || location.reload();
-    })();
+      postMessage(port, { kind: "init" }) ? resolve() : reject();
+    });
   });
-});
+};
 
 const main = (port, texts, cain, instant) => {
   let history;
@@ -144,9 +159,14 @@ const main = (port, texts, cain, instant) => {
     prevText = response.text == null ? "" : response.text;
     prevCain = response.cain == null ? cain : response.cain;
 
+    $("#cain").prop("disabled", false);
+    $("#close").prop("disabled", false);
+
     initTempHistory(response.input);
-    $("#search").val(history[index]);
-    $("#search").focus();
+    if ($("#search").val() === "") {
+      $("#search").val(history[index]);
+      $("#search").focus();
+    }
     setCain(prevCain);
     searchWithoutSavingHistory();
 

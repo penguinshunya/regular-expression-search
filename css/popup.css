@@ -23,12 +23,15 @@
     white-space: nowrap;
 }
 #count.spinner-grow {
-    width: 1.6rem;
+    width: 1.682rem;
     color: #aaaaaa;
+    border-left: none;
+    border-right: none;
 }
 #count.spinner-border {
-    width: 1.4rem;
     color: #aaaaaa;
+    border-left: none;
+    border-right: none;
 }
 .chevron {
     margin: 0.5em;
