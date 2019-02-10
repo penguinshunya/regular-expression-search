@@ -9,6 +9,7 @@
   <script src="lib/js/jquery.min.js"></script>
   <script src="lib/js/bootstrap.bundle.min.js"></script>
   <script src="lib/js/function.js"></script>
+  <script src="lib/js/localize.js"></script>
   <script src="js/define.js"></script>
   <script src="js/option.js"></script>
 </head>
@@ -16,7 +17,7 @@
 <body>
   <div class="container">
     <div class="form-group row">
-      <label for="instant" class="col-8 form-check-label"></label>
+      <label for="instant" class="col-8 form-check-label">__MSG_instantSearch__</label>
       <div class="col-4 btn-group btn-group-toggle" data-toggle="buttons">
         <label class="btn btn-outline-dark btn-sm">
           <input type="radio" name="instant" value="on">On
@@ -27,7 +28,7 @@
       </div>
     </div>
     <div class="form-group row">
-      <label for="ignoreBlank" class="col-8 form-check-label"></label>
+      <label for="ignoreBlank" class="col-8 form-check-label">__MSG_ignoreBlank__</label>
       <div class="col-4 btn-group btn-group-toggle" data-toggle="buttons">
         <label class="btn btn-outline-dark btn-sm">
           <input type="radio" name="ignoreBlank" value="on">On
@@ -38,7 +39,7 @@
       </div>
     </div>
     <div class="form-group row">
-      <label for="background" class="col-8 form-check-label"></label>
+      <label for="background" class="col-8 form-check-label">__MSG_workInBackground__</label>
       <div class="col-4 btn-group btn-group-toggle" data-toggle="buttons">
         <label class="btn btn-outline-dark btn-sm">
           <input type="radio" name="background" value="on">On
@@ -49,7 +50,7 @@
       </div>
     </div>
     <div class="form-group row">
-      <label for="color" class="col-3 col-form-label"></label>
+      <label for="color" class="col-3 col-form-label">__MSG_color__</label>
       <div id="color" class="col-9">
         <svg width="40" height="40">
           <rect x="0" y="0" rx="5" ry="5" width="32" height="32" fill="yellow" />

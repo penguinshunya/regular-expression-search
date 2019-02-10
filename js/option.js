@@ -5,11 +5,6 @@ $(async () => {
   const ignoreBlank = await getStorageValue("ignoreBlank", IGNORE_BLANK);
   const background = await getStorageValue("background", BACKGROUND);
 
-  $("label[for=instant]").text(chrome.i18n.getMessage("instantSearch"));
-  $("label[for=ignoreBlank]").text(chrome.i18n.getMessage("ignoreBlank"));
-  $("label[for=background]").text(chrome.i18n.getMessage("workInBackground"));
-  $("label[for=color]").text(chrome.i18n.getMessage("color"));
-
   check("instant", instant);
   check("ignoreBlank", ignoreBlank);
   check("background", background);
@@ -23,10 +18,7 @@ $(async () => {
   });
 
   $("input[type=radio]").change(function () {
-    const key = $(this).attr("name");
-    const checked = $(this).val() === "on";
-    sendToRuntime({ key: key, value: checked });
-    setStorageValue(key, checked);
+    setStorageValue($(this).attr("name"), $(this).val() === "on");
   });
 
   $("#color svg").click(function () {
@@ -34,8 +26,6 @@ $(async () => {
     $(this).addClass("selected");
     const mc = $(this).find("rect:eq(0)").attr("fill");
     const fc = $(this).find("rect:eq(1)").attr("fill");
-    sendToRuntime({ key: "markerColor", value: mc });
-    sendToRuntime({ key: "focusedMarkerColor", value: fc });
     setStorageValue("markerColor", mc);
     setStorageValue("focusedMarkerColor", fc);
   });

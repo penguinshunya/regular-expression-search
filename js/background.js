@@ -1,7 +1,7 @@
-// from option page
-chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
-  sendToAllTab(request);
-  sendResponse();
+chrome.storage.onChanged.addListener((changes, _) => {
+  for (const key in changes) {
+    sendToAllTab({ key: key, value: changes[key].newValue });
+  }
 });
 
 // from content page
