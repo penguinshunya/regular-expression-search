@@ -1,4 +1,5 @@
 $(async () => {
+  $("#search").focus();
   while (true) {
     try {
       await preprocess();
