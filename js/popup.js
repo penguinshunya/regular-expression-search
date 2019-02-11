@@ -166,6 +166,7 @@ const main = (port, texts, cain, instant) => {
     initTempHistory(response.input);
     if ($("#search").val() === "") {
       $("#search").val(history[index]);
+      $("#search").focus();
     }
     setCain(prevCain);
     searchWithoutSavingHistory();
