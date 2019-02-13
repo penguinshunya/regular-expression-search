@@ -39,7 +39,7 @@ chrome.runtime.onConnect.addListener((() => {
     };
   })();
 
-  const postSearchProcess = (pid = idle) => {
+  const postProcessStatus = (pid = idle) => {
     const p = procs[pid];
     postMessage(port, {
       process: p.status,
@@ -57,34 +57,36 @@ chrome.runtime.onConnect.addListener((() => {
 
     marker.init(mc, fc);
 
+    proc.status = Process.Searching;
+    postProcessStatus(pid);
     for (const [i, t] of SearchAndSplit(proc.text, proc.cain, ignoreBlank)) {
       marker.add(new Mark(i, t));
       if (await wait()) {
-        if (current !== pid) return;
+        if (proc.status !== Process.Searching) return;
       }
     }
 
     proc.status = Process.Calculating;
-    postSearchProcess(pid);
+    postProcessStatus(pid);
     for (var _ of marker.calc()) {
       if (await wait()) {
-        if (current !== pid) return;
+        if (proc.status !== Process.Calculating) return;
       }
     }
 
     proc.status = Process.Marking;
-    postSearchProcess(pid);
+    postProcessStatus(pid);
     let cnt = 0;
     for (var _ of marker.wrap()) {
       if (await wait()) {
-        if (current !== pid) return;
+        if (proc.status !== Process.Marking) return;
         if ((cnt = ++cnt % 15) === 0) marker.redraw();
       }
     }
     marker.redraw();
 
     proc.status = Process.Finish;
-    postSearchProcess(pid);
+    postProcessStatus(pid);
   };
 
   // from background page
@@ -124,7 +126,7 @@ chrome.runtime.onConnect.addListener((() => {
       // Clear mark elements.
       if (current === idle) {
         procs[idle].status = Process.Clearing;
-        postSearchProcess();
+        postProcessStatus();
       }
       for (const pid in procs) {
         if (pid == idle) continue;
@@ -138,7 +140,7 @@ chrome.runtime.onConnect.addListener((() => {
       }
       if (current === idle) {
         procs[idle].status = Process.DoNothing;
-        postSearchProcess();
+        postProcessStatus();
       }
 
       // Normalize text and destroy zombie process.
@@ -197,16 +199,14 @@ chrome.runtime.onConnect.addListener((() => {
 
       procs[current].status = Process.Clearing;
 
-      // Update current variable and stop search currently being done.
       current = maxpid++;
 
       procs[current] = {
-        status: Process.Searching,
+        status: Process.DoNothing,
         marker: new Marker(),
         text: request.text,
         cain: request.cain,
       };
-      postSearchProcess(current);
 
       await search(current);
     });
@@ -231,7 +231,7 @@ chrome.runtime.onConnect.addListener((() => {
         default:
           return;
       }
-      postSearchProcess(current);
+      postProcessStatus(current);
     });
   };
 })());
