@@ -216,12 +216,14 @@ const main = (port, texts, cain, instant) => {
           removeSpinner();
           $("#count").css("color", "#aaaaaa");
           $("#count").addClass(searching);
+          changeButtonStatus(false);
           break;
         case Process.Calculating:
           $("#count").text("");
           removeSpinner();
           $("#count").css("color", "#aaaaaa");
           $("#count").addClass(calculating);
+          changeButtonStatus(false);
           break;
         case Process.Marking:
           removeSpinner();
@@ -235,12 +237,14 @@ const main = (port, texts, cain, instant) => {
           modifyCount(response.index, response.count);
           prevText = response.text;
           prevCain = response.cain;
+          changeButtonStatus(true);
           break;
         case Process.Clearing:
           $("#count").text("");
           removeSpinner();
           $("#count").css("color", "#aaaaaa");
           $("#count").addClass(clearing);
+          changeButtonStatus(false);
           break;
       }
     };
