@@ -6,3 +6,4 @@ yarn.lock
 *.bundle.js
 analytics-code.js
 .vscode
+dist/*.html

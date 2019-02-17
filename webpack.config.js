@@ -42,14 +42,14 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      inject: false,
       filename: "popup.html",
       template: "./src/html/popup.html",
+      chunks: ["popup"],
     }),
     new HtmlWebpackPlugin({
-      inject: false,
       filename: "option.html",
       template: "./src/html/option.html",
+      chunks: ["option"],
     }),
     new webpack.ProvidePlugin({
       $: "jquery",
