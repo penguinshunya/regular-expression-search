@@ -6,7 +6,7 @@ module.exports = {
   mode: "development",
   entry: {
     "page": ["./src/page.js"],
-    "background": ["./src/background.js"],
+    "background": ["./src/background.ts"],
     "popup": ["./src/popup.js", "./src/analytics.js"],
     "option": ["./src/option.js", "./src/analytics.js"]
   },
@@ -17,6 +17,11 @@ module.exports = {
   },
   module: {
     rules: [
+      {
+        test: /\.tsx?$/,
+        loader: "ts-loader",
+        exclude: /node_modules/
+      },
       {
         test: /\.css$/,
         use: [
@@ -39,6 +44,9 @@ module.exports = {
         }
       }
     ]
+  },
+  resolve: {
+    extensions: [ '.tsx', '.ts', '.js' ]
   },
   plugins: [
     new HtmlWebpackPlugin({
