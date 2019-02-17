@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Regular Expression Search",
   "short_name": "regex search",
-  "version": "2.5.3.6",
+  "version": "2.5.3.7",
   "description": "__MSG_description__",
   "commands": {
     "_execute_browser_action": {
@@ -44,7 +44,7 @@
   },
   "options_ui": {
     "page": "option.html",
-    "open_in_tab": false
+    "open_in_tab": true
   },
   "permissions": [
     "activeTab",

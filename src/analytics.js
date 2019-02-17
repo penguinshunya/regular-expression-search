@@ -1,6 +1,12 @@
 // Copyright (c) 2012 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+/**
+ * Add your Analytics tracking ID here.
+ */
+var _AnalyticsCode = 'UA-XXXXXXXXX-X';
+
 /**
  * Below is a modified version of the Google Analytics asynchronous tracking
  * code snippet.  It has been modified to pull the HTTPS version of ga.js
@@ -11,7 +17,8 @@
 var _gaq = _gaq || [];
 _gaq.push(['_setAccount', _AnalyticsCode]);
 _gaq.push(['_trackPageview']);
-(function () {
+
+(function() {
   var ga = document.createElement('script');
   ga.type = 'text/javascript';
   ga.async = true;
@@ -19,6 +26,7 @@ _gaq.push(['_trackPageview']);
   var s = document.getElementsByTagName('script')[0];
   s.parentNode.insertBefore(ga, s);
 })();
+
 /**
  * Track a click on a button using the asynchronous tracking API.
  *
@@ -28,6 +36,7 @@ _gaq.push(['_trackPageview']);
 function trackButtonClick(e) {
   _gaq.push(['_trackEvent', e.target.id, 'clicked']);
 }
+
 /**
  * Now set up your event handlers for the popup's `button` elements once the
  * popup's DOM has loaded.

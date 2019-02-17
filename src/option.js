@@ -1,3 +1,7 @@
+import "bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./option.css";
+
 $(async () => {
   const markerColor = await getStorageValue("markerColor", MARKER_COLOR);
   const focusedMarkerColor = await getStorageValue("focusedMarkerColor", FOCUSED_MARKER_COLOR);
@@ -17,8 +21,19 @@ $(async () => {
     }
   });
 
-  $("input[type=radio]").change(function () {
-    setStorageValue($(this).attr("name"), $(this).val() === "on");
+  $("#instant button").click(function() {
+    $(this).addClass('active').siblings().removeClass('active');
+    setStorageValue("instant", $(this).text() === "On");
+  });
+
+  $("#ignoreBlank button").click(function() {
+    $(this).addClass('active').siblings().removeClass('active');
+    setStorageValue("ignoreBlank", $(this).text() === "On");
+  });
+
+  $("#background button").click(function() {
+    $(this).addClass('active').siblings().removeClass('active');
+    setStorageValue("background", $(this).text() === "On");
   });
 
   $("#color svg").click(function () {
@@ -32,16 +47,9 @@ $(async () => {
 });
 
 const check = (name, checked) => {
-  const elems = $(`input[name=${name}]`);
-  elems.each((_, e) => {
-    $(e).parent().removeClass("active");
-  });
-  let box;
   if (checked) {
-    box = $(`input[name=${name}][value=on]`);
+    $(`#${name} button:contains(On)`).addClass("active");
   } else {
-    box = $(`input[name=${name}][value=off]`);
+    $(`#${name} button:contains(Off)`).addClass("active");
   }
-  box.prop("checked", true);
-  box.parent().addClass("active");
 };

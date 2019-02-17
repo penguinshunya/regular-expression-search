@@ -6,6 +6,13 @@
   "author": "penguinshunya <penguinshunya@hotmail.com>",
   "license": "MIT",
   "devDependencies": {
+    "bootstrap": "^4.3.1",
+    "css-loader": "^2.1.0",
+    "file-loader": "^3.0.1",
+    "jquery": "^3.3.1",
+    "open-iconic": "^1.1.1",
+    "popper.js": "^1.14.7",
+    "style-loader": "^0.23.1",
     "webpack": "^4.29.4",
     "webpack-cli": "^3.2.3"
   }

@@ -4,49 +4,34 @@
 <head>
   <meta charset="UTF-8">
   <title>Option Page</title>
-  <link rel="stylesheet" href="lib/css/bootstrap.min.css">
-  <link rel="stylesheet" href="css/option.css">
   <script src="lib/js/jquery.min.js"></script>
-  <script src="lib/js/bootstrap.bundle.min.js"></script>
   <script src="lib/js/function.js"></script>
   <script src="lib/js/localize.js"></script>
   <script src="js/define.js"></script>
-  <script src="js/option.js"></script>
+  <script src="js/option.bundle.js"></script>
 </head>
 
 <body>
   <div class="container">
     <div class="form-group row">
       <label for="instant" class="col-8 form-check-label">__MSG_instantSearch__</label>
-      <div class="col-4 btn-group btn-group-toggle" data-toggle="buttons">
-        <label class="btn btn-outline-dark btn-sm">
-          <input type="radio" name="instant" value="on">On
-        </label>
-        <label class="btn btn-outline-dark btn-sm">
-          <input type="radio" name="instant" value="off">Off
-        </label>
+      <div id="instant" class="col-4 btn-group">
+        <button class="btn btn-outline-dark btn-sm">On</button>
+        <button class="btn btn-outline-dark btn-sm">Off</button>
       </div>
     </div>
     <div class="form-group row">
       <label for="ignoreBlank" class="col-8 form-check-label">__MSG_ignoreBlank__</label>
-      <div class="col-4 btn-group btn-group-toggle" data-toggle="buttons">
-        <label class="btn btn-outline-dark btn-sm">
-          <input type="radio" name="ignoreBlank" value="on">On
-        </label>
-        <label class="btn btn-outline-dark btn-sm">
-          <input type="radio" name="ignoreBlank" value="off">Off
-        </label>
+      <div id="ignoreBlank" class="col-4 btn-group">
+        <button class="btn btn-outline-dark btn-sm">On</button>
+        <button class="btn btn-outline-dark btn-sm">Off</button>
       </div>
     </div>
     <div class="form-group row">
       <label for="background" class="col-8 form-check-label">__MSG_workInBackground__</label>
-      <div class="col-4 btn-group btn-group-toggle" data-toggle="buttons">
-        <label class="btn btn-outline-dark btn-sm">
-          <input type="radio" name="background" value="on">On
-        </label>
-        <label class="btn btn-outline-dark btn-sm">
-          <input type="radio" name="background" value="off">Off
-        </label>
+      <div id="background" class="col-4 btn-group">
+        <button class="btn btn-outline-dark btn-sm">On</button>
+        <button class="btn btn-outline-dark btn-sm">Off</button>
       </div>
     </div>
     <div class="form-group row">
