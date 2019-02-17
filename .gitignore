@@ -1,9 +1,6 @@
 .DS_Store
+.vscode
+/dist/
 /node_modules/
-/dist/asset/
 package-lock.json
 yarn.lock
-*.bundle.js
-analytics-code.js
-.vscode
-dist/*.html
