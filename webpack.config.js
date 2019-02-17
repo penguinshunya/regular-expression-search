@@ -1,5 +1,6 @@
 const path = require("path");
 const webpack = require("webpack");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
   mode: "development",
@@ -40,6 +41,16 @@ module.exports = {
     ]
   },
   plugins: [
+    new HtmlWebpackPlugin({
+      inject: false,
+      filename: "popup.html",
+      template: "./src/html/popup.html",
+    }),
+    new HtmlWebpackPlugin({
+      inject: false,
+      filename: "option.html",
+      template: "./src/html/option.html",
+    }),
     new webpack.ProvidePlugin({
       $: "jquery",
       jQuery: "jquery",
