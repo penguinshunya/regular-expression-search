@@ -1,3 +1,5 @@
+import { Marker } from "../marker";
+
 // default values
 export const TEXTS: string[] = [];
 export const CAIN: boolean = false;
@@ -8,12 +10,19 @@ export const IGNORE_BLANK: boolean = true;
 export const BACKGROUND: boolean = true;
 
 // search process names
-export const Process: { [s: string]: number } = {
-  DoNothing: 1,
-  Searching: 2,
-  Calculating: 3,
-  Marking: 4,
-  Finish: 5,
-  Clearing: 6,
-  Zombie: 7,
+export enum Process {
+  DoNothing = 1,
+  Searching,
+  Calculating,
+  Marking,
+  Finish,
+  Clearing,
+  Zombie,
+};
+
+export class Proc {
+  status: Process;
+  marker: Marker;
+  text: string;
+  cain: boolean;
 };

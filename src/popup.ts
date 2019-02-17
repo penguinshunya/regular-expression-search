@@ -51,11 +51,11 @@ const preprocess = async () => {
   });
 };
 
-const main = (port, texts, cain, instant) => {
-  let history;
-  let index;
-  let prevText;
-  let prevCain;
+const main = (port: chrome.runtime.Port, texts: string[], cain: boolean, instant: boolean) => {
+  let history: string[];
+  let index: number;
+  let prevText: string;
+  let prevCain: boolean;
 
   const Status = {
     Empty: 1,
@@ -65,7 +65,7 @@ const main = (port, texts, cain, instant) => {
   };
 
   const verify = () => {
-    const text = $("#search").val();
+    const text = $("#search").val() as string;
     if (text === "") {
       return { status: Status.Empty };
     }
@@ -104,11 +104,11 @@ const main = (port, texts, cain, instant) => {
     return $("#cain")[0].dataset.select === "true";
   };
 
-  const setCain = ci => {
+  const setCain = (ci: boolean) => {
     $("#cain")[0].dataset.select = ci ? "true" : "false";
   };
 
-  const saveCain = async ci => {
+  const saveCain = async (ci: boolean) => {
     await setStorageValue("cain", ci);
   };
 
@@ -126,7 +126,7 @@ const main = (port, texts, cain, instant) => {
     $("#search").select();
   };
 
-  const initTempHistory = text => {
+  const initTempHistory = (text: string) => {
     history = texts.map(t => t);
     if (text != null && history.length > 0 && history[history.length - 1] !== text) {
       history.push(text);
@@ -142,7 +142,7 @@ const main = (port, texts, cain, instant) => {
   };
 
   const saveTempHistory = () => {
-    history[index] = $("#search").val();
+    history[index] = $("#search").val() as string;
     if (history[index] !== "" && index === history.length - 1) {
       history.push("");
     } else if (history[index] === "" && index < texts.length) {
@@ -196,7 +196,7 @@ const main = (port, texts, cain, instant) => {
 
   port.onMessage.addListener(response => {
     if (response.instant == null) return;
-    instant = request.instant;
+    instant = response.instant;
   });
 
   port.onMessage.addListener((() => {
@@ -206,7 +206,7 @@ const main = (port, texts, cain, instant) => {
 
     // Only here can change the state of COUNT, PREV, NEXT element.
     // Trigger for change should not be a popup script.
-    const modifyCount = (index, count) => {
+    const modifyCount = (index: number, count: number) => {
       if (index === 0) {
         $("#count").text(count);
       } else {
@@ -214,7 +214,7 @@ const main = (port, texts, cain, instant) => {
       }
     };
 
-    const changeButtonStatus = enabled => {
+    const changeButtonStatus = (enabled: boolean) => {
       $("#prev").prop("disabled", !enabled);
       $("#next").prop("disabled", !enabled);
     };
@@ -224,7 +224,7 @@ const main = (port, texts, cain, instant) => {
       $("#count").removeClass(calculating);
     };
 
-    return response => {
+    return (response: any) => {
       switch (response.process) {
         case Process.DoNothing:
           $("#count").text("");

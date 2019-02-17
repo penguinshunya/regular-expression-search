@@ -5,10 +5,10 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 module.exports = {
   mode: "development",
   entry: {
-    "page": ["./src/page.js"],
+    "page": ["./src/page.ts"],
     "background": ["./src/background.ts"],
-    "popup": ["./src/popup.js", "./src/analytics.js"],
-    "option": ["./src/option.js", "./src/analytics.js"]
+    "popup": ["./src/popup.ts", "./src/analytics.js"],
+    "option": ["./src/option.ts", "./src/analytics.js"]
   },
   devtool: 'inline-source-map',
   output: {

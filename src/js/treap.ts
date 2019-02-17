@@ -1,5 +1,5 @@
 export class Treap<T> {
-  private root: Node<T>;
+  private _root: Node<T>;
 
   private _count(t: Node<T>) {
     return t == null ? 0 : t.cnt;
@@ -55,20 +55,20 @@ export class Treap<T> {
   };
 
   count() {
-    return this._count(this.root);
+    return this._count(this._root);
   }
 
   insert(k: number, v: T) {
-    this.root = this._insert(this.root, k, v);
+    this._root = this._insert(this._root, k, v);
   };
 
   push(v: T) {
-    this.root = this._insert(this.root, this._count(this.root), v);
+    this._root = this._insert(this._root, this._count(this._root), v);
     return this;
   };
 
   search(k: number) {
-    return this._search(this.root, k);
+    return this._search(this._root, k);
   };
 
   [Symbol.iterator] = function* (): IterableIterator<T> {

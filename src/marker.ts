@@ -1,57 +1,60 @@
 import { blackOrWhite } from "./js/function";
 import { RankTreap } from "./js/rank-treap";
 
-export const Mark = function (i, t) {
-  this.texts = t;
-  this.nodes = [];
-  this.top;
-  this.height;
-  this.rtop;
-  this.rheight;
-  this.index = i;
-};
+export class Mark {
+  texts: Text[];
+  nodes: JQuery<Element>[] = [];
+  top: number;
+  height: number;
+  rtop: number;
+  rheight: number;
+  index: number;
 
-export const Marker = function () {
-  this._marks = new RankTreap();
-  this._dispCount = 0;
-  this._curr = null;
-  this._prev = null;
-  this._canvas;
-  this._context;
-  this._mc;
-  this._fc;
-  this._destroyed = 0;
-};
+  constructor(i: number, t: Text[]) {
+    this.texts = t;
+    this.index = i;
+  }
+}
 
-{
-  const canvases = [];
+const canvases: HTMLCanvasElement[] = [];
 
-  const canvas = $("<canvas>").css({
-    zIndex: 65536,
-    position: "fixed",
-    margin: 0,
-    padding: 0,
-    top: 0,
-    right: 0,
-  });
+const canvas = $("<canvas>").css({
+  zIndex: 65536,
+  position: "fixed",
+  margin: 0,
+  padding: 0,
+  top: 0,
+  right: 0,
+}) as JQuery<HTMLCanvasElement>;
 
-  const wrapWithMark = (() => {
+export class Marker {
+  private _marks = new RankTreap<Mark, number>();
+  private _dispCount: number = 0;
+  private _curr: Mark = null;
+  private _prev: Mark = null;
+  private _canvas: HTMLCanvasElement;
+  private _context: CanvasRenderingContext2D;
+  private _mc: string;
+  private _fc: string;
+  private _destroyed = 0;
+
+  private wrapWithMark = (() => {
     const org = $("<mark>").attr("tabindex", "-1").css({
       margin: 0,
       border: "none",
       padding: 0,
       font: "inherit",
     });
-
-    const clickMark = function (m) {
+  
+    const clickMark = function (m: Marker) {
       return function () {
         m._prev = m._curr;
         m._curr = $(this).data("mark");
         m._focus();
       };
     };
-
-    return (m, node, mrk) => {
+  
+    return (m: Marker, node: Text, mrk: Mark) => {
       const mark = org.clone();
       mark.data("mark", mrk);
       mark.on("click", clickMark(m));
@@ -62,8 +65,8 @@ export const Marker = function () {
       return $(node).wrap(mark).parent();
     };
   })();
-
-  const getMarkFromY = (m, y) => {
+  
+  private getMarkFromY(m: Marker, y: number) {
     const t = y / m._canvas.height;
 
     for (const mark of m._marks) {
@@ -77,13 +80,13 @@ export const Marker = function () {
     return null;
   };
 
-  Marker.prototype._focus = function () {
+  private _focus() {
     this.focusMark();
     this.redraw();
   };
 
-  Marker.prototype._select = function (y) {
-    const mark = getMarkFromY(this, y);
+  private _select(y: number) {
+    const mark = this.getMarkFromY(this, y);
     if (mark !== null) {
       this._prev = this._curr;
       this._curr = mark;
@@ -91,23 +94,23 @@ export const Marker = function () {
     }
   };
 
-  Marker.prototype._changeCursor = function (y) {
-    if (getMarkFromY(this, y) !== null) {
+  private _changeCursor(y: number) {
+    if (this.getMarkFromY(this, y) !== null) {
       $(this._canvas).css("cursor", "pointer");
     } else {
       $(this._canvas).css("cursor", "default");
     }
   };
 
-  Marker.prototype.index = function () {
+  index() {
     return this._curr == null ? -1 : this._curr.index;
   };
 
-  Marker.prototype.count = function () {
+  count() {
     return this._marks.count();
   };
 
-  Marker.prototype.init = function (mc, fc) {
+  init(mc: string, fc: string) {
     this._mc = mc;
     this._fc = fc;
 
@@ -129,7 +132,7 @@ export const Marker = function () {
     this.redraw();
   };
 
-  Marker.prototype.focusMark = function () {
+  focusMark() {
     if (this._prev === null) this._prev = this._curr;
 
     this._prev.nodes.forEach(mark => mark.css({
@@ -144,7 +147,7 @@ export const Marker = function () {
     this._curr.nodes[0].focus();
   };
 
-  Marker.prototype.redraw = function () {
+  redraw() {
     if (this._dispCount === 0) {
       this._canvas.width = 0;
       this._canvas.height = 0;
@@ -170,7 +173,7 @@ export const Marker = function () {
     }
   };
 
-  Marker.prototype.focusPrev = function () {
+  focusPrev() {
     if (this._dispCount === 0) return;
 
     if (this._curr == null) {
@@ -184,7 +187,7 @@ export const Marker = function () {
     this._focus();
   };
 
-  Marker.prototype.focusNext = function () {
+  focusNext() {
     if (this._dispCount === 0) return;
 
     if (this._curr == null) {
@@ -198,13 +201,14 @@ export const Marker = function () {
     this._focus();
   };
 
-  Marker.prototype.add = function (m) {
+  add(m: Mark) {
     this._marks.insertRank(m.index, m);
   };
 
-  Marker.prototype.calc = function* () {
+  calc = function* (): IterableIterator<void> {
+    const that = this as Marker;
     const r = document.createRange();
-    for (const m of this._marks) {
+    for (const m of that._marks) {
       r.selectNodeContents(m.texts[0]);
       const rect = r.getBoundingClientRect();
       m.top = rect.top;
@@ -213,57 +217,58 @@ export const Marker = function () {
     }
   };
 
-  Marker.prototype.wrap = function* () {
+  wrap = function* (): IterableIterator<void> {
+    const that = this as Marker;
     const btop = document.body.getBoundingClientRect().top;
     const docHeight = $(document).height();
     const winHeight = window.innerHeight;
 
-    for (const m of this._marks) {
+    for (const m of that._marks) {
       const t = (m.top - btop) / (docHeight - m.height);
       const h = m.height / docHeight * winHeight;
 
-      m.nodes = m.texts.map(n => wrapWithMark(this, n, m));
+      m.nodes = m.texts.map(n => this.wrapWithMark(that, n, m));
       m.rtop = t;
       m.rheight = h < 3 ? 3 : h;
-      this._dispCount++;
+      that._dispCount++;
       yield;
     }
   };
 
-  Marker.prototype.clear = function* () {
-    for (const m of this._marks) {
+  clear = function* (): IterableIterator<void> {
+    const that = this as Marker;
+    for (const m of that._marks) {
       m.nodes.forEach(n => n.contents().unwrap());
       yield;
     }
-    this._canvas.width = 0;
-    this._canvas.height = 0;
+    that._canvas.width = 0;
+    that._canvas.height = 0;
   };
 
-  Marker.prototype.destroy = (() => {
-    const exclusions = [
-      "pre",
-    ];
+  private exclusions = [
+    "pre",
+  ];
 
-    // It takes a long time to normalize an element with huge text.
-    // Don't normalize elements which are possibilities of having a huge text.
-    // Why not judge by the number of characters of text,
-    // textContent (or jQueryObject.text()) is a time-consuming process.
-    const normalize = text => {
-      const parent = $(text).parent()[0];
-      if (parent == null) return;
-      if (exclusions.indexOf(parent.tagName.toLowerCase()) >= 0) return;
-      parent.normalize();
-    };
+  // It takes a long time to normalize an element with huge text.
+  // Don't normalize elements which are possibilities of having a huge text.
+  // Why not judge by the number of characters of text,
+  // textContent (or jQueryObject.text()) is a time-consuming process.
+  private normalize = (text: Text) => {
+    const parent = $(text).parent()[0] as Node as Element;
+    if (parent == null) return;
+    if (this.exclusions.indexOf(parent.tagName.toLowerCase()) >= 0) return;
+    parent.normalize();
+  };
 
-    return function* () {
-      for (let i = this._destroyed; i < this.count(); i++) {
-        this._marks.search(i).texts.forEach(normalize);
-        this._destroyed++;
-        yield;
-      }
-      $(this._canvas).remove();
-      const i = canvases.indexOf(this._canvas);
-      canvases.splice(i, 1);
-    };
-  })();
+  destroy = function* (): IterableIterator<void> {
+    const that = this as Marker;
+    for (let i = that._destroyed; i < that.count(); i++) {
+      that._marks.search(i).texts.forEach(t => that.normalize(t));
+      that._destroyed++;
+      yield;
+    }
+    $(that._canvas).remove();
+    const i = canvases.indexOf(that._canvas);
+    canvases.splice(i, 1);
+  };
 }

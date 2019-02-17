@@ -13,12 +13,13 @@ import {
   FOCUSED_MARKER_COLOR,
   IGNORE_BLANK,
   BACKGROUND,
+  Proc,
 } from "./js/define";
 
 chrome.runtime.onConnect.addListener((() => {
   // The smaller the FPS, the quicker the search ends but the page gets stiff.
   let FPS = 60;
-  let port = null;
+  let port: chrome.runtime.Port = null;
 
   let mc = MARKER_COLOR;
   let fc = FOCUSED_MARKER_COLOR;
@@ -28,19 +29,19 @@ chrome.runtime.onConnect.addListener((() => {
   let background = BACKGROUND;
 
   const idle = 0;
-  const procs = {
+  const procs: { [s: string]: Proc } = {
     [idle]: {
       status: Process.DoNothing,
       marker: new Marker(),
       text: null,
       cain: null,
-    }
+    },
   };
   let maxpid = 1;
   let current = idle;
 
   // popup information
-  let input = null;
+  let input: string = null;
 
   // If return value is true, there is a possibility that
   // another process may have intervened in the middle.
@@ -68,7 +69,7 @@ chrome.runtime.onConnect.addListener((() => {
   };
 
   // It is possible to stop search by updating current variable.
-  const search = async pid => {
+  const search = async (pid: number) => {
     const proc = procs[pid];
     const marker = proc.marker;
 
@@ -125,7 +126,7 @@ chrome.runtime.onConnect.addListener((() => {
         background = request.value;
         break;
     }
-    sendResponse();
+    sendResponse(null);
   });
 
   // Initialize and start event loop.
@@ -146,7 +147,7 @@ chrome.runtime.onConnect.addListener((() => {
         postProcessStatus();
       }
       for (const pid in procs) {
-        if (pid == idle) continue;
+        if (+pid === idle) continue;
         if (procs[pid].status !== Process.Clearing) {
           continue;
         }
@@ -162,7 +163,7 @@ chrome.runtime.onConnect.addListener((() => {
 
       // Normalize text and destroy zombie process.
       for (const pid in procs) {
-        if (pid == idle) continue;
+        if (+pid === idle) continue;
         if (procs[pid].status !== Process.Zombie) {
           continue;
         }
@@ -186,7 +187,7 @@ chrome.runtime.onConnect.addListener((() => {
     }
   })();
 
-  return p => {
+  return (p: chrome.runtime.Port) => {
     p.onDisconnect.addListener(() => {
       saveHistory(procs[current].text);
     });

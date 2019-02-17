@@ -28,10 +28,10 @@ export const sleeping = async (work: boolean) => {
   }
 };
 
-export const getStorageValue = async (key: string, defaultValue: any) => {
-  const promise = new Promise(resolve => {
-    const param: { [s: string]: any } = {};
-    param[key] = defaultValue;
+export const getStorageValue = async <T>(key: string, value: T) => {
+  const promise: Promise<T> = new Promise(resolve => {
+    const param: { [s: string]: T } = {};
+    param[key] = value;
     chrome.storage.local.get(param, response => {
       resolve(response[key]);
     });

@@ -51,7 +51,7 @@ $(async () => {
   });
 
   $("#color svg").click(function () {
-    $("#color svg").each((_, e) => $(e).removeClass("selected"));
+    $("#color svg").each((_, e) => { $(e).removeClass("selected"); });
     $(this).addClass("selected");
     const mc = $(this).find("rect:eq(0)").attr("fill");
     const fc = $(this).find("rect:eq(1)").attr("fill");
@@ -60,7 +60,7 @@ $(async () => {
   });
 });
 
-const check = (name, checked) => {
+const check = (name: string, checked: boolean) => {
   if (checked) {
     $(`#${name} button:contains(On)`).addClass("active");
   } else {
