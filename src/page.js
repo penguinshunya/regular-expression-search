@@ -1,3 +1,20 @@
+import { Mark, Marker } from "./marker";
+import { SearchAndSplit } from "./search";
+import {
+  sleep,
+  sleeping,
+  postMessage,
+  getStorageValue,
+  saveHistory
+} from "./js/function";
+import {
+  Process,
+  MARKER_COLOR,
+  FOCUSED_MARKER_COLOR,
+  IGNORE_BLANK,
+  BACKGROUND,
+} from "./js/define";
+
 chrome.runtime.onConnect.addListener((() => {
   // The smaller the FPS, the quicker the search ends but the page gets stiff.
   let FPS = 60;

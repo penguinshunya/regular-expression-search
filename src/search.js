@@ -1,4 +1,7 @@
-const SearchAndSplit = function* (text, cain, ignoreBlank) {
+import { reduce, collectTextNode } from "./js/function";
+import { Treap } from "./js/treap";
+
+export const SearchAndSplit = function* (text, cain, ignoreBlank) {
   const r = new RegExp(text, cain ? "gi" : "g");
   const t = reduce(collectTextNode(document.body), (t, n) => t.push(n), new Treap());
   const c = reduce(t, (c, e) => c + e.textContent, "");

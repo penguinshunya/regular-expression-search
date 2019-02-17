@@ -3,7 +3,20 @@ import "webpack-jquery-ui/css";
 import "bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "open-iconic/font/css/open-iconic-bootstrap.css";
-import "./popup.css";
+import {
+  sleep,
+  getStorageValue,
+  setStorageValue,
+  postMessage,
+  saveHistory,
+} from "./js/function";
+import {
+  Process,
+  TEXTS,
+  CAIN,
+  INSTANT,
+} from "./js/define";
+import "./css/popup.css";
 
 $(async () => {
   $("#search").focus();

@@ -4,6 +4,8 @@ const webpack = require("webpack");
 module.exports = {
   mode: "development",
   entry: {
+    "page": ["./src/page.js"],
+    "background": ["./src/background.js"],
     "popup": ["./src/popup.js", "./src/analytics.js"],
     "option": ["./src/option.js", "./src/analytics.js"]
   },

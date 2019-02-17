@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Regular Expression Search",
   "short_name": "regex search",
-  "version": "2.5.3.7",
+  "version": "2.5.3.8",
   "description": "__MSG_description__",
   "commands": {
     "_execute_browser_action": {
@@ -25,20 +25,12 @@
       "<all_urls>"
     ],
     "js": [
-      "lib/js/jquery.min.js",
-      "lib/js/treap.js",
-      "lib/js/rank-treap.js",
-      "lib/js/function.js",
-      "js/define.js",
-      "js/marker.js",
-      "js/search.js",
-      "js/page.js"
+      "js/page.bundle.js"
     ]
   }],
   "background": {
     "scripts": [
-      "lib/js/function.js",
-      "js/background.js"
+      "js/background.bundle.js"
     ],
     "persistent": false
   },

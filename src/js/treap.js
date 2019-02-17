@@ -1,4 +1,4 @@
-const Treap = function () {
+export const Treap = function () {
   this._root = null;
 };
 

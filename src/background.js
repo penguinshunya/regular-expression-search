@@ -1,3 +1,5 @@
+import { sendToAllTab, postMessage } from "./js/function";
+
 chrome.storage.onChanged.addListener((changes, _) => {
   for (const key in changes) {
     sendToAllTab({ key: key, value: changes[key].newValue });

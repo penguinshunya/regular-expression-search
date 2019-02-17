@@ -2,7 +2,19 @@ import "webpack-jquery-ui";
 import "webpack-jquery-ui/css";
 import "bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./option.css";
+import "./js/localize";
+import {
+  getStorageValue,
+  setStorageValue,
+} from "./js/function";
+import {
+  MARKER_COLOR,
+  FOCUSED_MARKER_COLOR,
+  INSTANT,
+  IGNORE_BLANK,
+  BACKGROUND,
+} from "./js/define";
+import "./css/option.css";
 
 $(async () => {
   const markerColor = await getStorageValue("markerColor", MARKER_COLOR);

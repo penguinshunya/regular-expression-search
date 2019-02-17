@@ -1,4 +1,4 @@
-const RankTreap = function () {
+export const RankTreap = function () {
   this._root = null;
 };
 

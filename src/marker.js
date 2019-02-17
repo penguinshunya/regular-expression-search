@@ -1,4 +1,7 @@
-const Mark = function (i, t) {
+import { blackOrWhite } from "./js/function";
+import { RankTreap } from "./js/rank-treap";
+
+export const Mark = function (i, t) {
   this.texts = t;
   this.nodes = [];
   this.top;
@@ -8,7 +11,7 @@ const Mark = function (i, t) {
   this.index = i;
 };
 
-const Marker = function () {
+export const Marker = function () {
   this._marks = new RankTreap();
   this._dispCount = 0;
   this._curr = null;
