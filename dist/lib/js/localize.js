@@ -1,5 +1,5 @@
 // https://stackoverflow.com/questions/25467009/internationalization-of-html-pages-for-my-google-chrome-extension
-$(() => {
+document.addEventListener("DOMContentLoaded", () => {
   //Localize by replacing __MSG_***__ meta tags
   var objects = document.getElementsByTagName('html');
   for (var j = 0; j < objects.length; j++)
@@ -17,4 +17,4 @@ $(() => {
       obj.innerHTML = valNewH;
     }
   }
-});
+}, false);

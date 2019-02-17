@@ -1,10 +1,11 @@
 const path = require("path");
+const webpack = require("webpack");
 
 module.exports = {
   mode: "development",
   entry: {
-    "popup": ["./src/analytics.js", "./src/popup.js"],
-    "option": ["./src/option.js"]
+    "popup": ["./src/popup.js", "./src/analytics.js"],
+    "option": ["./src/option.js", "./src/analytics.js"]
   },
   devtool: 'inline-source-map',
   output: {
@@ -35,5 +36,13 @@ module.exports = {
         }
       }
     ]
-  }
+  },
+  plugins: [
+    new webpack.ProvidePlugin({
+      $: "jquery",
+      jQuery: "jquery",
+      "window.jQuery": "jquery",
+      "window.$": "jquery"
+    })
+  ]
 };
