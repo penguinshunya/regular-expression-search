@@ -1,0 +1,12 @@
+{
+  "name": "regular-expression-search",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/penguinshunya/regular-expression-search.git",
+  "author": "penguinshunya <penguinshunya@hotmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "webpack": "^4.29.4",
+    "webpack-cli": "^3.2.3"
+  }
+}

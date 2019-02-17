@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Regular Expression Search",
   "short_name": "regex search",
-  "version": "2.5.3.5",
+  "version": "2.5.3.6",
   "description": "__MSG_description__",
   "commands": {
     "_execute_browser_action": {
@@ -52,5 +52,5 @@
     "*://*/*"
   ],
   "default_locale": "en",
-  "content_security_policy": "script-src 'self' https://ssl.google-analytics.com; object-src 'self'"
+  "content_security_policy": "script-src 'self' 'unsafe-eval' https://ssl.google-analytics.com; object-src 'self'"
 }

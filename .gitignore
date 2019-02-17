@@ -1,2 +1,5 @@
 .DS_Store
-lib/js/analytics-code.js
+/node_modules/
+package-lock.json
+*.bundle.js
+analytics-code.js
