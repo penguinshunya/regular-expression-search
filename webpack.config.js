@@ -1,7 +1,8 @@
 const path = require("path");
 const webpack = require("webpack");
+const CleanWebpackPlugin = require("clean-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const CopyPlugin = require('copy-webpack-plugin');
+const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   mode: "development",
@@ -11,7 +12,7 @@ module.exports = {
     "popup": ["./src/popup.ts", "./src/analytics.js"],
     "option": ["./src/option.ts", "./src/analytics.js"]
   },
-  devtool: 'inline-source-map',
+  devtool: "inline-source-map",
   output: {
     filename: "js/[name].bundle.js",
     path: path.resolve(__dirname, "dist")
@@ -47,9 +48,10 @@ module.exports = {
     ]
   },
   resolve: {
-    extensions: [ '.tsx', '.ts', '.js' ]
+    extensions: [ ".tsx", ".ts", ".js" ]
   },
   plugins: [
+    new CleanWebpackPlugin(["dist"]),
     new HtmlWebpackPlugin({
       filename: "popup.html",
       template: "./src/html/popup.html",
