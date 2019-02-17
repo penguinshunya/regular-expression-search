@@ -5,14 +5,10 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
-  mode: "development",
   entry: {
     "page": ["./src/page.ts"],
     "background": ["./src/background.ts"],
-    "popup": ["./src/popup.ts", "./src/analytics.js"],
-    "option": ["./src/option.ts", "./src/analytics.js"]
   },
-  devtool: "inline-source-map",
   output: {
     filename: "js/[name].bundle.js",
     path: path.resolve(__dirname, "dist")
