@@ -69,8 +69,8 @@ describe("Treap", () => {
     it("out of range", () => {
       const t = makeTreap(["foo", "bar", "baz"]);
       expect(t.search(0)).toBe("foo");
-      expect(t.search(-1)).toBe(null);
-      expect(t.search(3)).toBe(null);
+      expect(t.search(-1)).toBeNull();
+      expect(t.search(3)).toBeNull();
     });
   });
 });
