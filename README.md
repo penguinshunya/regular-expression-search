@@ -5,7 +5,7 @@ Search using regular expression on chrome extension.
 Build
 =====
 ```
-npm install && npx webpack
+npm install && npm run dev
 ```
 
 Licensing
