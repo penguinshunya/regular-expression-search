@@ -78,7 +78,7 @@ const exclusions = [
 ];
 
 export const collectTextNode: (parent: any) => IterableIterator<any> = function* (parent) {
-  for (const node of parent.childNodes) {
+  for (let node of parent.childNodes) {
     if (node.nodeType === Node.TEXT_NODE) {
       yield node;
       continue;
@@ -121,7 +121,7 @@ export const blackOrWhite = (hexcolor: string) => {
 export const saveHistory = async (text: string) => {
   if (text == null || text === "") return;
 
-  const texts: any = await getStorageValue("texts", []);
+  const texts: string[] = await getStorageValue("texts", []);
 
   // If it is a same as last search keyword, don't save.
   if (texts[texts.length - 1] !== text) {

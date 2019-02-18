@@ -62,7 +62,8 @@ export class Marker {
         backgroundColor: m._mc,
         color: blackOrWhite(m._mc),
       });
-      return $(node).wrap(mark).parent();
+      $(node).wrap(mark);
+      return $(node).parent() as JQuery<Node> as JQuery<Element>;
     };
   })();
   
@@ -181,8 +182,9 @@ export class Marker {
     } else {
       this._prev = this._curr;
 
-      const i = this._marks.searchRank(this._curr.index)[1];
-      this._curr = this._marks.search(i - 1 < 0 ? this._dispCount - 1 : i - 1);
+      let i = this._marks.searchRank(this._curr.index)[1];
+      i = i - 1 < 0 ? this._dispCount - 1 : i - 1;
+      this._curr = this._marks.search(i);
     }
     this._focus();
   };
@@ -195,8 +197,9 @@ export class Marker {
     } else {
       this._prev = this._curr;
 
-      const i = this._marks.searchRank(this._curr.index)[1];
-      this._curr = this._marks.search(i + 1 >= this._dispCount ? 0 : i + 1);
+      let i = this._marks.searchRank(this._curr.index)[1];
+      i = i + 1 >= this._dispCount ? 0 : i + 1;
+      this._curr = this._marks.search(i);
     }
     this._focus();
   };
@@ -205,10 +208,9 @@ export class Marker {
     this._marks.insertRank(m.index, m);
   };
 
-  calc = function* (): IterableIterator<void> {
-    const that = this as Marker;
+  *calc(): Iterable<void> {
     const r = document.createRange();
-    for (const m of that._marks) {
+    for (const m of this._marks) {
       r.selectNodeContents(m.texts[0]);
       const rect = r.getBoundingClientRect();
       m.top = rect.top;
@@ -217,32 +219,30 @@ export class Marker {
     }
   };
 
-  wrap = function* (): IterableIterator<void> {
-    const that = this as Marker;
+  *wrap(): Iterable<void> {
     const btop = document.body.getBoundingClientRect().top;
     const docHeight = $(document).height();
     const winHeight = window.innerHeight;
 
-    for (const m of that._marks) {
+    for (const m of this._marks) {
       const t = (m.top - btop) / (docHeight - m.height);
       const h = m.height / docHeight * winHeight;
 
-      m.nodes = m.texts.map(n => this.wrapWithMark(that, n, m));
+      m.nodes = m.texts.map(n => this.wrapWithMark(this, n, m));
       m.rtop = t;
       m.rheight = h < 3 ? 3 : h;
-      that._dispCount++;
+      this._dispCount++;
       yield;
     }
   };
 
-  clear = function* (): IterableIterator<void> {
-    const that = this as Marker;
-    for (const m of that._marks) {
+  *clear(): Iterable<void> {
+    for (const m of this._marks) {
       m.nodes.forEach(n => n.contents().unwrap());
       yield;
     }
-    that._canvas.width = 0;
-    that._canvas.height = 0;
+    this._canvas.width = 0;
+    this._canvas.height = 0;
   };
 
   private exclusions = [
@@ -260,15 +260,14 @@ export class Marker {
     parent.normalize();
   };
 
-  destroy = function* (): IterableIterator<void> {
-    const that = this as Marker;
-    for (let i = that._destroyed; i < that.count(); i++) {
-      that._marks.search(i).texts.forEach(t => that.normalize(t));
-      that._destroyed++;
+  *destroy(): Iterable<void> {
+    for (let i = this._destroyed; i < this.count(); i++) {
+      this._marks.search(i).texts.forEach(t => this.normalize(t));
+      this._destroyed++;
       yield;
     }
-    $(that._canvas).remove();
-    const i = canvases.indexOf(that._canvas);
+    $(this._canvas).remove();
+    const i = canvases.indexOf(this._canvas);
     canvases.splice(i, 1);
   };
 }

@@ -1,4 +1,4 @@
-export class Treap<T> {
+export class Treap<T> implements Iterable<T> {
   private _root: Node<T>;
 
   private _count(t: Node<T>) {
@@ -71,7 +71,7 @@ export class Treap<T> {
     return this._search(this._root, k);
   };
 
-  [Symbol.iterator] = function* (): IterableIterator<T> {
+  [Symbol.iterator] = function* (): Iterator<T> {
     const count = this.count();
     for (let i = 0; i < count; i++) {
       yield this.search(i);

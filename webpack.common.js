@@ -67,5 +67,9 @@ module.exports = {
     new CopyPlugin([
       { from: "./src/other", to: "./" }
     ])
-  ]
+  ],
+  performance: {
+    maxEntrypointSize: 1048576,
+    maxAssetSize: 1048576
+  }
 };
