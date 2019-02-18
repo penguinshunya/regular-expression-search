@@ -8,6 +8,12 @@ Build
 npm install && npm run dev
 ```
 
+Test
+====
+```
+npm run test
+```
+
 Licensing
 =========
 This software is released under the MIT License. See [LICENSE](LICENSE) for the full license text.
