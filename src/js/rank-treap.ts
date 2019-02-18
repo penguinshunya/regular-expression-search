@@ -101,7 +101,7 @@ export class RankTreap<T, S> implements Iterable<T> {
     return this._search(this._root, k);
   };
 
-  [Symbol.iterator] = function* (): Iterator<T> {
+  *[Symbol.iterator](): Iterator<T> {
     const count = this.count();
     for (let i = 0; i < count; i++) {
       yield this.search(i);

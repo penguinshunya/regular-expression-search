@@ -78,7 +78,7 @@ const exclusions = [
 ];
 
 export const collectTextNode: (parent: any) => IterableIterator<any> = function* (parent) {
-  for (let node of parent.childNodes) {
+  for (const node of parent.childNodes) {
     if (node.nodeType === Node.TEXT_NODE) {
       yield node;
       continue;
