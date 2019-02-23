@@ -5,6 +5,8 @@ Search using regular expression on chrome extension.
 Build
 =====
 ```
+git clone https://github.com/penguinshunya/regular-expression-search.git
+cd regular-expression-search
 npm install && npm run dev
 ```
 
