@@ -1,5 +1,5 @@
+import Treap from "@penguinshunya/treap/dist/treap";
 import { reduce, collectTextNode } from "./js/function";
-import { Treap } from "./js/treap";
 
 export const SearchAndSplit = function* (text: string, cain: boolean, ignoreBlank: boolean): IterableIterator<[number, Text[]]> {
   const r = new RegExp(text, cain ? "gi" : "g");

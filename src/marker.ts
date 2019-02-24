@@ -1,5 +1,5 @@
+import RankTreap from "@penguinshunya/treap/dist/rank-treap";
 import { blackOrWhite } from "./js/function";
-import { RankTreap } from "./js/rank-treap";
 
 export class Mark {
   texts: Text[];

@@ -11,6 +11,7 @@
   "author": "penguinshunya <penguinshunya@hotmail.com>",
   "license": "MIT",
   "devDependencies": {
+    "@penguinshunya/treap": "^1.4.0",
     "@types/chrome": "0.0.80",
     "@types/jest": "^24.0.5",
     "@types/jquery": "^3.3.29",
