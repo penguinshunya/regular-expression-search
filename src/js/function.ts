@@ -5,7 +5,7 @@ export const reduce = <S, T>(iter: Iterable<T>, func: (a: S, c: T) => S, accu: S
   return accu;
 };
 
-export const sleep = async (msec: number) => {
+export async function sleep(msec: number) {
   return new Promise(resolve => {
     window.setTimeout(resolve, msec);
   });
@@ -130,3 +130,11 @@ export const saveHistory = async (text: string) => {
     await setStorageValue("texts", texts);
   }
 };
+
+export function makeSVG(tag: string, attrs: {[s: string]: string }) {
+  const elem = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  for (const key in attrs) {
+    elem.setAttribute(key, attrs[key]);
+  }
+  return elem;
+}
