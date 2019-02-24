@@ -6,8 +6,10 @@ const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   entry: {
-    "page": ["./src/page.ts"],
-    "background": ["./src/background.ts"],
+    "page": "./src/page.ts",
+    "background": "./src/background.ts",
+    "popup": "./src/popup.ts",
+    "option": "./src/option.ts"
   },
   output: {
     filename: "js/[name].bundle.js",
