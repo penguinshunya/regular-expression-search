@@ -18,5 +18,21 @@
   "color": {
     "message": "カラー",
     "description": ""
+  },
+  "caseInsensitive": {
+    "message": "大文字小文字を区別しない",
+    "description": ""
+  },
+  "prev": {
+    "message": "前へ",
+    "description": ""
+  },
+  "next": {
+    "message": "次へ",
+    "description": ""
+  },
+  "close": {
+    "message": "検索結果を削除し、ダイアログを閉じる",
+    "description": ""
   }
 }

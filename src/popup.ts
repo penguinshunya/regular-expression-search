@@ -3,6 +3,7 @@ import "webpack-jquery-ui/css";
 import "bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "open-iconic/font/css/open-iconic-bootstrap.css";
+import "./js/localize";
 import {
   sleep,
   getStorageValue,

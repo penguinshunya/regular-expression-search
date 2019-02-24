@@ -18,5 +18,21 @@
   "color": {
     "message": "Marker Color",
     "description": ""
+  },
+  "caseInsensitive": {
+    "message": "case insensitive",
+    "description": ""
+  },
+  "prev": {
+    "message": "previous",
+    "description": ""
+  },
+  "next": {
+    "message": "next",
+    "description": ""
+  },
+  "close": {
+    "message": "clear search result and close dialog",
+    "description": ""
   }
 }
