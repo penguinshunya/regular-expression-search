@@ -15,7 +15,6 @@
     "@types/chrome": "0.0.80",
     "@types/jest": "^24.0.5",
     "@types/jquery": "^3.3.29",
-    "@types/universal-analytics": "^0.4.2",
     "bootstrap": "^4.3.1",
     "clean-webpack-plugin": "^1.0.1",
     "copy-webpack-plugin": "^4.6.0",
