@@ -16,7 +16,7 @@ import {
   CAIN,
   INSTANT,
 } from "./js/define";
-import "./css/popup.css";
+import "./css/popup.sass";
 
 $(async () => {
   $("#search").focus();

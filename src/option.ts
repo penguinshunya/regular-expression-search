@@ -15,7 +15,7 @@ import {
   IGNORE_BLANK,
   BACKGROUND,
 } from "./js/define";
-import "./css/option.css";
+import "./css/option.sass";
 
 $(async () => {
   const colors = [
