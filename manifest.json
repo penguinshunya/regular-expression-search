@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "Regular Expression Search",
+  "version": "3.0.0.0",
+  "description": "A basic example extension with only required keys",
+  "icons": {
+    "16": "image/icon16.png",
+    "48": "image/icon48.png",
+    "128": "image/icon128.png"
+  }
+}
