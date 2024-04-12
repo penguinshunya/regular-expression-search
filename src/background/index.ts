@@ -1,3 +1,4 @@
 chrome.storage.onChanged.addListener((changes, _) => {
-  console.log(changes);
+  const a = 123;
+  const b = a * 2;
 });

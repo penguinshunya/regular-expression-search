@@ -8,11 +8,13 @@
     "@parcel/packager-ts": "2.12.0",
     "@parcel/transformer-typescript-types": "2.12.0",
     "@types/chrome": "^0.0.266",
+    "@types/react": "^18.2.77",
+    "@types/react-dom": "^18.2.25",
     "parcel": "^2.12.0",
+    "process": "^0.11.10",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "typescript": ">=3.0.0"
-  },
-  "engines": {
-    "node": "20.x"
   },
   "scripts": {
     "watch": "parcel watch",
@@ -20,16 +22,19 @@
   },
   "targets": {
     "background": {
+      "context": "service-worker",
       "source": "src/background/index.ts"
     },
     "option": {
-      "source": "src/option/index.html"
+      "source": "src/option/index.html",
+      "publicUrl": "."
     },
     "page": {
       "source": "src/page/index.ts"
     },
     "popup": {
-      "source": "src/popup/index.html"
+      "source": "src/popup/index.html",
+      "publicUrl": "."
     }
   }
 }
