@@ -1,5 +1,6 @@
 {
   "name": "regular-expression-search",
+  "type": "module",
   "version": "1.0.0",
   "repository": "https://github.com/penguinshunya/regular-expression-search.git",
   "author": "penguinshunya <takayashunya@gmail.com>",
@@ -14,26 +15,27 @@
     "process": "^0.11.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "typescript": ">=3.0.0"
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "watch": "parcel watch",
-    "build": "parcel build"
+    "build": "parcel build",
+    "lint": "eslint src"
   },
   "targets": {
     "background": {
       "context": "service-worker",
-      "source": "src/background/index.ts"
+      "source": "src/entrypoints/background/index.ts"
     },
     "option": {
-      "source": "src/option/index.html",
+      "source": "src/entrypoints/option/index.html",
       "publicUrl": "."
     },
     "page": {
-      "source": "src/page/index.ts"
+      "source": "src/entrypoints/page/index.ts"
     },
     "popup": {
-      "source": "src/popup/index.html",
+      "source": "src/entrypoints/popup/index.html",
       "publicUrl": "."
     }
   }
