@@ -19,8 +19,7 @@
   },
   "scripts": {
     "watch": "parcel watch",
-    "build": "parcel build",
-    "lint": "eslint src"
+    "build": "parcel build"
   },
   "targets": {
     "background": {
