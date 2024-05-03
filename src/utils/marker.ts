@@ -1,5 +1,5 @@
 import RankTreap from "@penguinshunya/treap/dist/rank-treap";
-import { blackOrWhite } from "./js/function";
+import { blackOrWhite } from "./functions";
 
 export class Mark {
   texts: Text[];
@@ -30,8 +30,8 @@ const canvas = $("<canvas>").css({
 export class Marker {
   private _marks = new RankTreap<Mark, number>();
   private _dispCount: number = 0;
-  private _curr: Mark = null;
-  private _prev: Mark = null;
+  private _curr: Mark | null = null;
+  private _prev: Mark | null = null;
   private _canvas: HTMLCanvasElement;
   private _context: CanvasRenderingContext2D;
   private _mc: string;
@@ -45,7 +45,7 @@ export class Marker {
       padding: 0,
       font: "inherit",
     });
-  
+
     const clickMark = function (m: Marker) {
       return function () {
         m._prev = m._curr;
@@ -53,7 +53,7 @@ export class Marker {
         m._focus();
       };
     };
-  
+
     return (m: Marker, node: Text, mrk: Mark) => {
       const mark = org.clone();
       mark.data("mark", mrk);
@@ -66,7 +66,7 @@ export class Marker {
       return $(node).parent() as JQuery<Node> as JQuery<Element>;
     };
   })();
-  
+
   private getMarkFromY(m: Marker, y: number) {
     const t = y / m._canvas.height;
 
@@ -116,7 +116,7 @@ export class Marker {
     this._fc = fc;
 
     this._canvas = canvas.clone().appendTo("body")[0];
-    this._context = this._canvas.getContext("2d");
+    this._context = this._canvas.getContext("2d")!;
 
     $(this._canvas).on("click", e => this._select(e.offsetY));
     $(this._canvas).on("mousemove", e => this._changeCursor(e.offsetY));
@@ -136,16 +136,16 @@ export class Marker {
   focusMark() {
     if (this._prev === null) this._prev = this._curr;
 
-    this._prev.nodes.forEach(mark => mark.css({
+    this._prev?.nodes.forEach(mark => mark.css({
       backgroundColor: this._mc,
       color: blackOrWhite(this._mc),
     }));
-    this._curr.nodes.forEach(mark => mark.css({
+    this._curr?.nodes.forEach(mark => mark.css({
       backgroundColor: this._fc,
       color: blackOrWhite(this._fc),
     }));
 
-    this._curr.nodes[0].focus();
+    this._curr?.nodes[0].focus();
   };
 
   redraw() {
@@ -221,7 +221,7 @@ export class Marker {
 
   *wrap(): Iterable<void> {
     const btop = document.body.getBoundingClientRect().top;
-    const docHeight = $(document).height();
+    const docHeight = $(document).height() ?? 1024; // MEMO 1024は適当な値
     const winHeight = window.innerHeight;
 
     for (const m of this._marks) {

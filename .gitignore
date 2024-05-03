@@ -1,8 +1,5 @@
 .DS_Store
 .vscode
-coverage/
+.parcel-cache/
 dist/
 node_modules/
-*.zip
-package-lock.json
-yarn.lock

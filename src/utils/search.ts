@@ -1,11 +1,12 @@
 import Treap from "@penguinshunya/treap/dist/treap";
-import { reduce, collectTextNode } from "./js/function";
+import { collectTextNode } from "./browser";
+import { reduce } from "./functions";
 
 export const SearchAndSplit = function* (text: string, cain: boolean, ignoreBlank: boolean): IterableIterator<[number, Text[]]> {
   const r = new RegExp(text, cain ? "gi" : "g");
   const t = reduce(collectTextNode(document.body), (t, n) => t.push(n), new Treap<Text>());
   const c = reduce(t, (c, e) => c + e.textContent, "");
-  let a: RegExpExecArray;
+  let a: RegExpExecArray | null;
   let i = 0, l = 0;
   let index = 0;
 
@@ -19,7 +20,7 @@ export const SearchAndSplit = function* (text: string, cain: boolean, ignoreBlan
       continue;
     }
 
-    const texts = [];
+    const texts: Text[] = [];
 
     while (a.index >= l + t.search(i).data.length) {
       l += t.search(i++).data.length;

@@ -19,7 +19,8 @@ export const sleeping = async (work: boolean) => {
     return new Promise(resolve => {
       port.onMessage.addListener(response => {
         if (response.sleep == null) return;
-        resolve();
+        // TODO あまり意味のない値である null
+        resolve(null);
       });
       postMessage(port, { sleep: true });
     });
@@ -42,7 +43,8 @@ export const getStorageValue = async <T>(key: string, value: T) => {
 export const setStorageValue = async (key: string, value: any) => {
   const promise = new Promise(resolve => {
     chrome.storage.local.set({ [key]: value }, () => {
-      resolve();
+      // TODO あまり意味のない値である null
+      resolve(null);
     });
   });
   return promise;
@@ -55,6 +57,7 @@ const checkLastError = (_: any) => {
 export const sendToAllTab = (params: { [s: string]: any }, callback = checkLastError) => {
   chrome.tabs.query({}, tabs => {
     tabs.forEach(tab => {
+      if (tab.id == null) return;
       chrome.tabs.sendMessage(tab.id, params, callback);
     });
   });
@@ -66,47 +69,6 @@ export const postMessage = (port: chrome.runtime.Port, message: Object) => {
     return true;
   } catch (_) {
     return false;
-  }
-};
-
-const exclusions = [
-  "script",
-  "noscript",
-  "style",
-  "textarea",
-  "svg",
-];
-
-export const collectTextNode: (parent: any) => IterableIterator<any> = function* (parent) {
-  for (const node of parent.childNodes) {
-    if (node.nodeType === Node.TEXT_NODE) {
-      yield node;
-      continue;
-    }
-    if (node.nodeType !== Node.ELEMENT_NODE) {
-      continue;
-    }
-    const tagName = node.tagName.toLowerCase();
-    if (exclusions.indexOf(tagName) >= 0) {
-      continue;
-    }
-    if ($(node).css("display") === "none") {
-      continue;
-    }
-    if (tagName === "details" && $(node).attr("open") == null) {
-      continue;
-    }
-    if (tagName === "iframe") {
-      try {
-        // Error occurs in this line when cross domain.
-        const body = node.contentWindow.document.body;
-
-        yield* collectTextNode(body);
-      } catch (e) {
-      }
-      continue;
-    }
-    yield* collectTextNode(node);
   }
 };
 
@@ -130,11 +92,3 @@ export const saveHistory = async (text: string) => {
     await setStorageValue("texts", texts);
   }
 };
-
-export function makeSVG(tag: string, attrs: {[s: string]: string }) {
-  const elem = document.createElementNS("http://www.w3.org/2000/svg", tag);
-  for (const key in attrs) {
-    elem.setAttribute(key, attrs[key]);
-  }
-  return elem;
-}
