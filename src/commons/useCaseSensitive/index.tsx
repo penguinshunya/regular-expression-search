@@ -1,4 +1,4 @@
-import * as storage from "../../lib/storage";
+import * as storage from "../../externals/storage";
 import { useCallback, useEffect, useState } from "react";
 
 const KEY = "e40323e6-d2ab-4723-a198-57a5d6ef72e4";
