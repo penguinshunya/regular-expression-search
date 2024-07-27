@@ -4,15 +4,8 @@ export function* collectTextNode(parent: Node): Generator<Text, void, void> {
     "style",
   ]);
   for (const node of parent.childNodes) {
-    if (node.nodeType === Node.TEXT_NODE) {
-      // MEMO: This condition should never be met.
-      if (!(node instanceof Text)) {
-        throw new Error("Unexpected node type");
-      }
+    if (node instanceof Text) {
       yield node;
-    }
-    if (node.nodeType !== Node.ELEMENT_NODE) {
-      continue;
     }
     // MEMO: <svg> is not a HTMLElement.
     if (!(node instanceof HTMLElement)) {
