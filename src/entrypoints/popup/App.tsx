@@ -1,10 +1,10 @@
-import AbcIcon from '@mui/icons-material/Abc';
-import CloseIcon from '@mui/icons-material/Close';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import { IconButton, Input } from '@mui/material';
-import React from 'react';
-import useCaseSensitive from '../../hooks/useCaseSensitive';
+import AbcIcon from "@mui/icons-material/Abc";
+import CloseIcon from "@mui/icons-material/Close";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import { IconButton, Input } from "@mui/material";
+import React from "react";
+import useCaseSensitive from "../../hooks/useCaseSensitive";
 
 export function App() {
   const [caseSensitive, onToggleCaseSensitive] = useCaseSensitive();
@@ -34,5 +34,5 @@ export function App() {
         <CloseIcon fontSize="small" />
       </IconButton>
     </div>
-  )
+  );
 }

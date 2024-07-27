@@ -1,6 +1,6 @@
 export async function get<T>(key: string, initialValue: T): Promise<T> {
   return new Promise<T>(resolve => {
-    const param: { [s: string]: T } = {};
+    const param: Record<string, unknown> = {};
     param[key] = initialValue;
     chrome.storage.local.get(param, response => {
       resolve(response[key]);
