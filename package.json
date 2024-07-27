@@ -12,7 +12,8 @@
   "scripts": {
     "build": "parcel build",
     "watch": "parcel watch",
-    "test": "jest"
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "targets": {
     "background": {
