@@ -1,21 +1,16 @@
-Regular Expression Search
-=========================
-Search using regular expression on chrome extension.
+## Environment
 
-Build
-=====
-```
-git clone https://github.com/penguinshunya/regular-expression-search.git
-cd regular-expression-search
-npm install && npm run dev
-```
+- Visual Studio Code Dev Containers
 
-Test
-====
+## Setup
+
 ```
-npm test
+yarn
+yarn build
 ```
 
-Licensing
-=========
-This software is released under the MIT License. See [LICENSE](LICENSE) for the full license text.
+## Test
+
+```
+yarn test
+```
