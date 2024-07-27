@@ -24,14 +24,14 @@
   "targets": {
     "background": {
       "context": "service-worker",
-      "source": "src/entrypoints/background/index.ts"
+      "source": "src/entrypoints/background/index.tsx"
     },
     "option": {
       "source": "src/entrypoints/option/index.html",
       "publicUrl": "."
     },
     "page": {
-      "source": "src/entrypoints/page/index.ts"
+      "source": "src/entrypoints/page/index.tsx"
     },
     "popup": {
       "source": "src/entrypoints/popup/index.html",
