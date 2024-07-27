@@ -4,7 +4,7 @@ import Treap from ".";
 describe("basic operations", () => {
   const treap = new Treap<string>();
 
-  it("correct push", () => {
+  it("push", () => {
     treap.push("a");
     treap.push("b");
     treap.push("c");
@@ -15,17 +15,17 @@ describe("basic operations", () => {
     expect(result).toEqual(["a", "b", "c"]);
   });
 
-  it("correct search", () => {
+  it("search", () => {
     const value = treap.search(1);
     expect(value).toBe("b");
   });
 
-  it("correct count", () => {
+  it("count", () => {
     const count = treap.count();
     expect(count).toBe(3);
   });
 
-  it("correct insert", () => {
+  it("insert", () => {
     treap.insert(1, "d");
     const result: string[] = [];
     for (const value of treap) {
