@@ -8,3 +8,9 @@
 yarn
 yarn build
 ```
+
+## Test
+
+```
+yarn test
+```
