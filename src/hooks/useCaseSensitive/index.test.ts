@@ -3,7 +3,7 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import useCaseSensitive from ".";
 import { mockStorage } from "../../lib/storage/mock";
 
-test('simple', async () => {
+test("simple", async () => {
   mockStorage();
   const { result } = renderHook(() => useCaseSensitive());
   expect(result.current[0]).toBe(false);
