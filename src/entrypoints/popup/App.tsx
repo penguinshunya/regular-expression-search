@@ -4,7 +4,7 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { IconButton, Input } from "@mui/material";
 import React from "react";
-import useCaseSensitive from "../../commons/useCaseSensitive";
+import useCaseSensitive from "../../hooks/useCaseSensitive";
 
 export function App() {
   const [caseSensitive, onToggleCaseSensitive] = useCaseSensitive();

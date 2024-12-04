@@ -1,6 +1,6 @@
 import * as searchHistory from ".";
 import { expect, test } from "@jest/globals";
-import mockStorage from "../../externals/storage/mock";
+import { mockStorage } from "../storage/mock";
 
 test("initial", async () => {
   mockStorage();

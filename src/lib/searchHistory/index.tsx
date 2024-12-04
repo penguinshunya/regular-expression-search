@@ -1,4 +1,4 @@
-import * as storage from "../../externals/storage";
+import * as storage from "../storage";
 
 const KEY = "7be745ed-4b58-4f16-8f6d-da8bab094666";
 
