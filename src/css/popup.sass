@@ -1,0 +1,66 @@
+#container
+  display: flex
+  padding: 0.1em 0.2em
+
+*:focus
+  outline: 0
+
+#search_wrapper
+  display: flex
+  align-items: center
+  width: 440px
+  font-size: 0.8em
+
+#search
+  font-family: 'Courier New', Courier, monospace
+  margin-left: 1em
+  border: 0
+  width: 100%
+
+#count
+  margin-right: 1.2em
+  text-align: right
+  white-space: nowrap
+
+  &.spinner-grow
+    width: 1.682rem
+    color: #aaaaaa
+    border-left: none
+    border-right: none
+
+  &.spinner-border
+    color: #aaaaaa
+    border-left: none
+    border-right: none
+
+button
+  margin: 0.5em
+  padding: 0.5em 0.8em
+  border: none
+  background-color: inherit
+  font-size: 0.5em
+  cursor: pointer
+
+  &:disabled
+    color: #cccccc
+
+  &:focus
+    background-color: #dfdfdf
+    border-radius: 0.2em
+    outline: 0
+
+#cain
+  padding: 0.5em 0.9em
+
+  &:focus
+    background-color: #dfdfdf
+    border-radius: 0.2em
+  
+  &[data-select="true"]
+    background-color: #dfdfdf
+    border-radius: 1.25em
+  
+  &[data-select="true"]:focus
+    color: white
+    background-color: #888888
+    border-radius: 0.2em
