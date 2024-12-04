@@ -40,7 +40,9 @@ This repository contains the code for the Regular Expression Search Chrome exten
 
 ## TODO
 
-- [ ] hello
+- [ ] i18n
+- [ ] Switch the testing tool from Jest to Vitest.
+- [ ] Switch the bundling tool from Webpack to Vite (or possibly Rollup, but likely Vite).
 
 ## Licensing
 
