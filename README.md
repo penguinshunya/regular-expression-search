@@ -40,9 +40,12 @@ This repository contains the code for the Regular Expression Search Chrome exten
 
 ## TODO
 
-- [ ] i18n
-- [ ] Switch the testing tool from Jest to Vitest.
-- [ ] Switch the bundling tool from Webpack to Vite (or possibly Rollup, but likely Vite).
+Express difficulty as Easy/Medium/Hard, sorted in increasing order of difficulty.
+
+- [ ] i18n (Easy)
+- [ ] Switch the testing tool from Jest to Vitest. (Easy)
+- [ ] Switch the bundling tool from Webpack to Vite (or possibly Rollup, but likely Vite). (Medium)
+- [ ] Handle dynamic DOM element changes. (Hard)
 
 ## Licensing
 
