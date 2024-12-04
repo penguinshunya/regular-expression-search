@@ -4,5 +4,4 @@ coverage/
 dist/
 node_modules/
 *.zip
-package-lock.json
 yarn.lock
