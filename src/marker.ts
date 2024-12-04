@@ -1,5 +1,5 @@
-import RankTreap from "@penguinshunya/treap/dist/rank-treap";
 import { blackOrWhite } from "./js/function";
+import RankTreap from "./lib/RankTreap";
 
 export class Mark {
   texts: Text[];
@@ -45,7 +45,7 @@ export class Marker {
       padding: 0,
       font: "inherit",
     });
-  
+
     const clickMark = function (m: Marker) {
       return function () {
         m._prev = m._curr;
@@ -53,7 +53,7 @@ export class Marker {
         m._focus();
       };
     };
-  
+
     return (m: Marker, node: Text, mrk: Mark) => {
       const mark = org.clone();
       mark.data("mark", mrk);
@@ -66,7 +66,7 @@ export class Marker {
       return $(node).parent() as JQuery<Node> as JQuery<Element>;
     };
   })();
-  
+
   private getMarkFromY(m: Marker, y: number) {
     const t = y / m._canvas.height;
 
