@@ -40,7 +40,7 @@ export const getStorageValue = async <T>(key: string, value: T) => {
 };
 
 export const setStorageValue = async (key: string, value: any) => {
-  const promise = new Promise(resolve => {
+  const promise = new Promise<void>(resolve => {
     chrome.storage.local.set({ [key]: value }, () => {
       resolve();
     });
