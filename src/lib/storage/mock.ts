@@ -2,7 +2,7 @@ import * as storage from ".";
 import { jest } from "@jest/globals";
 
 export function mockStorage() {
-  const memo: Record<string, unknown> = {};
+  const memo: { [s: string]: unknown } = {};
   jest.spyOn(storage, "get").mockImplementation(async (key, initialValue) => {
     if (memo[key] == null) {
       memo[key] = initialValue;

@@ -19,7 +19,7 @@ export function* collectTextNode(parent: Node): Generator<Text, void, void> {
       continue;
     }
     if (tagName === "details" && !node.hasAttribute("open")) {
-      continue;
+      continue
     }
     yield* collectTextNode(node);
   }

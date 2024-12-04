@@ -34,7 +34,7 @@ test("except <script> and <style>", async () => {
   );
   const root = await screen.findByTestId("root");
   testNode(root, []);
-});
+})
 
 test("except <svg>", async () => {
   render(
@@ -46,7 +46,7 @@ test("except <svg>", async () => {
   );
   const root = await screen.findByTestId("root");
   testNode(root, []);
-});
+})
 
 test("except when display is set to none", async () => {
   render(

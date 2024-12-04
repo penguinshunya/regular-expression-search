@@ -9,8 +9,8 @@ test("simple", async () => {
   expect(result.current[0]).toBe(false);
   act(() => {
     result.current[1]();
-  });
+  })
   await waitFor(() => {
     expect(result.current[0]).toBe(true);
-  });
+  })
 });
