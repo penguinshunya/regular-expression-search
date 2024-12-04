@@ -1,11 +1,11 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "Regular Expression Search",
   "short_name": "regex search",
   "version": "2.5.4.10",
   "description": "__MSG_description__",
   "commands": {
-    "_execute_browser_action": {
+    "_execute_action": {
       "suggested_key": {
         "default": "Ctrl+Shift+F",
         "mac": "Command+Shift+F"
@@ -17,7 +17,7 @@
     "48": "image/icon48.png",
     "128": "image/icon128.png"
   },
-  "browser_action": {
+  "action": {
     "default_popup": "popup.html"
   },
   "content_scripts": [{
@@ -29,10 +29,7 @@
     ]
   }],
   "background": {
-    "scripts": [
-      "js/background.bundle.js"
-    ],
-    "persistent": false
+    "service_worker": "js/background.bundle.js"
   },
   "options_ui": {
     "page": "option.html",
@@ -40,9 +37,13 @@
   },
   "permissions": [
     "activeTab",
-    "storage",
+    "storage"
+  ],
+  "host_permissions": [
     "*://*/*"
   ],
   "default_locale": "en",
-  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
 }
