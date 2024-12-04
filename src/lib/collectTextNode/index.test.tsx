@@ -84,7 +84,7 @@ test("complex", async () => {
   testNode(root, ["123", "456", "789"]);
 });
 
-function testNode(node: HTMLElement, texts: string[]) {
+function testNode(node: Node, texts: string[]) {
   const res: string[] = [];
   for (const n of collectTextNode(node)) {
     res.push(n.textContent ?? "");
