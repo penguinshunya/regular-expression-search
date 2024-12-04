@@ -23,7 +23,3 @@ jobs:
 
     - name: Run build
       run: npm run build
-
-    - name: Check if build was successful
-      if: success()  # 成功した場合のみ実行
-      run: echo "Build was successful! ✅"
