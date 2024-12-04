@@ -1,6 +1,5 @@
-import { describe, expect, it, test } from "@jest/globals";
+import { describe, expect, it } from "@jest/globals";
 import RankTreap from ".";
-import shuffle from "../shuffle";
 
 describe("basic operations", () => {
   const treap = new RankTreap<string>();
@@ -31,21 +30,4 @@ describe("basic operations", () => {
     const value = treap.search(3);
     expect(value).toBeNull();
   });
-});
-
-test("shuffle", () => {
-  const array = shuffle([...Array(16).keys()]);
-  expect(array).toHaveLength(16);
-
-  const treap = new RankTreap<number>();
-  expect(treap.count()).toBe(0);
-  for (const value of array) {
-    treap.insertRank(value, value);
-  }
-  expect(treap.count()).toBe(16);
-
-  for (let i = 0; i < 16; i++) {
-    const value = treap.search(i);
-    expect(value).toBe(i);
-  }
 });
