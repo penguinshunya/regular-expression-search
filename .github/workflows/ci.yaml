@@ -18,8 +18,39 @@ jobs:
       with:
         node-version-file: .nvmrc
 
-    - name: Install dependencies
-      run: npm install
+    # - name: Install dependencies
+    #   run: npm install
 
-    - name: Run build
-      run: npm run build
+    # - name: Run build
+    #   run: npm run build
+
+    - name: Get latest release version
+      id: get_latest_release
+      run: |
+        latest_release=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/latest)
+        latest_tag=$(echo $latest_release | jq -r .tag_name)
+        echo "Latest release tag is $latest_tag"
+        echo "::set-output name=latest_tag::$latest_tag"
+        
+    - name: Increment version and create new tag
+      id: increment_tag
+      run: |
+        latest_tag=${{ steps.get_latest_tag.outputs.latest_tag }}
+        if [ -z "$latest_tag" ]; then
+          new_tag="v1.0.0"
+        else
+          new_tag=$(echo $latest_tag | awk -F. -v OFS=. '{$NF++; print $0}')
+        fi
+        echo "New tag will be $new_tag"
+        echo "::set-output name=new_tag::$new_tag"
+
+    # - name: Zip dist directory
+    #   run: zip -r dist.zip dist
+
+    # - name: Upload to GitHub Releases
+    #   uses: gh-actions/gh-release@v1.0.0
+    #   with:
+    #     tag: ${{ github.ref }}  # リリースタグを指定
+    #     files: dist.zip  # アップロードするファイル
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # リリースの作成に必要なGitHub Token
