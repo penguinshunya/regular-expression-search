@@ -16,7 +16,7 @@ export const sleeping = async (work: boolean) => {
     // Creating a connection object once,
     // perhaps may lead to poor performance.
     const port = chrome.runtime.connect();
-    return new Promise(resolve => {
+    return new Promise<void>(resolve => {
       port.onMessage.addListener(response => {
         if (response.sleep == null) return;
         resolve();

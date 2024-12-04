@@ -32,7 +32,7 @@ $(async () => {
 });
 
 const preprocess = async () => {
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     chrome.tabs.query({ active: true, currentWindow: true }, async tabs => {
       if (tabs[0].status === "loading") {
         reject();
