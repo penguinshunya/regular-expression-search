@@ -38,6 +38,10 @@ This repository contains the code for the Regular Expression Search Chrome exten
 5. Check in Chrome Extension Management
    A `dist` directory will be created, which can be loaded in the Chrome extension management screen.
 
+## TODO
+
+- [ ] hello
+
 ## Licensing
 
 This software is released under the MIT License. See [LICENSE](LICENSE) for the full license text.
