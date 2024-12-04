@@ -11,13 +11,11 @@
     "@types/react-dom": "^18.3.0",
     "parcel": "^2.12.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "typescript": "^5.5.4"
+    "react-dom": "^18.3.1"
   },
   "scripts": {
-    "build": "parcel build",
     "watch": "parcel watch",
-    "test": "jest"
+    "build": "parcel build"
   },
   "targets": {
     "background": {
@@ -37,9 +35,6 @@
     }
   },
   "devDependencies": {
-    "@jest/globals": "^29.7.0",
-    "jest": "^29.7.0",
-    "process": "^0.11.10",
-    "ts-jest": "^29.2.3"
+    "process": "^0.11.10"
   }
 }
