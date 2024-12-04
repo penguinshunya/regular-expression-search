@@ -6,10 +6,6 @@
   "author": "penguinshunya <takayashunya@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@emotion/react": "^11.13.0",
-    "@emotion/styled": "^11.13.0",
-    "@mui/icons-material": "^5.16.5",
-    "@mui/material": "^5.16.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
