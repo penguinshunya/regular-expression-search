@@ -44,7 +44,7 @@ Express difficulty as Easy/Medium/Hard, sorted in increasing order of difficulty
 
 - [ ] i18n (Easy)
 - [ ] Switch the testing tool from Jest to Vitest. (Easy)
-- [ ] Add a CI workflow to create a release and include a .zip file in the release. (Medium)
+- [x] Add a CI workflow to create a release and include a .zip file in the release. (Medium)
 - [ ] Switch the bundling tool from Webpack to Vite (or possibly Rollup, but likely Vite). (Medium)
 - [ ] Handle dynamic DOM element changes. (Hard)
 
