@@ -2,22 +2,19 @@ export default class RankTreap<T, S> implements Iterable<T> {
   private _root: Node<T, S> | null;
 
   constructor() {
-    this._root = null; // Initially, the tree is empty
+    this._root = null;
   }
 
-  // Count the number of nodes in the treap
   private _count(t: Node<T, S> | null): number {
     return t === null ? 0 : t.cnt;
   }
 
-  // Update the count of nodes in the subtree
   private _update(t: Node<T, S> | null): Node<T, S> | null {
     if (!t) return null;
     t.cnt = this._count(t.lch) + this._count(t.rch) + 1;
     return t;
   }
 
-  // Merge two treaps
   private _merge(
     l: Node<T, S> | null,
     r: Node<T, S> | null,
@@ -40,7 +37,6 @@ export default class RankTreap<T, S> implements Iterable<T> {
     }
   }
 
-  // Split the treap at the given rank
   private _split(
     t: Node<T, S> | null,
     k: number,
@@ -57,7 +53,6 @@ export default class RankTreap<T, S> implements Iterable<T> {
     }
   }
 
-  // Find the rank of a given element
   private _searchSplit(t: Node<T, S> | null, r: S): number {
     if (!t) return 0;
     if (t.rnk === r) throw new Error("Rank already exists");
@@ -68,7 +63,6 @@ export default class RankTreap<T, S> implements Iterable<T> {
     }
   }
 
-  // Insert an element at the given rank
   private _insertRank(t: Node<T, S> | null, r: S, v: T): Node<T, S> | null {
     const k = this._searchSplit(t, r);
     const [left, right] = this._split(t, k);
@@ -77,7 +71,6 @@ export default class RankTreap<T, S> implements Iterable<T> {
     return this._merge(mergedLeft, right);
   }
 
-  // Search for an element at the given rank
   private _searchRank(t: Node<T, S> | null, r: S): [T, number] | null {
     if (!t) return null;
     if (t.rnk === r) {
@@ -90,7 +83,6 @@ export default class RankTreap<T, S> implements Iterable<T> {
     }
   }
 
-  // Search for the element at the given index (k)
   private _search(t: Node<T, S> | null, k: number): T | null {
     if (k < 0 || k >= this._count(t)) return null;
     if (this._count(t!.lch) === k) return t!.val;
@@ -98,27 +90,22 @@ export default class RankTreap<T, S> implements Iterable<T> {
     return this._search(t!.rch, k - this._count(t!.lch) - 1);
   }
 
-  // Public method to count the number of elements in the treap
   count(): number {
     return this._count(this._root);
   }
 
-  // Insert an element with a specific rank
   insertRank(r: S, v: T): void {
     this._root = this._insertRank(this._root, r, v);
   }
 
-  // Search for an element by its rank
   searchRank(r: S): [T, number] | null {
     return this._searchRank(this._root, r);
   }
 
-  // Search for an element by its index
   search(k: number): T | null {
     return this._search(this._root, k);
   }
 
-  // Implement the iterable interface
   *[Symbol.iterator](): Iterator<T> {
     const count = this.count();
     for (let i = 0; i < count; i++) {
@@ -137,11 +124,11 @@ class Node<T, S> {
   rch: Node<T, S> | null;
 
   constructor(v: T, r: S) {
-    this.pri = Math.random(); // Priority is randomly assigned
-    this.cnt = 1; // Initial count is 1
+    this.pri = Math.random();
+    this.cnt = 1;
     this.val = v;
     this.rnk = r;
-    this.lch = null; // Left child
-    this.rch = null; // Right child
+    this.lch = null;
+    this.rch = null;
   }
 }
