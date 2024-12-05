@@ -20,14 +20,12 @@
   "action": {
     "default_popup": "popup.html"
   },
-  "content_scripts": [{
-    "matches": [
-      "<all_urls>"
-    ],
-    "js": [
-      "js/page.bundle.js"
-    ]
-  }],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["js/page.bundle.js"]
+    }
+  ],
   "background": {
     "service_worker": "js/background.bundle.js"
   },
@@ -35,13 +33,8 @@
     "page": "option.html",
     "open_in_tab": false
   },
-  "permissions": [
-    "activeTab",
-    "storage"
-  ],
-  "host_permissions": [
-    "*://*/*"
-  ],
+  "permissions": ["activeTab", "storage"],
+  "host_permissions": ["*://*/*"],
   "default_locale": "en",
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"

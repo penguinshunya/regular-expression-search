@@ -11,12 +11,7 @@ import {
   postMessage,
   saveHistory,
 } from "./js/function";
-import {
-  Process,
-  TEXTS,
-  CAIN,
-  INSTANT,
-} from "./js/define";
+import { Process, TEXTS, CAIN, INSTANT } from "./js/define";
 import "./css/popup.sass";
 
 $(async () => {
@@ -25,15 +20,14 @@ $(async () => {
     try {
       await preprocess();
       break;
-    } catch (_) {
-    }
+    } catch (_) {}
     await sleep(1000 / 30);
   }
 });
 
 const preprocess = async () => {
   return new Promise<void>((resolve, reject) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, async tabs => {
+    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
       if (tabs[0].status === "loading") {
         reject();
         return;
@@ -52,7 +46,12 @@ const preprocess = async () => {
   });
 };
 
-const main = (port: chrome.runtime.Port, texts: string[], cain: boolean, instant: boolean) => {
+const main = (
+  port: chrome.runtime.Port,
+  texts: string[],
+  cain: boolean,
+  instant: boolean,
+) => {
   let history: string[];
   let index: number;
   let prevText: string;
@@ -128,8 +127,12 @@ const main = (port: chrome.runtime.Port, texts: string[], cain: boolean, instant
   };
 
   const initTempHistory = (text: string) => {
-    history = texts.map(t => t);
-    if (text != null && history.length > 0 && history[history.length - 1] !== text) {
+    history = texts.map((t) => t);
+    if (
+      text != null &&
+      history.length > 0 &&
+      history[history.length - 1] !== text
+    ) {
       history.push(text);
     }
     if (history.length === 0) {
@@ -175,7 +178,7 @@ const main = (port: chrome.runtime.Port, texts: string[], cain: boolean, instant
     });
   };
 
-  port.onMessage.addListener(response => {
+  port.onMessage.addListener((response) => {
     if (response.init == null) return;
 
     prevText = response.text == null ? "" : response.text;
@@ -195,87 +198,89 @@ const main = (port: chrome.runtime.Port, texts: string[], cain: boolean, instant
     postMessage(port, { kind: "updatePopup" });
   });
 
-  port.onMessage.addListener(response => {
+  port.onMessage.addListener((response) => {
     if (response.instant == null) return;
     instant = response.instant;
   });
 
-  port.onMessage.addListener((() => {
-    const searching = "spinner-grow spinner-grow-sm";
-    const calculating = "spinner-border spinner-border-sm";
-    const clearing = calculating;
+  port.onMessage.addListener(
+    (() => {
+      const searching = "spinner-grow spinner-grow-sm";
+      const calculating = "spinner-border spinner-border-sm";
+      const clearing = calculating;
 
-    // Only here can change the state of COUNT, PREV, NEXT element.
-    // Trigger for change should not be a popup script.
-    const modifyCount = (index: number, count: number) => {
-      if (index === 0) {
-        $("#count").text(count);
-      } else {
-        $("#count").text(`${index} / ${count}`);
-      }
-    };
+      // Only here can change the state of COUNT, PREV, NEXT element.
+      // Trigger for change should not be a popup script.
+      const modifyCount = (index: number, count: number) => {
+        if (index === 0) {
+          $("#count").text(count);
+        } else {
+          $("#count").text(`${index} / ${count}`);
+        }
+      };
 
-    const changeButtonStatus = (enabled: boolean) => {
-      $("#prev").prop("disabled", !enabled);
-      $("#next").prop("disabled", !enabled);
-    };
+      const changeButtonStatus = (enabled: boolean) => {
+        $("#prev").prop("disabled", !enabled);
+        $("#next").prop("disabled", !enabled);
+      };
 
-    const removeSpinner = () => {
-      $("#count").removeClass(searching);
-      $("#count").removeClass(calculating);
-    };
+      const removeSpinner = () => {
+        $("#count").removeClass(searching);
+        $("#count").removeClass(calculating);
+      };
 
-    return (response: any) => {
-      switch (response.process) {
-        case Process.DoNothing:
-          $("#count").text("");
-          removeSpinner();
-          changeButtonStatus(false);
-          break;
-        case Process.Searching:
-          $("#count").text("");
-          removeSpinner();
-          $("#count").css("color", "#aaaaaa");
-          $("#count").addClass(searching);
-          changeButtonStatus(false);
-          break;
-        case Process.Calculating:
-          $("#count").text("");
-          removeSpinner();
-          $("#count").css("color", "#aaaaaa");
-          $("#count").addClass(calculating);
-          changeButtonStatus(false);
-          break;
-        case Process.Marking:
-          removeSpinner();
-          $("#count").css("color", "#aaaaaa");
-          modifyCount(response.index, response.count);
-          changeButtonStatus(true);
-          break;
-        case Process.Finish:
-          removeSpinner();
-          $("#count").css("color", "black");
-          modifyCount(response.index, response.count);
-          prevText = response.text;
-          prevCain = response.cain;
-          changeButtonStatus(true);
-          break;
-        case Process.Clearing:
-          $("#count").text("");
-          removeSpinner();
-          $("#count").css("color", "#aaaaaa");
-          $("#count").addClass(clearing);
-          changeButtonStatus(false);
-          break;
-      }
-    };
-  })());
+      return (response: any) => {
+        switch (response.process) {
+          case Process.DoNothing:
+            $("#count").text("");
+            removeSpinner();
+            changeButtonStatus(false);
+            break;
+          case Process.Searching:
+            $("#count").text("");
+            removeSpinner();
+            $("#count").css("color", "#aaaaaa");
+            $("#count").addClass(searching);
+            changeButtonStatus(false);
+            break;
+          case Process.Calculating:
+            $("#count").text("");
+            removeSpinner();
+            $("#count").css("color", "#aaaaaa");
+            $("#count").addClass(calculating);
+            changeButtonStatus(false);
+            break;
+          case Process.Marking:
+            removeSpinner();
+            $("#count").css("color", "#aaaaaa");
+            modifyCount(response.index, response.count);
+            changeButtonStatus(true);
+            break;
+          case Process.Finish:
+            removeSpinner();
+            $("#count").css("color", "black");
+            modifyCount(response.index, response.count);
+            prevText = response.text;
+            prevCain = response.cain;
+            changeButtonStatus(true);
+            break;
+          case Process.Clearing:
+            $("#count").text("");
+            removeSpinner();
+            $("#count").css("color", "#aaaaaa");
+            $("#count").addClass(clearing);
+            changeButtonStatus(false);
+            break;
+        }
+      };
+    })(),
+  );
 
   $("#search").focus(function () {
     $(this).select();
   });
 
-  $("#search").on("keydown", e => {
+  $("#search").on("keydown", (e) => {
     switch (e.key) {
       case "ArrowUp":
         e.preventDefault();
@@ -288,7 +293,7 @@ const main = (port: chrome.runtime.Port, texts: string[], cain: boolean, instant
     }
   });
 
-  $("#search").on("keydown", e => {
+  $("#search").on("keydown", (e) => {
     if (e.key !== "Enter") return;
     e.preventDefault();
 
@@ -334,7 +339,7 @@ const main = (port: chrome.runtime.Port, texts: string[], cain: boolean, instant
     });
   });
 
-  $("#search").on("keyup", e => {
+  $("#search").on("keyup", (e) => {
     if (e.key === "Enter") return;
     e.preventDefault();
     saveTempHistory();
@@ -345,7 +350,7 @@ const main = (port: chrome.runtime.Port, texts: string[], cain: boolean, instant
     });
   });
 
-  $("#cain").on("keydown", e => {
+  $("#cain").on("keydown", (e) => {
     if (e.key !== "Enter" && e.key !== " ") return;
     e.preventDefault();
     const ci = !getCain();
@@ -354,7 +359,7 @@ const main = (port: chrome.runtime.Port, texts: string[], cain: boolean, instant
     searchWithoutSavingHistory();
   });
 
-  $("#cain").on("click", e => {
+  $("#cain").on("click", (e) => {
     e.preventDefault();
     const ci = !getCain();
     setCain(ci);
@@ -362,36 +367,36 @@ const main = (port: chrome.runtime.Port, texts: string[], cain: boolean, instant
     searchWithoutSavingHistory();
   });
 
-  $("#prev").on("keydown", e => {
+  $("#prev").on("keydown", (e) => {
     if (e.key !== "Enter" && e.key !== " ") return;
     e.preventDefault();
     movePrevSearchResult();
   });
 
-  $("#prev").on("click", e => {
+  $("#prev").on("click", (e) => {
     e.preventDefault();
     movePrevSearchResult();
   });
 
-  $("#next").on("keydown", e => {
+  $("#next").on("keydown", (e) => {
     if (e.key !== "Enter" && e.key !== " ") return;
     e.preventDefault();
     moveNextSearchResult();
   });
 
-  $("#next").on("click", e => {
+  $("#next").on("click", (e) => {
     e.preventDefault();
     moveNextSearchResult();
   });
 
-  $("#close").on("keydown", e => {
+  $("#close").on("keydown", (e) => {
     if (e.key !== "Enter" && e.key !== " ") return;
     e.preventDefault();
     clearSearchResult();
     window.close();
   });
 
-  $("#close").on("click", e => {
+  $("#close").on("click", (e) => {
     e.preventDefault();
     clearSearchResult();
     window.close();

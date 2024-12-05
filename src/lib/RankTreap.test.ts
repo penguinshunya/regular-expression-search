@@ -1,4 +1,4 @@
-import RankTreap from "./RankTreap"
+import RankTreap from "./RankTreap";
 
 describe("basic operation", () => {
   const t = new RankTreap<string, number>();

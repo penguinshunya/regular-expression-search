@@ -5,7 +5,8 @@
   "scripts": {
     "build": "webpack --config webpack.dev.js",
     "build:prod": "webpack --config webpack.prod.js",
-    "test": "jest"
+    "test": "jest",
+    "format": "prettier . --write"
   },
   "repository": "https://github.com/penguinshunya/regular-expression-search.git",
   "author": "penguinshunya <takayashunya@gmail.com>",
@@ -27,6 +28,7 @@
     "node-pre-gyp": "^0.12.0",
     "open-iconic": "^1.1.1",
     "popper.js": "^1.14.7",
+    "prettier": "3.4.2",
     "sass": "^1.82.0",
     "sass-loader": "^7.1.0",
     "style-loader": "^0.23.1",

@@ -21,7 +21,10 @@ export default class Treap<T> implements Iterable<T> {
     }
   }
 
-  private _split(t: Node<T> | null, k: number): [Node<T> | null, Node<T> | null] {
+  private _split(
+    t: Node<T> | null,
+    k: number,
+  ): [Node<T> | null, Node<T> | null] {
     if (!t) return [null, null];
     if (k <= this._count(t.lch)) {
       const s = this._split(t.lch, k);

@@ -79,12 +79,12 @@ export class Marker {
       }
     }
     return null;
-  };
+  }
 
   private _focus() {
     this.focusMark();
     this.redraw();
-  };
+  }
 
   private _select(y: number) {
     const mark = this.getMarkFromY(this, y);
@@ -93,7 +93,7 @@ export class Marker {
       this._curr = mark;
       this._focus();
     }
-  };
+  }
 
   private _changeCursor(y: number) {
     if (this.getMarkFromY(this, y) !== null) {
@@ -101,15 +101,15 @@ export class Marker {
     } else {
       $(this._canvas).css("cursor", "default");
     }
-  };
+  }
 
   index() {
     return this._curr == null ? -1 : this._curr.index;
-  };
+  }
 
   count() {
     return this._marks.count();
-  };
+  }
 
   init(mc: string, fc: string) {
     this._mc = mc;
@@ -118,8 +118,8 @@ export class Marker {
     this._canvas = canvas.clone().appendTo("body")[0];
     this._context = this._canvas.getContext("2d");
 
-    $(this._canvas).on("click", e => this._select(e.offsetY));
-    $(this._canvas).on("mousemove", e => this._changeCursor(e.offsetY));
+    $(this._canvas).on("click", (e) => this._select(e.offsetY));
+    $(this._canvas).on("mousemove", (e) => this._changeCursor(e.offsetY));
     $(window).resize(this.redraw.bind(this));
 
     canvases.push(this._canvas);
@@ -131,22 +131,26 @@ export class Marker {
       }
     }
     this.redraw();
-  };
+  }
 
   focusMark() {
     if (this._prev === null) this._prev = this._curr;
 
-    this._prev.nodes.forEach(mark => mark.css({
-      backgroundColor: this._mc,
-      color: blackOrWhite(this._mc),
-    }));
-    this._curr.nodes.forEach(mark => mark.css({
-      backgroundColor: this._fc,
-      color: blackOrWhite(this._fc),
-    }));
+    this._prev.nodes.forEach((mark) =>
+      mark.css({
+        backgroundColor: this._mc,
+        color: blackOrWhite(this._mc),
+      }),
+    );
+    this._curr.nodes.forEach((mark) =>
+      mark.css({
+        backgroundColor: this._fc,
+        color: blackOrWhite(this._fc),
+      }),
+    );
 
     this._curr.nodes[0].focus();
-  };
+  }
 
   redraw() {
     if (this._dispCount === 0) {
@@ -172,7 +176,7 @@ export class Marker {
       this._context.fillStyle = this._fc;
       this._context.fillRect(0, m.rtop * this._canvas.height, 16, m.rheight);
     }
-  };
+  }
 
   focusPrev() {
     if (this._dispCount === 0) return;
@@ -187,7 +191,7 @@ export class Marker {
       this._curr = this._marks.search(i);
     }
     this._focus();
-  };
+  }
 
   focusNext() {
     if (this._dispCount === 0) return;
@@ -202,11 +206,11 @@ export class Marker {
       this._curr = this._marks.search(i);
     }
     this._focus();
-  };
+  }
 
   add(m: Mark) {
     this._marks.insertRank(m.index, m);
-  };
+  }
 
   *calc(): Iterable<void> {
     const r = document.createRange();
@@ -217,7 +221,7 @@ export class Marker {
       m.height = rect.height;
       yield;
     }
-  };
+  }
 
   *wrap(): Iterable<void> {
     const btop = document.body.getBoundingClientRect().top;
@@ -226,28 +230,26 @@ export class Marker {
 
     for (const m of this._marks) {
       const t = (m.top - btop) / (docHeight - m.height);
-      const h = m.height / docHeight * winHeight;
+      const h = (m.height / docHeight) * winHeight;
 
-      m.nodes = m.texts.map(n => this.wrapWithMark(this, n, m));
+      m.nodes = m.texts.map((n) => this.wrapWithMark(this, n, m));
       m.rtop = t;
       m.rheight = h < 3 ? 3 : h;
       this._dispCount++;
       yield;
     }
-  };
+  }
 
   *clear(): Iterable<void> {
     for (const m of this._marks) {
-      m.nodes.forEach(n => n.contents().unwrap());
+      m.nodes.forEach((n) => n.contents().unwrap());
       yield;
     }
     this._canvas.width = 0;
     this._canvas.height = 0;
-  };
+  }
 
-  private exclusions = [
-    "pre",
-  ];
+  private exclusions = ["pre"];
 
   // It takes a long time to normalize an element with huge text.
   // Don't normalize elements which are possibilities of having a huge text.
@@ -262,12 +264,12 @@ export class Marker {
 
   *destroy(): Iterable<void> {
     for (let i = this._destroyed; i < this.count(); i++) {
-      this._marks.search(i).texts.forEach(t => this.normalize(t));
+      this._marks.search(i).texts.forEach((t) => this.normalize(t));
       this._destroyed++;
       yield;
     }
     $(this._canvas).remove();
     const i = canvases.indexOf(this._canvas);
     canvases.splice(i, 1);
-  };
+  }
 }

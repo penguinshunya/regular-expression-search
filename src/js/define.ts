@@ -18,11 +18,11 @@ export enum Process {
   Finish,
   Clearing,
   Zombie,
-};
+}
 
 export class Proc {
   status: Process;
   marker: Marker;
   text: string;
   cain: boolean;
-};
+}

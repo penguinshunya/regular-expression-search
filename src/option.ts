@@ -3,11 +3,7 @@ import "webpack-jquery-ui/css";
 import "bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./js/localize";
-import {
-  getStorageValue,
-  setStorageValue,
-  makeSVG,
-} from "./js/function";
+import { getStorageValue, setStorageValue, makeSVG } from "./js/function";
 import {
   MARKER_COLOR,
   FOCUSED_MARKER_COLOR,
@@ -34,7 +30,10 @@ $(async () => {
   });
 
   const markerColor = await getStorageValue("markerColor", MARKER_COLOR);
-  const focusedMarkerColor = await getStorageValue("focusedMarkerColor", FOCUSED_MARKER_COLOR);
+  const focusedMarkerColor = await getStorageValue(
+    "focusedMarkerColor",
+    FOCUSED_MARKER_COLOR,
+  );
   const instant = await getStorageValue("instant", INSTANT);
   const ignoreBlank = await getStorageValue("ignoreBlank", IGNORE_BLANK);
   const background = await getStorageValue("background", BACKGROUND);
@@ -51,23 +50,25 @@ $(async () => {
     }
   });
 
-  $("#instant button").click(function() {
-    $(this).addClass('active').siblings().removeClass('active');
+  $("#instant button").click(function () {
+    $(this).addClass("active").siblings().removeClass("active");
     setStorageValue("instant", $(this).text() === "On");
   });
 
-  $("#ignoreBlank button").click(function() {
-    $(this).addClass('active').siblings().removeClass('active');
+  $("#ignoreBlank button").click(function () {
+    $(this).addClass("active").siblings().removeClass("active");
     setStorageValue("ignoreBlank", $(this).text() === "On");
   });
 
-  $("#background button").click(function() {
-    $(this).addClass('active').siblings().removeClass('active');
+  $("#background button").click(function () {
+    $(this).addClass("active").siblings().removeClass("active");
     setStorageValue("background", $(this).text() === "On");
   });
 
   $("#color svg").click(function () {
-    $("#color svg").each((_, e) => { $(e).removeClass("selected"); });
+    $("#color svg").each((_, e) => {
+      $(e).removeClass("selected");
+    });
     $(this).addClass("selected");
     const mc = $(this).find("rect:eq(0)").attr("fill");
     const fc = $(this).find("rect:eq(1)").attr("fill");
@@ -82,12 +83,28 @@ function check(name: string, checked: boolean) {
   } else {
     $(`#${name} button:contains(Off)`).addClass("active");
   }
-};
+}
 
 function makeColorBox(mc: string, fc: string) {
-  const svg = makeSVG("svg", {width: "40", height: "40"});
-  const mce = makeSVG("rect", {x: "0", y: "0", rx: "5", ry: "5", width: "32", height: "32", fill: mc});
-  const fce = makeSVG("rect", {x: "8", y: "8", rx: "5", ry: "5", width: "32", height: "32", fill: fc});
+  const svg = makeSVG("svg", { width: "40", height: "40" });
+  const mce = makeSVG("rect", {
+    x: "0",
+    y: "0",
+    rx: "5",
+    ry: "5",
+    width: "32",
+    height: "32",
+    fill: mc,
+  });
+  const fce = makeSVG("rect", {
+    x: "8",
+    y: "8",
+    rx: "5",
+    ry: "5",
+    width: "32",
+    height: "32",
+    fill: fc,
+  });
   svg.appendChild(mce);
   svg.appendChild(fce);
   return svg;

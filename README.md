@@ -19,18 +19,21 @@ This repository contains the code for the Regular Expression Search Chrome exten
 
 2. **Install Node.js using nvm**  
    Run the following command in the terminal to install the required Node.js version:
+
    ```bash
    nvm install
    ```
 
 3. **Install Dependencies**
    Install the project dependencies by running:
+
    ```bash
    npm install
    ```
 
 4. **Build the Project**
    Run the following command to build the project:
+
    ```bash
    npm run build
    ```

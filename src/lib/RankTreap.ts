@@ -18,7 +18,10 @@ export default class RankTreap<T, S> implements Iterable<T> {
   }
 
   // Merge two treaps
-  private _merge(l: Node<T, S> | null, r: Node<T, S> | null): Node<T, S> | null {
+  private _merge(
+    l: Node<T, S> | null,
+    r: Node<T, S> | null,
+  ): Node<T, S> | null {
     if (!l || !r) return l ?? r;
     if (l.pri > r.pri) {
       if (l.rnk > r.rnk) {
@@ -38,7 +41,10 @@ export default class RankTreap<T, S> implements Iterable<T> {
   }
 
   // Split the treap at the given rank
-  private _split(t: Node<T, S> | null, k: number): [Node<T, S> | null, Node<T, S> | null] {
+  private _split(
+    t: Node<T, S> | null,
+    k: number,
+  ): [Node<T, S> | null, Node<T, S> | null] {
     if (!t) return [null, null];
     if (k <= this._count(t.lch)) {
       const s = this._split(t.lch, k);
