@@ -5,8 +5,7 @@
   "scripts": {
     "build": "webpack --config webpack.dev.js",
     "build:prod": "webpack --config webpack.prod.js",
-    "test": "jest",
-    "format": "prettier . --write"
+    "test": "jest"
   },
   "repository": "https://github.com/penguinshunya/regular-expression-search.git",
   "author": "penguinshunya <takayashunya@gmail.com>",
