@@ -11,5 +11,5 @@ chrome.runtime.onConnect.addListener((port) => {
   port.onMessage.addListener((request) => {
     if (request.sleep == null) return;
     postMessage(port, { sleep: true });
-  });
+  })
 });
