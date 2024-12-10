@@ -62,7 +62,7 @@ module.exports = {
       chunks: ["option"],
     }),
     new webpack.ProvidePlugin({
-      $: "jquery",
+      $: "jquery", // TODO: jQueryへの依存をなくしたい
       jQuery: "jquery",
       "window.jQuery": "jquery",
       "window.$": "jquery",
