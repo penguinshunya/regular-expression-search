@@ -76,48 +76,11 @@ export const postMessage = (port: chrome.runtime.Port, message: Object) => {
   }
 };
 
-const exclusions = ["script", "noscript", "style", "textarea", "svg"];
-
-export const collectTextNode: (parent: Node) => IterableIterator<Text> =
-  function* (parent) {
-    for (const node of parent.childNodes) {
-      if (node.nodeType === Node.TEXT_NODE) {
-        yield node as Text;
-        continue;
-      }
-      if (node.nodeType !== Node.ELEMENT_NODE) {
-        continue;
-      }
-      const elem = node as Element;
-      const tagName = elem.tagName.toLowerCase();
-      if (exclusions.includes(tagName)) {
-        continue;
-      }
-      const style = window.getComputedStyle(elem);
-      if (style.display === "none") {
-        continue;
-      }
-      if (tagName === "details" && !elem.hasAttribute("open")) {
-        continue;
-      }
-      if (tagName === "iframe") {
-        const iframe = elem as HTMLIFrameElement;
-        try {
-          // Error occurs in this line when cross domain.
-          const body = iframe.contentWindow.document.body;
-
-          yield* collectTextNode(body);
-        } catch (e) {}
-        continue;
-      }
-      yield* collectTextNode(elem);
-    }
-  };
-
 export const blackOrWhite = (hexcolor: string) => {
-  const r = parseInt(hexcolor.substr(1, 2), 16);
-  const g = parseInt(hexcolor.substr(3, 2), 16);
-  const b = parseInt(hexcolor.substr(5, 2), 16);
+  // TODO: "yellow"などもhexcolorに入ってくる可能性がありそう
+  const r = parseInt(hexcolor.substring(1, 3), 16);
+  const g = parseInt(hexcolor.substring(3, 5), 16);
+  const b = parseInt(hexcolor.substring(5, 7), 16);
 
   return (r * 299 + g * 587 + b * 114) / 1000 < 128 ? "white" : "black";
 };
