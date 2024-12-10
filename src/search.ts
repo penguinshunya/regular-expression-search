@@ -13,7 +13,7 @@ export const SearchAndSplit = function* (
     (t, n) => t.push(n),
     new Treap<Text>(),
   );
-  const c = [...t].map((e) => e.textContent).join("");
+  const c = [...t].map((e) => e.textContent).join(""); // TODO: 要テスト。あとメモリが大丈夫かちょっと心配（でもそれを解決するのはむつかしそう）
   let a: RegExpExecArray;
   let i = 0,
     l = 0;

@@ -1,3 +1,4 @@
+// TODO: 削除したい
 export const reduce = <S, T>(
   iter: Iterable<T>,
   func: (a: S, c: T) => S,
